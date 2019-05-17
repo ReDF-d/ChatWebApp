@@ -2,14 +2,6 @@ HELP.md
 .gradle
 !gradle/wrapper/gradle-wrapper.jar
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.settings
-.springBeans
-.sts4-cache
-
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -21,6 +13,3 @@ HELP.md
 /dist/
 /nbdist/
 /.nb-gradle/
-
-### VS Code ###
-.vscode/
