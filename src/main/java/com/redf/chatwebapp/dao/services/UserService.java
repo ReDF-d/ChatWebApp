@@ -1,8 +1,9 @@
-package com.redf.chatwebapp.Services;
+package com.redf.chatwebapp.dao.services;
 
-import com.redf.chatwebapp.DAO.UserDAOImpl;
-import com.redf.chatwebapp.Entities.Message;
-import com.redf.chatwebapp.Entities.User;
+import com.redf.chatwebapp.dao.MessageEntity;
+import com.redf.chatwebapp.dao.UserDAOImpl;
+import com.redf.chatwebapp.dao.UserEntity;
+import org.jetbrains.annotations.Contract;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ public class UserService {
 
     public static final UserService INSTANCE = new UserService();
     private UserDAOImpl usersDao = new UserDAOImpl();
+
 
     private UserService() {
         try {
@@ -21,37 +23,36 @@ public class UserService {
     }
 
 
-    public User findUser(int id) {
+    @Contract(pure = true)
+    public static UserService getInstance() {
+        return INSTANCE;
+    }
+
+    public UserEntity findUser(int id) {
         return usersDao.findById(id);
     }
 
-
-    public void saveUser(User user) {
+    public void saveUser(UserEntity user) {
         usersDao.save(user);
     }
 
-
-    public void deleteUser(User user) {
+    public void deleteUser(UserEntity user) {
         usersDao.delete(user);
     }
 
-
-    public void updateUser(User user) {
+    public void updateUser(UserEntity user) {
         usersDao.update(user);
     }
 
-
-    public List<User> findAllUsers() {
+    public List<UserEntity> findAllUsers() {
         return usersDao.findAll();
     }
 
-
-    public Message findMessageById(int messageId) {
+    public MessageEntity findMessageById(int messageId) {
         return usersDao.findMessageById(messageId);
     }
 
-
-    public User createUser(String login, String password) {
+    public UserEntity createUser(String login, String password) {
         return usersDao.create(login, password);
     }
 }

@@ -1,8 +1,6 @@
-package com.redf.chatwebapp.DAO;
+package com.redf.chatwebapp.dao;
 
-import com.redf.chatwebapp.Entities.Message;
-import com.redf.chatwebapp.Entities.User;
-import com.redf.chatwebapp.Utils.HibernateSessionFactory;
+import com.redf.chatwebapp.dao.utils.HibernateSessionFactory;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -11,19 +9,19 @@ import java.util.List;
 public class UserDAOImpl implements UserDAO {
 
 
-    public User findById(int id) {
-        return HibernateSessionFactory.getSessionFactory().openSession().get(User.class, id);
+    public UserEntity findById(int id) {
+        return HibernateSessionFactory.getSessionFactory().openSession().get(UserEntity.class, id);
     }
 
 
     @Override
-    public User create(String login, String password) {
-        return new User(login, password);
+    public UserEntity create(String login, String password) {
+        return new UserEntity(login, password);
     }
 
 
     @Override
-    public void save(User user) {
+    public void save(UserEntity user) {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.save(user);
@@ -33,7 +31,7 @@ public class UserDAOImpl implements UserDAO {
 
 
     @Override
-    public void update(User user) {
+    public void update(UserEntity user) {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.update(user);
@@ -43,7 +41,7 @@ public class UserDAOImpl implements UserDAO {
 
 
     @Override
-    public void delete(User user) {
+    public void delete(UserEntity user) {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.delete(user);
@@ -53,13 +51,15 @@ public class UserDAOImpl implements UserDAO {
 
 
     @Override
-    public Message findMessageById(int id) {
-        return HibernateSessionFactory.getSessionFactory().openSession().get(Message.class, id);
+    public MessageEntity findMessageById(int id) {
+        return HibernateSessionFactory.getSessionFactory().openSession().get(MessageEntity.class, id);
     }
 
 
     @Override
-    public List<User> findAll() {
-        return (List<User>) HibernateSessionFactory.getSessionFactory().openSession().createQuery("From User").list();
+    @SuppressWarnings(value = "unchecked")
+    public List<UserEntity> findAll() {
+        Session session = HibernateSessionFactory.getSessionFactory().openSession();
+        return session.createQuery("From UserEntity").list();
     }
 }

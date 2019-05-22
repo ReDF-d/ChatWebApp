@@ -1,4 +1,4 @@
-package com.redf.chatwebapp.Init;
+package com.redf.chatwebapp.init;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
