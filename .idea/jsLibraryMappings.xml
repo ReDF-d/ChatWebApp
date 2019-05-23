@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/javax.annotation/javax.annotation-api/1.3.2/934c04d3cfef185a8008e7bf34331b79730a9d43" libraries="{jquery, stomp}" />
+    <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-core/9.0.19/56e42e12bf92b713befd0700430f7c5c0af68d49" libraries="{jquery, stomp}" />
+    <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-el/9.0.19/6145f2cd11c7df4ad9463637087c0f7e8e673394" libraries="{jquery, stomp}" />
+    <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocket/9.0.19/dee79022818f490203f4901f5651f3233aee14db" libraries="{jquery, stomp}" />
+    <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-tomcat/2.1.5.RELEASE/49de1c20ea6b8c6920d0a66329f9bf980e4498eb" libraries="{jquery, stomp}" />
+    <file url="file://$PROJECT_DIR$" libraries="{stomp}" />
+    <file url="file://$PROJECT_DIR$/src/main" libraries="{jquery, stomp}" />
+    <file url="file://$PROJECT_DIR$/src/test" libraries="{stomp}" />
+  </component>
+</project>
