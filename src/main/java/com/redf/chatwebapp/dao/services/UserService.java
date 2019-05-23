@@ -9,7 +9,7 @@ import java.util.List;
 
 public class UserService {
 
-    public static final UserService INSTANCE = new UserService();
+    private static final UserService INSTANCE = new UserService();
     private UserDAOImpl usersDao = new UserDAOImpl();
 
 

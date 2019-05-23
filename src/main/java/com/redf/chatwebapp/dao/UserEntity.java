@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @DynamicUpdate
 @Entity
-@Table(name = "users", schema = "public", catalog = "chatdb")
+@Table(name = "users", schema = "public", catalog = "d3vj1afn940bj7")
 public class UserEntity {
     private int id;
     private String login;

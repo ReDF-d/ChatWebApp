@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @DynamicUpdate
 @Entity
-@Table(name = "messages", schema = "public", catalog = "chatdb")
+@Table(name = "messages", schema = "public", catalog = "d3vj1afn940bj7")
 public class MessageEntity {
     private int messageId;
     private String messageText;
@@ -19,11 +19,11 @@ public class MessageEntity {
 
     @Id
     @Column(name = "message_id")
-    @GenericGenerator(name = "messages_message_id_seq", strategy = "sequence", parameters = {
-            @org.hibernate.annotations.Parameter(name = "messages_message_id_seq", value = "messages_message_id_seq"),
+    @GenericGenerator(name = "message_ids", strategy = "sequence", parameters = {
+            @org.hibernate.annotations.Parameter(name = "message_ids", value = "message_ids"),
             @org.hibernate.annotations.Parameter(name = "allocationSize", value = "1"),
     })
-    @GeneratedValue(generator = "messages_message_id_seq", strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator = "message_ids", strategy = GenerationType.SEQUENCE)
     public int getMessageId() {
         return messageId;
     }
