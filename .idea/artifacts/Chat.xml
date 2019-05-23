@@ -1,13 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" build-on-make="true" name="Chat">
+  <artifact type="war" name="Chat">
     <output-path>$PROJECT_DIR$/out/artifacts/Chat</output-path>
-    <root id="root">
-      <element id="javaee-facet-resources" facet="com.redf.chatwebapp/web/Web" />
-      <element id="directory" name="WEB-INF">
-        <element id="directory" name="classes">
-          <element id="module-output" name="com.redf.chatwebapp" />
-        </element>
-      </element>
-    </root>
+    <root id="archive" name="Chat.war" />
   </artifact>
 </component>
