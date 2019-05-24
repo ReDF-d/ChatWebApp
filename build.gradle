@@ -21,6 +21,8 @@ jar {
                 'Main-Class': 'com.redf.chatwebapp.ChatWebAppApplication'
         )
     }
+    archiveBaseName = 'yapp'
+    version = 'version'
 }
 
 dependencies {
