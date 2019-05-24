@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="chatwebapp:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="com.redf" external.system.module.type="sourceSet" external.system.module.version="0.0.1-SNAPSHOT" type="JAVA_MODULE" version="4">
+<module external.linked.project.id="chatwebapp:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="com.redf" external.system.module.type="sourceSet" external.system.module.version="chatwebapp.0.1" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Spring" name="Spring">
       <configuration>
@@ -20,7 +20,7 @@
         <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/../../src/main/resources/Hibernate/hibernate.cfg.xml" />
       </configuration>
     </facet>
-    <facet type="web" name="Web Gradle : chatwebapp-0.0.1-SNAPSHOT.war">
+    <facet type="web" name="Web Gradle : chatwebapp-chatwebapp.0.1.war">
       <configuration>
         <webroots>
           <root url="file://E:\JavaProjects\ChatWebApp\src\main\webapp" relative="/" />
@@ -31,6 +31,11 @@
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../out/production/classes" />
     <exclude-output />
+    <content url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/javax.annotation/javax.annotation-api/1.3.2/934c04d3cfef185a8008e7bf34331b79730a9d43" />
+    <content url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-core/9.0.19/56e42e12bf92b713befd0700430f7c5c0af68d49" />
+    <content url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-el/9.0.19/6145f2cd11c7df4ad9463637087c0f7e8e673394" />
+    <content url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocket/9.0.19/dee79022818f490203f4901f5651f3233aee14db" />
+    <content url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-tomcat/2.1.5.RELEASE/49de1c20ea6b8c6920d0a66329f9bf980e4498eb" />
     <content url="file://$MODULE_DIR$/../../src/main">
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
@@ -39,9 +44,9 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.tomcat.embed:tomcat-embed-el:9.0.19" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: javax.annotation:javax.annotation-api:1.3.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.tomcat.embed:tomcat-embed-websocket:9.0.19" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.springframework.boot:spring-boot-starter-tomcat:2.1.5.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-security:2.1.5.RELEASE" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.tomcat.embed:tomcat-embed-websocket:9.0.19" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.tomcat.embed:tomcat-embed-core:9.0.19" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains:annotations:16.0.2" level="project" />
     <orderEntry type="library" name="Gradle: com.sun.xml.bind:jaxb-core:2.3.0.1" level="project" />

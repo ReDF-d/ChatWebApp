@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.redf'
-version = '0.0.1-SNAPSHOT'
+version = 'chatwebapp.0.1'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -32,4 +32,16 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-websocket', version: '5.1.7.RELEASE'
     compile group: 'javax', name: 'javaee-api', version: '8.0.1'
     compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.20'
+}
+
+
+task chatwebapp(type: Jar) {
+    archiveClassifier = 'build'
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
 }
