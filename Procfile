@@ -1,1 +1,1 @@
-web: java -jar target/chatwebapp.jar
+web: java $JAVA_OPTS -jar target/*.jar --p $PORT
