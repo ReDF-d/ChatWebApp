@@ -1,7 +1,7 @@
-package com.redf.chatwebapp.dao;
+package com.redf.chatwebapp.dao.utils;
 
 
-import java.util.List;
+import com.redf.chatwebapp.dao.entities.UserEntity;
 
 public interface UserDAO {
 
@@ -14,8 +14,4 @@ public interface UserDAO {
     void update(UserEntity user);
 
     void delete(UserEntity user);
-
-    MessageEntity findMessageById(int id);
-
-    List<UserEntity> findAll();
 }

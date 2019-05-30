@@ -1,9 +1,12 @@
-package com.redf.chatwebapp.dao;
+package com.redf.chatwebapp.dao.entities;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @DynamicUpdate
 @Entity
@@ -12,7 +15,8 @@ public class UserEntity {
     private int id;
     private String login;
     private String password;
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "UserEntity")
+    private Set<RoleEntity> authorities = new HashSet<>();
 
     public UserEntity() {
     }
@@ -56,7 +60,16 @@ public class UserEntity {
 
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = new BCryptPasswordEncoder().encode(password);
     }
 
+
+    public Set<RoleEntity> getAuthorities() {
+        return authorities;
+    }
+
+
+    public void setAuthorities(Set<RoleEntity> authorities) {
+        this.authorities = authorities;
+    }
 }

@@ -1,16 +1,20 @@
-package com.redf.chatwebapp.dao;
+package com.redf.chatwebapp.dao.utils;
 
-import com.redf.chatwebapp.dao.utils.HibernateSessionFactory;
+import com.redf.chatwebapp.dao.entities.UserEntity;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
 
 
     public UserEntity findById(int id) {
         return HibernateSessionFactory.getSessionFactory().openSession().get(UserEntity.class, id);
+    }
+
+
+    public UserEntity findByLogin(String login) {
+        return HibernateSessionFactory.getSessionFactory().openSession().get(UserEntity.class, login);
     }
 
 
@@ -47,19 +51,5 @@ public class UserDAOImpl implements UserDAO {
         session.delete(user);
         tx1.commit();
         session.close();
-    }
-
-
-    @Override
-    public MessageEntity findMessageById(int id) {
-        return HibernateSessionFactory.getSessionFactory().openSession().get(MessageEntity.class, id);
-    }
-
-
-    @Override
-    @SuppressWarnings(value = "unchecked")
-    public List<UserEntity> findAll() {
-        Session session = HibernateSessionFactory.getSessionFactory().openSession();
-        return session.createQuery("From UserEntity").list();
     }
 }
