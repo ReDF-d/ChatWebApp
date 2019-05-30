@@ -1,13 +1,16 @@
 package com.redf.chatwebapp.dao.services;
 
-import com.redf.chatwebapp.dao.MessageEntity;
-import com.redf.chatwebapp.dao.UserDAOImpl;
-import com.redf.chatwebapp.dao.UserEntity;
+import com.redf.chatwebapp.dao.entities.RoleEntity;
+import com.redf.chatwebapp.dao.entities.UserEntity;
+import com.redf.chatwebapp.dao.utils.UserDAOImpl;
 import org.jetbrains.annotations.Contract;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.List;
 
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private static final UserService INSTANCE = new UserService();
     private UserDAOImpl usersDao = new UserDAOImpl();
@@ -44,15 +47,26 @@ public class UserService {
         usersDao.update(user);
     }
 
-    public List<UserEntity> findAllUsers() {
-        return usersDao.findAll();
-    }
-
-    public MessageEntity findMessageById(int messageId) {
-        return usersDao.findMessageById(messageId);
-    }
-
     public UserEntity createUser(String login, String password) {
         return usersDao.create(login, password);
+    }
+
+
+    @Override
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        UserEntity user = usersDao.findByLogin(login);
+        User.UserBuilder builder = null;
+        if (user != null) {
+
+            builder = org.springframework.security.core.userdetails.User.withUsername(login);
+            builder.password(user.getPassword());
+            String[] authorities = user.getAuthorities()
+                    .stream().map(RoleEntity::getAuthority).toArray(String[]::new);
+
+            builder.authorities(authorities);
+        } else {
+            throw new UsernameNotFoundException("User not found.");
+        }
+        return builder.build();
     }
 }

@@ -1,4 +1,4 @@
-package com.redf.chatwebapp.dao;
+package com.redf.chatwebapp.dao.entities;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
@@ -13,7 +13,8 @@ public class MessageEntity {
     private int messageId;
     private String messageText;
     private Timestamp time;
-    private UserEntity user;
+    @Column(name = "user_id")
+    private UserEntity author;
 
 
     @Id
@@ -58,11 +59,11 @@ public class MessageEntity {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "id", nullable = false)
-    public UserEntity getSender() {
-        return user;
+    public UserEntity getAuthor() {
+        return author;
     }
 
-    public void setSender(UserEntity user) {
-        this.user = user;
+    public void setSender(UserEntity author) {
+        this.author = author;
     }
 }

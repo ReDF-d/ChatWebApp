@@ -1,7 +1,8 @@
 package com.redf.chatwebapp.dao.utils;
 
-import com.redf.chatwebapp.dao.MessageEntity;
-import com.redf.chatwebapp.dao.UserEntity;
+import com.redf.chatwebapp.dao.entities.MessageEntity;
+import com.redf.chatwebapp.dao.entities.RoleEntity;
+import com.redf.chatwebapp.dao.entities.UserEntity;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
@@ -14,7 +15,7 @@ public class HibernateSessionFactory {
     private static SessionFactory sessionFactory;
     private static Configuration configuration = new Configuration();
 
-    public static SessionFactory getSessionFactory() {
+    static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
                 properties.setProperty(Environment.DRIVER, "org.postgresql.Driver");
@@ -26,6 +27,7 @@ public class HibernateSessionFactory {
                 configuration.setProperties(properties);
                 configuration.addAnnotatedClass(UserEntity.class);
                 configuration.addAnnotatedClass(MessageEntity.class);
+                configuration.addAnnotatedClass(RoleEntity.class);
                 sessionFactory = configuration.buildSessionFactory();
             } catch (Exception e) {
                 e.printStackTrace();
