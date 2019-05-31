@@ -5,7 +5,7 @@ import com.redf.chatwebapp.dao.entities.UserEntity;
 
 public interface UserDAO {
 
-    UserEntity findById(int id);
+    UserEntity findByUsername(String login);
 
     UserEntity create(String login, String password);
 

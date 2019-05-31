@@ -1,22 +1,17 @@
 package com.redf.chatwebapp.dao.entities;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.Serializable;
 
 @DynamicUpdate
 @Entity
 @Table(name = "users", schema = "public", catalog = "d3vj1afn940bj7")
-public class UserEntity {
-    private int id;
+public class UserEntity implements Serializable {
     private String login;
     private String password;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "UserEntity")
-    private Set<RoleEntity> authorities = new HashSet<>();
+    private RoleEntity role;
 
     public UserEntity() {
     }
@@ -27,23 +22,10 @@ public class UserEntity {
         setPassword(password);
     }
 
-    @Id
-    @Column(name = "id", nullable = false)
-    @GenericGenerator(name = "user_ids", strategy = "sequence", parameters = {
-            @org.hibernate.annotations.Parameter(name = "user_ids", value = "user_ids"),
-            @org.hibernate.annotations.Parameter(name = "allocationSize", value = "1"),
-    })
-    @GeneratedValue(generator = "user_ids", strategy = GenerationType.SEQUENCE)
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     @Basic
     @Column(name = "login", nullable = false, length = 64)
+    @Id
     public String getLogin() {
         return login;
     }
@@ -60,16 +42,15 @@ public class UserEntity {
 
 
     public void setPassword(String password) {
-        this.password = new BCryptPasswordEncoder().encode(password);
+        this.password = password;
+    }
+
+    public RoleEntity getRole() {
+        return role;
     }
 
 
-    public Set<RoleEntity> getAuthorities() {
-        return authorities;
-    }
-
-
-    public void setAuthorities(Set<RoleEntity> authorities) {
-        this.authorities = authorities;
+    public void setRole(RoleEntity role) {
+        this.role = role;
     }
 }
