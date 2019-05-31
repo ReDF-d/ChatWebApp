@@ -4,16 +4,17 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.sql.Timestamp;
+
 
 @DynamicUpdate
 @Entity
 @Table(name = "messages", schema = "public", catalog = "d3vj1afn940bj7")
-public class MessageEntity {
+public class MessageEntity implements Serializable {
     private int messageId;
     private String messageText;
     private Timestamp time;
-    @Column(name = "user_id")
     private UserEntity author;
 
 
@@ -58,12 +59,12 @@ public class MessageEntity {
 
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "author", referencedColumnName = "login", nullable = false)
     public UserEntity getAuthor() {
         return author;
     }
 
-    public void setSender(UserEntity author) {
+    public void setAuthor(UserEntity author) {
         this.author = author;
     }
 }

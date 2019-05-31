@@ -8,12 +8,7 @@ import org.hibernate.Transaction;
 public class UserDAOImpl implements UserDAO {
 
 
-    public UserEntity findById(int id) {
-        return HibernateSessionFactory.getSessionFactory().openSession().get(UserEntity.class, id);
-    }
-
-
-    public UserEntity findByLogin(String login) {
+    public UserEntity findByUsername(String login) {
         return HibernateSessionFactory.getSessionFactory().openSession().get(UserEntity.class, login);
     }
 
