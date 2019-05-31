@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
     <title>Home</title>
 </head>
 <body>
 <h1>Welcome!</h1>
 <p>Log in or sign up to use the chat!</p>
-<p><a href="login">Log in</a></p>
-<p><a href="signup">Sign up</a></p>
+<p><a th:href="@{/login}">Log in</a></p>
+<p><a th:href="@{/signup}">Sign up</a></p>
 </body>
 </html>
