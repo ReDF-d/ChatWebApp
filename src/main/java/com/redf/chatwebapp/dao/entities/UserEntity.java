@@ -2,7 +2,10 @@ package com.redf.chatwebapp.dao.entities;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 @DynamicUpdate
@@ -11,19 +14,20 @@ import java.io.Serializable;
 public class UserEntity implements Serializable {
     private String login;
     private String password;
-    private RoleEntity role;
+    private String role;
 
     public UserEntity() {
     }
 
 
-    public UserEntity(String login, String password) {
+    public UserEntity(String login, String password, String role) {
         setLogin(login);
         setPassword(password);
+        setRole(role);
     }
 
 
-    @Basic
+
     @Column(name = "login", nullable = false, length = 64)
     @Id
     public String getLogin() {
@@ -34,8 +38,8 @@ public class UserEntity implements Serializable {
         this.login = login;
     }
 
-    @Basic
-    @Column(name = "password", nullable = false, length = 64)
+
+    @Column(name = "password", nullable = false, length = 128)
     public String getPassword() {
         return password;
     }
@@ -45,12 +49,13 @@ public class UserEntity implements Serializable {
         this.password = password;
     }
 
-    public RoleEntity getRole() {
+    @Column(name = "role", nullable = false)
+    public String getRole() {
         return role;
     }
 
 
-    public void setRole(RoleEntity role) {
+    public void setRole(String role) {
         this.role = role;
     }
 }

@@ -1,26 +1,35 @@
 package com.redf.chatwebapp.dao.utils;
 
 import com.redf.chatwebapp.dao.entities.UserEntity;
+import com.redf.chatwebapp.dao.services.UserService;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 
 public class UserDAOImpl implements UserDAO {
 
 
-    public UserEntity findByUsername(String login) {
+    public static UserEntity findByUsername(String login) {
         return HibernateSessionFactory.getSessionFactory().openSession().get(UserEntity.class, login);
     }
 
 
-    @Override
-    public UserEntity create(String login, String password) {
-        return new UserEntity(login, password);
+    @NotNull
+    @Contract("_, _, _ -> new")
+    public static UserEntity create(String login, String password, String role) {
+        password = UserService.passwordEncoder().encode(password);
+        return new UserEntity(login, password, role);
     }
 
 
-    @Override
-    public void save(UserEntity user) {
+    public static void createAndSave(String login, String password, String role) {
+        save(create(login, password, role));
+    }
+
+
+    public static void save(UserEntity user) {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.save(user);
@@ -29,8 +38,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
 
-    @Override
-    public void update(UserEntity user) {
+    public static void update(UserEntity user) {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.update(user);
@@ -39,8 +47,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
 
-    @Override
-    public void delete(UserEntity user) {
+    public static void delete(UserEntity user) {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.delete(user);

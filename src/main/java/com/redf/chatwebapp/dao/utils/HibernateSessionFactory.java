@@ -1,7 +1,6 @@
 package com.redf.chatwebapp.dao.utils;
 
 import com.redf.chatwebapp.dao.entities.MessageEntity;
-import com.redf.chatwebapp.dao.entities.RoleEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -24,10 +23,17 @@ public class HibernateSessionFactory {
                 properties.setProperty(Environment.PASS, "18494d4206cb8473befbbcdf0bbbad8ad187642e63450ac83c9bd35284988c14");
                 properties.setProperty(Environment.DIALECT, "org.hibernate.dialect.PostgreSQL9Dialect");
                 properties.setProperty(Environment.SHOW_SQL, "true");
+                properties.setProperty(Environment.CONNECTION_PROVIDER, "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
+                properties.setProperty(Environment.C3P0_ACQUIRE_INCREMENT, "1");
+                properties.setProperty(Environment.C3P0_IDLE_TEST_PERIOD, "60");
+                properties.setProperty(Environment.C3P0_MIN_SIZE, "1");
+                properties.setProperty(Environment.C3P0_MAX_SIZE, "20");
+                properties.setProperty(Environment.C3P0_MAX_STATEMENTS, "50");
+                properties.setProperty(Environment.C3P0_TIMEOUT, "0");
+                properties.setProperty(Environment.NON_CONTEXTUAL_LOB_CREATION, "true");
                 configuration.setProperties(properties);
                 configuration.addAnnotatedClass(UserEntity.class);
                 configuration.addAnnotatedClass(MessageEntity.class);
-                configuration.addAnnotatedClass(RoleEntity.class);
                 sessionFactory = configuration.buildSessionFactory();
             } catch (Exception e) {
                 e.printStackTrace();
