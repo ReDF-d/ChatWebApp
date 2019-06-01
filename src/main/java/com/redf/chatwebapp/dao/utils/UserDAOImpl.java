@@ -1,7 +1,8 @@
 package com.redf.chatwebapp.dao.utils;
 
 import com.redf.chatwebapp.dao.entities.UserEntity;
-import com.redf.chatwebapp.dao.services.UserService;
+import com.redf.chatwebapp.dto.UserRegistrationDto;
+import com.redf.chatwebapp.security.BcryptPasswordEncoder;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.jetbrains.annotations.Contract;
@@ -19,13 +20,27 @@ public class UserDAOImpl implements UserDAO {
     @NotNull
     @Contract("_, _, _ -> new")
     public static UserEntity create(String login, String password, String role) {
-        password = UserService.passwordEncoder().encode(password);
+        password = BcryptPasswordEncoder.passwordEncoder().encode(password);
         return new UserEntity(login, password, role);
+    }
+
+
+    public static UserEntity create(@NotNull UserRegistrationDto userRegistrationDto) {
+        UserEntity user = new UserEntity();
+        user.setLogin(userRegistrationDto.getLogin());
+        user.setPassword(BcryptPasswordEncoder.passwordEncoder().encode(userRegistrationDto.getPassword()));
+        user.setRole("USER");
+        return user;
     }
 
 
     public static void createAndSave(String login, String password, String role) {
         save(create(login, password, role));
+    }
+
+
+    public static void createAndSave(UserRegistrationDto userRegistrationDto) {
+        save(create(userRegistrationDto));
     }
 
 

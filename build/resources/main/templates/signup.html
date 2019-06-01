@@ -1,13 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Sign up</title>
 </head>
 <body>
-    <form method="post" name="signupForm">
-        <input type="text" placeholder="Enter your username" autofocus name="login">
-        <input type="password" placeholder="Create your password" name="password">
-    </form>
+<form method="post" name="signupForm" th:object="${user}" th:action="@{/signup}">
+    <p
+            th:if="${#fields.hasGlobalErrors()}"
+            th:each="error : ${#fields.errors('global')}"
+            th:text="${error}">Validation error
+    </p>
+    <div class="form-group"
+         th:classappend="${#fields.hasErrors('login')}? 'has-error':''">
+        <label for="login" class="control-label">Choose your username</label>
+        <input id="login"
+               class="form-control"
+               th:field="*{login}"
+               th:autofocus/>
+        <p class="error-message"
+           th:errors="*{login}"
+           th:text="${errors}">Validation error</p>
+    </div>
+    <div class="form-group"
+         th:classappend="${#fields.hasErrors('password')}? 'has-error':''">
+        <label for="password" class="control-label">Create a password</label>
+        <input id="password"
+               class="form-control"
+               type="password"
+               th:field="*{password}"/>
+        <p class="error-message"
+           th:each="error : ${#fields.errors('password')}"
+           th:text="${error}">Validation error</p>
+    </div>
+    <div class="form-group"
+         th:classappend="${#fields.hasErrors('confirmPassword')}? 'has-error':''">
+        <label for="confirmPassword" class="control-label">Confirm your password</label>
+        <input id="confirmPassword"
+               class="form-control"
+               type="password"
+               th:field="*{confirmPassword}"/>
+        <p class="error-message"
+           th:each="error : ${#fields.errors('confirmPassword')}"
+           th:text="${error}">Validation error</p>
+    </div>
+    <div class="form-group"
+         th:classappend="${#fields.hasErrors('terms')}? 'has-error':''">
+        <input id="terms"
+               type="checkbox"
+               th:field="*{terms}"/>
+        <label class="control-label" for="terms">
+            I agree with the <a href="terms">terms and conditions</a> for Registration.
+        </label>
+        <p class="error-message"
+           th:each="error : ${#fields.errors('terms')}"
+           th:text="${error}">Validation error</p>
+    </div>
+    <p><input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/></p>
+    <p><input type="submit" value="Sign Up"/></p>
+</form>
 </body>
 </html>

@@ -14,7 +14,7 @@ public class HibernateSessionFactory {
     private static SessionFactory sessionFactory;
     private static Configuration configuration = new Configuration();
 
-    static SessionFactory getSessionFactory() {
+    public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
                 properties.setProperty(Environment.DRIVER, "org.postgresql.Driver");

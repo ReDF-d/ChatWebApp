@@ -3,14 +3,13 @@ package com.redf.chatwebapp.dao.services;
 
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.utils.UserDAOImpl;
+import com.redf.chatwebapp.dto.UserRegistrationDto;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -18,12 +17,7 @@ public class UserService implements UserDetailsService {
 
     private static final UserService INSTANCE = new UserService();
 
-    @NotNull
-    @Contract(" -> new")
-    @Bean
-    public static BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 
     private UserService() {
         try {
@@ -55,6 +49,10 @@ public class UserService implements UserDetailsService {
 
     public void createAndSave(String login, String password, String role) {
         UserDAOImpl.createAndSave(login, password, role);
+    }
+
+    public void createAndSave(UserRegistrationDto userRegistrationDto) {
+        UserDAOImpl.createAndSave(userRegistrationDto);
     }
 
     @NotNull
