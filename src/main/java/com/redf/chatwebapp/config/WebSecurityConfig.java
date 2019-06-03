@@ -1,6 +1,7 @@
 package com.redf.chatwebapp.config;
 
 import com.redf.chatwebapp.dao.services.UserService;
+import com.redf.chatwebapp.security.BcryptPasswordEncoder;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,7 +16,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(UserService.getInstance()).passwordEncoder(UserService.passwordEncoder());
+        auth.userDetailsService(UserService.getInstance()).passwordEncoder(BcryptPasswordEncoder.passwordEncoder());
     }
 
 

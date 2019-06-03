@@ -44,6 +44,7 @@ dependencies {
     compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.20'
     compile group: 'org.hibernate', name: 'hibernate-hikaricp', version: '5.4.2.Final'
     compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.3.6.RELEASE'
+    compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 }
 
 
