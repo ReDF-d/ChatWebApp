@@ -58,4 +58,9 @@ task chatwebapp(type: Jar) {
     from {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
     }
+
+
+    test {
+        exclude '**/*'
+    }
 }
