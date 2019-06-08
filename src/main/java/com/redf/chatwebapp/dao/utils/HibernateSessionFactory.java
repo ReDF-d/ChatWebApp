@@ -37,6 +37,9 @@ public class HibernateSessionFactory {
                 sessionFactory = configuration.buildSessionFactory();
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                if (sessionFactory != null)
+                    sessionFactory.close();
             }
         }
         return sessionFactory;
