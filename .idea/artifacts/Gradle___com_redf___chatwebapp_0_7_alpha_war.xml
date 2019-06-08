@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="Gradle : com.redf : chatwebapp-0.7.alpha.war">
+    <output-path>$PROJECT_DIR$/build/libs</output-path>
+    <properties id="gradle-properties">
+      <options external-project-path="$PROJECT_DIR$" />
+    </properties>
+    <root id="archive" name="chatwebapp-0.7.alpha.war">
+      <element id="artifact" artifact-name="Gradle : com.redf : chatwebapp-0.7.alpha.war (exploded)" />
+    </root>
+  </artifact>
+</component>

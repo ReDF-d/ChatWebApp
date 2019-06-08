@@ -13,7 +13,10 @@ public class UserDAOImpl implements UserDAO {
 
 
     public static UserEntity findByUsername(String login) {
-        return HibernateSessionFactory.getSessionFactory().openSession().get(UserEntity.class, login);
+        Session session = HibernateSessionFactory.getSessionFactory().openSession();
+        UserEntity user = session.get(UserEntity.class, login);
+        session.close();
+        return user;
     }
 
 

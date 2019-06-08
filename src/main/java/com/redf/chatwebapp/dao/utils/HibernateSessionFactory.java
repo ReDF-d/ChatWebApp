@@ -28,7 +28,7 @@ public class HibernateSessionFactory {
                 properties.setProperty(Environment.C3P0_IDLE_TEST_PERIOD, "60");
                 properties.setProperty(Environment.C3P0_MIN_SIZE, "1");
                 properties.setProperty(Environment.C3P0_MAX_SIZE, "20");
-                properties.setProperty(Environment.C3P0_MAX_STATEMENTS, "50");
+                properties.setProperty(Environment.C3P0_MAX_STATEMENTS, "20");
                 properties.setProperty(Environment.C3P0_TIMEOUT, "0");
                 properties.setProperty(Environment.NON_CONTEXTUAL_LOB_CREATION, "true");
                 configuration.setProperties(properties);
