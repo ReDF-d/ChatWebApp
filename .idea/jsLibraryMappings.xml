@@ -7,7 +7,7 @@
     <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocket/9.0.19/dee79022818f490203f4901f5651f3233aee14db" libraries="{jquery, stomp}" />
     <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-tomcat/2.1.5.RELEASE/49de1c20ea6b8c6920d0a66329f9bf980e4498eb" libraries="{jquery, stomp}" />
     <file url="file://$PROJECT_DIR$" libraries="{stomp}" />
-    <file url="file://$PROJECT_DIR$/src/main" libraries="{jquery, stomp}" />
+    <file url="file://$PROJECT_DIR$/src/main" libraries="{bootstrap, jquery, stomp}" />
     <file url="file://$PROJECT_DIR$/src/test" libraries="{stomp}" />
   </component>
 </project>

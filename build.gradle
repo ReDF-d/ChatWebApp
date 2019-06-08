@@ -49,18 +49,7 @@ dependencies {
 }
 
 
-task chatwebapp(type: Jar) {
-    archiveClassifier = 'build'
-
-    from sourceSets.main.output
-
-    dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-    }
-
-
-    test {
-        exclude '**/*'
-    }
+test {
+    exclude '**/*'
 }
+

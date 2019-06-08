@@ -5,23 +5,23 @@ import javax.validation.constraints.NotEmpty;
 
 
 @FieldMatch.List({
-        @FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match"),
+        @FieldMatch(first = "password", second = "confirmPassword", message = "Пароли не совпадают"),
 })
 public class UserRegistrationDto {
 
-    @NotEmpty(message = "Username field must not be empty")
+    @NotEmpty(message = "Имя пользователя не может быть пусто")
     private String login;
 
 
-    @NotEmpty(message = "Password field must not be empty")
+    @NotEmpty(message = "Пароль не может не может быть пуст")
     private String password;
 
 
-    @NotEmpty(message = "Password confirmation field field must not be empty")
+    @NotEmpty(message = "Подтвердите пароль")
     private String confirmPassword;
 
 
-    @AssertTrue(message = "You must accept our Terms of Use to create an account")
+    @AssertTrue(message = "Вы должны принять \"Условия пользования\"")
     private Boolean terms;
 
 

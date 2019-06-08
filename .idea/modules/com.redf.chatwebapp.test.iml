@@ -104,8 +104,8 @@
     <orderEntry type="library" name="Gradle: org.springframework:spring-jcl:5.1.7.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: javax.activation:activation:1.1" level="project" />
     <orderEntry type="library" name="Gradle: javax.persistence:javax.persistence-api:2.2" level="project" />
-    <orderEntry type="library" name="Gradle: org.javassist:javassist:3.23.2-GA" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.yaml:snakeyaml:1.23" level="project" />
+    <orderEntry type="library" name="Gradle: org.javassist:javassist:3.23.2-GA" level="project" />
     <orderEntry type="library" name="Gradle: net.bytebuddy:byte-buddy:1.9.12" level="project" />
     <orderEntry type="library" name="Gradle: antlr:antlr:2.7.7" level="project" />
     <orderEntry type="library" name="Gradle: org.jboss:jandex:2.0.5.Final" level="project" />
@@ -130,6 +130,7 @@
     <orderEntry type="library" name="Gradle: ch.qos.logback:logback-core:1.2.3" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-api:2.11.2" level="project" />
     <orderEntry type="library" name="Gradle: org.ow2.asm:asm:5.0.4" level="project" />
+    <orderEntry type="library" name="stomp" level="application" />
   </component>
   <component name="TestModuleProperties" production-module="com.redf.chatwebapp.main" />
 </module>

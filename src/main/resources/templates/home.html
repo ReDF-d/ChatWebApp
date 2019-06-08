@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Home</title>
+    <title>BlinkTalk</title>
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -34,7 +34,7 @@
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     Вы вошли как: <span sec:authentication="name"></span> |
-                    <a th:href="@{/login}" th:method="get">Выйти</a>
+                    <a th:href="@{/logout}" th:method="get">Выйти</a>
                 </li>
                 <span sec:authorize="isAnonymous()">
                     <li class="nav-item">

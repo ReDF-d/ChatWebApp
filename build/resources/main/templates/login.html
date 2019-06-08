@@ -2,20 +2,17 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Логин</title>
 </head>
 <body>
 <div th:if="${param.error}">
-    Invalid username or password.
-</div>
-<div th:if="${param.logout}">
-    You have been logged out.
+    Неверное имя пользователя или пароль
 </div>
 <form method="post" th:action="@{/login}">
-    <p><label> User Name : <input th:name="username" type="text"/> </label></p>
-    <p><label> Password: <input th:name="password" type="password"/> </label></p>
+    <p><label> Логин : <input th:name="username" type="text"/> </label></p>
+    <p><label> Пароль: <input th:name="password" type="password"/> </label></p>
     <p><input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/></p>
-    <p><input type="submit" value="Sign In"/></p>
+    <p><input type="submit" value="Войти"/></p>
 </form>
 </body>
 </html>
