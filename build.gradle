@@ -1,7 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '2.1.5.RELEASE'
     id 'java'
-    id 'war'
+
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -31,12 +31,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     compile "org.springframework.boot:spring-boot-starter-security"
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
     compile 'org.jetbrains:annotations:16.0.2'
     compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0.1'
     compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
     compile group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.4.0-b180830.0438'
     runtimeOnly 'org.postgresql:postgresql'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     compile group: 'org.springframework', name: 'spring-messaging', version: '5.1.7.RELEASE'
     compile group: 'org.springframework', name: 'spring-websocket', version: '5.1.7.RELEASE'
