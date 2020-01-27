@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="header::links"></div>
+    <title>Главная</title>
+</head>
+<body>
+<div class="zoom">
+    <header th:replace="header :: head"></header>
+    <main class="bground" id="main">
+        <div class="container-fluid">
+            <div class="row padding text-center alert">
+                <div class="col-12 mrgn">
+                    <h1 class="display-2 wlcm">
+                        Добро пожаловать!
+                    </h1>
+                    <br>
+                    <button class="btn btn-success btn-lg" id="button-chat" type="submit">Начать чат</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer th:replace="footer :: foot"></footer>
+</div>
+
+</body>
+</html>
