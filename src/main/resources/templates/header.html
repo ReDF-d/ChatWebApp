@@ -34,14 +34,14 @@
                             <li class="nav-item d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
                                 role="presentation"
                                 sec:authorize="isAuthenticated()">
-                                <form id="searchUser" th:action="@{/search}" th:method="post">
-                                    <input id="searchUserInput" placeholder="Найти пользователя"
+                                <form class="form-inline d-xl-flex justify-content-xl-center align-items-xl-center"
+                                      id="searchUser" th:action="@{/search}" th:method="post">
+                                    <input class="form-control" id="searchUserInput" placeholder="Найти пользователя"
                                            style="padding: 1px 0 2px;" th:name="searchUsers"
                                            type="text"/>
                                     <button class="btn btn-light border rounded-0 border-secondary"
-                                            id="searchUserSubmit" style="padding: 4px 10px;"
-                                            type="button"><i class="fa fa-search"></i>
-                                    </button>
+                                            id="searchUserSubmit" style="padding: 6px 10px;"
+                                            type="button"><i class="fa fa-search"></i></button>
                                 </form>
                             </li>
                             <li class="nav-item" role="presentation"

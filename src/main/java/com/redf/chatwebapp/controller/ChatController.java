@@ -9,6 +9,7 @@ import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.MessageEntityRepository;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
+import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dao.utils.UserDetails;
 import com.redf.chatwebapp.dto.ChatCreateDto;
 import com.redf.chatwebapp.dto.ChatMemberDto;
@@ -23,6 +24,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,23 +46,28 @@ public class ChatController implements RoomBeautiyfier {
 
     private static boolean savePermitted = true;
 
-
     private MessageDAOImpl messageDAO;
     private RoomEntity room;
     private RoomEntityRepository roomEntityRepository;
     private ArrayList<RoomEntity> rooms;
     private FriendshipDAOImpl friendshipDAO;
     private MessageEntityRepository messageEntityRepository;
+    private SessionRegistry sessionRegistry;
+    private UserService userService;
+    private ArrayList<UserEntity> onlineUsers;
+    private ArrayList<UserEntity> offlineUsers;
 
 
     @Contract(pure = true)
     @Autowired
-    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO) {
+    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO, UserService userService, SessionRegistry sessionRegistry) {
         this.messageDAO = messageDAO;
         setRoom(room);
         setRoomEntityRepository(roomEntityRepository);
         setMessageEntityRepository(messageEntityRepository);
         setFriendshipDao(friendshipDAO);
+        setUserService(userService);
+        setSessionRegistry(sessionRegistry);
     }
 
 
@@ -124,7 +131,7 @@ public class ChatController implements RoomBeautiyfier {
 
 
     @GetMapping
-    public ModelAndView chat(@PathVariable String id, @ModelAttribute("messages") ArrayList<MessageEntity> messages, @ModelAttribute("currentDate") Calendar currentDate) {
+    public ModelAndView getChatPage(@PathVariable String id, @ModelAttribute("messages") ArrayList<MessageEntity> messages, @ModelAttribute("currentDate") Calendar currentDate) {
         RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (room != null && checkMembership(room, userDetails.getId())) {
@@ -132,11 +139,14 @@ public class ChatController implements RoomBeautiyfier {
             ArrayList<RoomBeautify> roomsBeautify = new ArrayList<>();
             setRooms((ArrayList<RoomEntity>) getRoomEntityRepository().findRoomsByMemberId(userDetails.getId()));
             addRooms(getRooms(), roomsBeautify, userDetails.getId(), getMessageEntityRepository());
+            initOnlineAndOfflineLists(Integer.parseInt(id));
             ModelAndView modelAndView = new ModelAndView("chat");
             modelAndView.addObject("roomId", id);
             modelAndView.addObject("friends", getFriendshipDAO().getUserFriends(userDetails.getId()));
             modelAndView.addObject("friendsToAdd", getFriendsToAddWithoutMembership(getFriendshipDAO().getUserFriends(userDetails.getId()), getRoom()));
             modelAndView.addObject("chats", roomsBeautify);
+            modelAndView.addObject("onlineUsers", getOnlineUsers());
+            modelAndView.addObject("offlineUsers", getOfflineUsers());
             return modelAndView;
         } else
             return new ModelAndView("redirect:/home");
@@ -150,6 +160,16 @@ public class ChatController implements RoomBeautiyfier {
 
     private void setRoom(RoomEntity room) {
         this.room = room;
+    }
+
+
+    @Contract(pure = true)
+    private List<UserEntity> getOnlineUsers() {
+        return onlineUsers;
+    }
+
+    private void setOnlineUsers(ArrayList<UserEntity> users) {
+        this.onlineUsers = users;
     }
 
 
@@ -209,5 +229,45 @@ public class ChatController implements RoomBeautiyfier {
 
     private void setFriendshipDao(FriendshipDAOImpl friendshipDao) {
         this.friendshipDAO = friendshipDao;
+    }
+
+    private void initOnlineAndOfflineLists(int id) {
+        List<UserEntity> members = getRoomEntityRepository().findRoomById(id).getRoomMembers();
+        List<Object> principals = getSessionRegistry().getAllPrincipals();
+        List<UserEntity> loggedUsers = new ArrayList<>();
+        principals.forEach(p -> {
+            if (p instanceof UserDetails)
+                loggedUsers.add(getUserService().findById(((UserDetails) p).getId()));
+        });
+        ArrayList<UserEntity> offlineUsers = (ArrayList<UserEntity>) CollectionUtils.subtract(members, loggedUsers);
+        setOfflineUsers(offlineUsers);
+        setOnlineUsers((ArrayList<UserEntity>) CollectionUtils.subtract(members, offlineUsers));
+    }
+
+    @Contract(pure = true)
+    private SessionRegistry getSessionRegistry() {
+        return sessionRegistry;
+    }
+
+    private void setSessionRegistry(SessionRegistry sessionRegistry) {
+        this.sessionRegistry = sessionRegistry;
+    }
+
+    @Contract(pure = true)
+    private UserService getUserService() {
+        return userService;
+    }
+
+    private void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Contract(pure = true)
+    private ArrayList<UserEntity> getOfflineUsers() {
+        return offlineUsers;
+    }
+
+    private void setOfflineUsers(ArrayList<UserEntity> offlineUsers) {
+        this.offlineUsers = offlineUsers;
     }
 }

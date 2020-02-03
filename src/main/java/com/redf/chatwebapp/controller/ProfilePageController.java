@@ -58,17 +58,12 @@ public class ProfilePageController {
     public ModelAndView getUserPage(@PathVariable String id) {
         UserEntity user = getUserService().findById(Long.parseLong(id));
         this.id = Long.parseLong(id);
+        ModelAndView modelAndView = new ModelAndView("profilepage");
         if (isAuthenticated())
             setPrincipal((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (getPrincipal() != null) {
             initFriendsFields(getPrincipal().getId(), user.getId());
-        }
-        ModelAndView modelAndView = new ModelAndView("profilepage");
-        modelAndView.addObject("user", user);
-        String url = getPrincipalPageUrl();
-        modelAndView.addObject("url", url);
-        modelAndView.addObject("isFriend", friends);
-        if (getPrincipal() != null) {
+            modelAndView.addObject("isFriend", isFriends());
             FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(getPrincipal().getId(), user.getId());
             if (friendshipEntity != null) {
                 if (isFriends())
@@ -82,6 +77,9 @@ public class ProfilePageController {
             } else
                 modelAndView.addObject("friends", "Добавить " + user.getUsername() + " в друзья");
         }
+        modelAndView.addObject("user", user);
+        String url = getPrincipalPageUrl();
+        modelAndView.addObject("url", url);
         setUserFriends((ArrayList<FriendshipEntity>) getFriendshipEntityRepository().getUserFriends(user.getId()));
         modelAndView.addObject("friendsCount", "Друзей:" + getUserFriends().size());
         return modelAndView;
@@ -90,7 +88,7 @@ public class ProfilePageController {
 
     @PutMapping
     public String getEditPage() {
-        return "redirect:edit";
+        return "redirect:/edit";
     }
 
 

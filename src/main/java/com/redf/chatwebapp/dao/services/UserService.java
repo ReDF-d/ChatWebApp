@@ -9,6 +9,7 @@ import com.redf.chatwebapp.dao.repo.BlockedUserEntityRepository;
 import com.redf.chatwebapp.dao.repo.UserEntityRepository;
 import com.redf.chatwebapp.dto.UserRegistrationDto;
 import com.redf.chatwebapp.dto.UserUpdateDto;
+import com.redf.chatwebapp.exception.AuthenticationException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,15 +86,17 @@ public class UserService implements UserDetailsService {
         if (user != null) {
             if (user.getIsLocked()) {
                 BlockedUserEntity blockedUser = getBlockedUserEntityRepository().findLastBlocked(user.getId());
-                if ((blockedUser.getEnds().getTime() - System.currentTimeMillis()) < 0) {
-                    user.setIsLocked(false);
-                    updateUser(user);
-                    return new com.redf.chatwebapp.dao.utils.UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword().trim(), user.getRoles(), !user.getIsLocked());
-                }
+                if (blockedUser.getEnds() != null) {
+                    System.out.println((blockedUser.getEnds().getTime() - System.currentTimeMillis()));
+                    if ((blockedUser.getEnds().getTime() - System.currentTimeMillis()) < 0) {
+                        user.setIsLocked(false);
+                        updateUser(user);
+                        return new com.redf.chatwebapp.dao.utils.UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword().trim(), user.getRoles(), !user.getIsLocked());
+                    } else throw new AuthenticationException("User blocked");
+                } else throw new AuthenticationException("User blocked");
             } else
                 return new com.redf.chatwebapp.dao.utils.UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword().trim(), user.getRoles(), !user.getIsLocked());
-        }
-        return null;
+        } else throw new AuthenticationException("User not found");
     }
 
 

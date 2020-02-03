@@ -29,7 +29,8 @@
                             <th:block th:each="chat : ${chats}">
                                 <a th:href="@{/chat/{id}(id=${chat.getId()})}">
                                     <div class="row row_bottom_border" style="margin: 0px;padding: 10px;">
-                                        <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-1 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center">
+                                        <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-2 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
+                                             style="padding: 0;">
                                             <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center your_chats_img"
                                                  th:if="${chat.getLastMessage() != null}"
                                                  th:src="@{${'~/media/avatars/avatar' + chat.getLastMessage().getUser().getId() + '.png'}}">
@@ -81,7 +82,7 @@
                     </div>
                 </div>
                 <div class="col-sm-6 col-md-6 col-lg-6 col-xl-7 phonehider column_leftborder">
-                    <div class="row chat_window" style="height: 70vh;">
+                    <div class="row chat_window column_rightborder" style="height: 70vh;">
                         <div class="col-sm-12 offset-lg-0" id="messageArea">
                             <th:block th:each="message : ${messages}">
                                 <div class="row opponents_message" style="padding: 10px;"
@@ -167,44 +168,55 @@
                                         class="online_status" style="font-size: 16px;">В сети:&nbsp;</span>
                                 </div>
                             </div>
-                            <div class="row" style="margin: 0px;">
-                                <div class="col your_chats_column" style="height: 32vh;">
-                                    <div class="row" style="margin: 0px;padding: 10px;">
-                                        <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-3 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center">
-                                            <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
-                                                 style="width: 35px;height: 35px;" th:src="''">
-                                        </div>
-                                        <div class="col-8 col-sm-12 col-md-7 col-xl-9 offset-xl-0 d-xl-flex justify-content-xl-center align-items-xl-center">
-                                            <div class="row">
-                                                <div class="col-xl-12 offset-xl-0 your_chats_online_users"
-                                                     style="padding-left: 0px;padding-right: 0px;"><span
-                                                        style="font-size: 13px;">Гуль 3к ммр</span></div>
+                            <div class="col your_chats_column" style="height: 32vh;">
+                                <th:block th:each="user : ${onlineUsers}">
+                                    <a th:href="@{/user/{id}(id=${user.getId()})}">
+                                        <div class="row userStatus" style="padding: 10px;">
+                                            <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-3 offset-xl-0 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center">
+                                                <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                                     style="width: 35px;height: 35px;"
+                                                     th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"/>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row" style="margin: 0px;">
-                                <div class="col text-center border_class"><span
-                                        class="online_status">Не в сети:&nbsp;</span></div>
-                            </div>
-                            <div class="row" style="margin: 0px;">
-                                <div class="col your_chats_column" style="height: 32vh;">
-                                    <div class="row" style="margin: 0px;padding: 10px;">
-                                        <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-3 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center">
-                                            <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
-                                                 style="width: 35px;height: 35px;" th:src="''">
-                                        </div>
-                                        <div class="col-8 col-sm-12 col-md-7 col-xl-9 offset-xl-0 d-xl-flex justify-content-xl-center align-items-xl-center">
-                                            <div class="row">
-                                                <div class="col-xl-12 offset-xl-0 your_chats_online_users"
-                                                     style="padding-left: 0px;padding-right: 0px;"><span
-                                                        style="font-size: 13px;">Гуль 8к ммр</span>
+                                            <div class="col-8 col-sm-12 col-md-7 col-xl-7 offset-xl-0 d-xl-flex justify-content-xl-start align-items-xl-center"
+                                                 style="padding: 0;">
+                                                <div class="row" style="margin: 0;">
+                                                    <div class="col-xl-12 offset-xl-0 your_chats_online_users"
+                                                         style="padding-left: 0;padding-right: 0;">
+                                                        <span style="font-size: 13px;"
+                                                              th:text="${user.getUsername()}"></span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
+                                    </a>
+                                </th:block>
+                            </div>
+                            <div class="row" style="margin: 0px;">
+                                <div class="col text-center border_class">
+                                    <span class="online_status">Не в сети:&nbsp;</span></div>
+                            </div>
+                            <div class="col your_chats_column" style="height: 32vh;">
+                                <th:block th:each="user : ${offlineUsers}">
+                                    <a th:href="@{/user/{id}(id=${user.getId()})}">
+                                        <div class="row userStatus" style="padding: 10px;">
+                                            <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-3 offset-xl-0 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center">
+                                                <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                                     style="width: 35px;height: 35px;"
+                                                     th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"/>
+                                            </div>
+                                            <div class="col-8 col-sm-12 col-md-7 col-xl-7 offset-xl-0 d-xl-flex justify-content-xl-start align-items-xl-center"
+                                                 style="padding: 0;">
+                                                <div class="row" style="margin: 0;">
+                                                    <div class="col-xl-12 offset-xl-0 your_chats_online_users"
+                                                         style="padding-left: 0;padding-right: 0;">
+                                                        <span style="font-size: 13px;"
+                                                              th:text="${user.getUsername()}"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </th:block>
                             </div>
                         </div>
                     </div>
@@ -232,7 +244,7 @@
                      style="padding-left: 35px;"><span class="d-md-flex justify-content-md-center align-items-md-center"
                                                        style="font-size: 21px;">Создание нового чата</span></div>
                 <div class="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
-                     style="padding: 0  ;">
+                     style="padding: 0 ;">
                     <button class="btn d-xl-flex justify-content-xl-center align-items-xl-center" id="closeCreate"
                             style="padding: 0;"
                             type="button">
@@ -244,7 +256,8 @@
                 <div class="row">
                     <div class="col d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
                          style="margin-top: 10px;margin-bottom: 10px;">
-                        <input placeholder="Название чата" th:field="*{title}" type="text">
+                        <input placeholder="Название чата(необязательно)" style="width: 15rem" th:field="*{title}"
+                               type="text">
                     </div>
                 </div>
                 <div class="row d-md-flex justify-content-md-center align-items-md-center">
@@ -292,8 +305,11 @@
              style="height: 30vh;margin-top: 7vh;">
             <div class="row">
                 <div class="col-11 col-sm-11 col-md-11 col-lg-11 d-flex d-sm-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center"
-                     style="padding-left: 35px;"><span class="d-md-flex justify-content-md-center align-items-md-center"
-                                                       style="font-size: 21px;">Добавить пользователей</span></div>
+                     style="padding-left: 35px;">
+                    <span class="d-md-flex justify-content-md-center align-items-md-center"
+                          style="font-size: 21px;">Добавить пользователей
+                    </span>
+                </div>
                 <div class="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
                      style="padding: 0  ;">
                     <button class="btn d-xl-flex justify-content-xl-center align-items-xl-center" id="closeAdd"

@@ -1,5 +1,5 @@
 package com.redf.chatwebapp.controller;
-
+/*
 
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
@@ -14,10 +14,7 @@ import com.redf.chatwebapp.exception.AvatarTooLargeException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -34,7 +31,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -61,7 +57,6 @@ public class AdminEditUserController implements HandlerExceptionResolver {
         setUserUpdateValidator(userUpdateValidator);
         setUserService(userService);
         setRoleEntityRepository(roleEntityRepository);
-        setUser(user);
         setUserUpdateDto(userUpdateDto);
         setUserEntityRepository(userEntityRepository);
     }
@@ -115,32 +110,14 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     }
 
 
-    private void setAuthentication(UserEntity user) {
-        final List<Object> principals = getSessionRegistry().getAllPrincipals();
-        for (Object principal : principals) {
-            if (principal instanceof UserDetails) {
-                final UserDetails loggedUser = (UserDetails) principal;
-                if (getUser().getUsername().equals(loggedUser.getUsername())) {
-                    loggedUser.setId(user.getId());
-                    loggedUser.setLogin(user.getLogin());
-                    loggedUser.setPassword(user.getPassword());
-                    loggedUser.setUsername(user.getUsername());
-                    loggedUser.setRoles(user.getRoles());
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(loggedUser, loggedUser.getPassword(), loggedUser.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
-        }
-    }
-
-
     @PostMapping
-    public ModelAndView updateUserProfile(@NotNull @ModelAttribute("userDto") UserUpdateDto userUpdateDto, BindingResult result) {
+    public String updateUserProfile(@NotNull @ModelAttribute("userDto") UserUpdateDto userUpdateDto, BindingResult result, @PathVariable String id) {
+        setUser(getUserDAO().findById(Long.parseLong(id)));
         UserEntity user = getUserEntityRepository().findByLogin(getUser().getLogin());
         UserDetails userDetails = new UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword(), user.getRoles(), !user.getIsLocked());
         getUserUpdateValidator().validateAllFields(result, userUpdateDto, userDetails, "ADMIN");
         if (result.hasErrors()) {
-            return new ModelAndView("redirect:/adminedituser");
+            return "redirect:/adminedituser";
         }
         userUpdateDto.setId(userDetails.getId());
         userUpdateDto.setRoles(getRoleList(userDetails.getAuthorities(), userUpdateDto));
@@ -149,8 +126,11 @@ public class AdminEditUserController implements HandlerExceptionResolver {
                 long millis = System.currentTimeMillis();
                 Date date = new Date(millis);
                 userUpdateDto.setStarted(new Timestamp(getSdf().parse(getSdf().format(date)).getTime()));
-                Date parsedDate = getSdf().parse(userUpdateDto.getDateTimeLocal());
-                userUpdateDto.setEnds(new Timestamp(parsedDate.getTime()));
+                if(userUpdateDto.getDateTimeLocal() != null && !userUpdateDto.getDateTimeLocal().equals("")) {
+                    Date parsedDate = getSdf().parse(userUpdateDto.getDateTimeLocal());
+                    userUpdateDto.setEnds(new Timestamp(parsedDate.getTime()));
+                }
+                else userUpdateDto.setEnds(null);
             } catch (ParseException e) {
                 System.out.println(e.getMessage());
             }
@@ -158,9 +138,7 @@ public class AdminEditUserController implements HandlerExceptionResolver {
         update(userUpdateDto);
         if (!userUpdateDto.getAvatar().isEmpty())
             getUserUpdateValidator().saveAvatar(userUpdateDto);
-        setUser(getUserDAO().findByLogin(userUpdateDto.getLogin()));
-        setAuthentication(getUser());
-        return new ModelAndView("redirect:/adminpanel/edituser/" + getUser().getId());
+        return "redirect:/adminpanel";
     }
 
 
@@ -263,4 +241,4 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
     }
-}
+}*/

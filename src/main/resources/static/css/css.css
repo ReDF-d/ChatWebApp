@@ -551,6 +551,11 @@ chat_welcome_h1 {
     background-color: #28a745
 }
 
+.userStatus:hover {
+    color: #fff;
+    background-color: #28a745
+}
+
 .message {
     border: 0 solid rgba(125, 125, 125, .9);
     word-wrap: break-word;
@@ -579,6 +584,10 @@ chat_welcome_h1 {
 
 .chat_window, .your_chats_column {
     overflow-y: auto
+}
+
+.column_rightborder {
+    border-right: 2px solid rgba(125, 125, 125, 0.9);
 }
 
 .invalid-search::-webkit-input-placeholder {

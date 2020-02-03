@@ -111,12 +111,10 @@
                             <div class="col">
                                 <span style="font-size: 12px;color: rgb(54,54,54);">Время блокировки</span>
                             </div>
-                            <div class="row">
-                                <div class="col d-xl-flex justify-content-xl-center align-items-xl-center">
-                                    <input id="banDate"
-                                           name="banDate" th:field="*{dateTimeLocal}"
-                                           type="datetime-local">
-                                </div>
+                        </div>
+                        <div class="row" hidden id="banDate">
+                            <div class="col d-xl-flex justify-content-xl-center align-items-xl-center">
+                                <input name="banDate" th:field="*{dateTimeLocal}" type="datetime-local">
                             </div>
                         </div>
                     </div>

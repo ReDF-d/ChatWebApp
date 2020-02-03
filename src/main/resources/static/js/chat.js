@@ -24,7 +24,6 @@ function connect() {
         let socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, onConnected, onError);
-        // stompClient.debug = null
     }
 }
 
@@ -123,6 +122,7 @@ function onMessageReceived(payload) {
             div1.appendChild(div3);
             div1.appendChild(div7);
             messageArea.appendChild(div1);
+            messageArea.scrollTop = messageArea.scrollHeight;
         } else {
             div1.classList.add('my_message');
             div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
@@ -158,6 +158,7 @@ function onMessageReceived(payload) {
             div1.appendChild(div2);
             div1.appendChild(div8);
             messageArea.appendChild(div1);
+            messageArea.scrollTop = messageArea.scrollHeight;
         }
     }
 }
