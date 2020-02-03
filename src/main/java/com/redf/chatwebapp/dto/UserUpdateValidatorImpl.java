@@ -4,6 +4,7 @@ package com.redf.chatwebapp.dto;
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.utils.UserDetails;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -113,6 +114,7 @@ public class UserUpdateValidatorImpl implements UserUpdateValidator {
     }
 
 
+    @Contract(pure = true)
     private UserDAOImpl getUserDAOImpl() {
         return userDAOImpl;
     }

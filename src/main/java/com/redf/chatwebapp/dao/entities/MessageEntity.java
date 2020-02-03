@@ -21,6 +21,7 @@ public class MessageEntity extends AbstractEntity implements Serializable {
     private String username;
     private RoomEntity room;
 
+
     public MessageEntity(String messageText, UserEntity user, Timestamp time, RoomEntity room) {
         setMessageText(messageText);
         setUser(user);
@@ -29,8 +30,10 @@ public class MessageEntity extends AbstractEntity implements Serializable {
         setUsername(user.getUsername());
     }
 
+
     public MessageEntity() {
     }
+
 
     @Id
     @Column(name = "message_id")
@@ -43,9 +46,11 @@ public class MessageEntity extends AbstractEntity implements Serializable {
         return messageId;
     }
 
+
     public void setMessageId(int messageId) {
         this.messageId = messageId;
     }
+
 
     @Basic
     @Column(name = "message_text", nullable = false, length = 1024)
@@ -53,9 +58,11 @@ public class MessageEntity extends AbstractEntity implements Serializable {
         return messageText;
     }
 
+
     public void setMessageText(String messageText) {
         this.messageText = messageText;
     }
+
 
     @Basic
     @Column(name = "time", nullable = false)
@@ -63,9 +70,11 @@ public class MessageEntity extends AbstractEntity implements Serializable {
         return time;
     }
 
+
     public void setTime(Timestamp time) {
         this.time = time;
     }
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -73,9 +82,11 @@ public class MessageEntity extends AbstractEntity implements Serializable {
         return user;
     }
 
+
     public void setUser(UserEntity user) {
         this.user = user;
     }
+
 
     public String getUsername() {
         return username;

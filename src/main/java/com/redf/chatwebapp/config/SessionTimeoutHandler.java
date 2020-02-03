@@ -12,12 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 public class SessionTimeoutHandler
         extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final Integer SESSION_TIMEOUT_IN_SECONDS = 60 * 300;
-
     @Override
     public void onAuthenticationSuccess(@NotNull HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) {
-        request.getSession().setMaxInactiveInterval(SESSION_TIMEOUT_IN_SECONDS);
+        // int SESSION_TIMEOUT_IN_SECONDS = 60 * 3000;
+        request.getSession().setMaxInactiveInterval(0);
     }
 }

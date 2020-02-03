@@ -28,6 +28,7 @@ public class UserService implements UserDetailsService {
     private UserEntityRepository userEntityRepository;
     private BlockedUserEntityRepository blockedUserEntityRepository;
 
+
     @Contract(pure = true)
     @Autowired
     UserService(UserDAOImpl userDAO, UserEntityRepository userEntityRepository, BlockedUserEntityRepository blockedUserEntityRepository) {
@@ -36,9 +37,11 @@ public class UserService implements UserDetailsService {
         setBlockedUserEntityRepository(blockedUserEntityRepository);
     }
 
+
     @Contract(pure = true)
     public UserService() {
     }
+
 
     public void saveUser(@NotNull UserEntity user) {
         getUserDAO().save(user);
@@ -98,22 +101,34 @@ public class UserService implements UserDetailsService {
         return getUserDAO().findByLogin(login);
     }
 
+
+    @Contract(pure = true)
     private UserDAOImpl getUserDAO() {
         return userDAO;
     }
+
+    public UserEntity findById(@NotNull Long id) {
+        return getUserDAO().findById(id);
+    }
+
 
     private void setUserDAO(UserDAOImpl userDAO) {
         this.userDAO = userDAO;
     }
 
+
+    @Contract(pure = true)
     private UserEntityRepository getUserEntityRepository() {
         return userEntityRepository;
     }
+
 
     private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
     }
 
+
+    @Contract(pure = true)
     private BlockedUserEntityRepository getBlockedUserEntityRepository() {
         return blockedUserEntityRepository;
     }

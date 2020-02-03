@@ -9,13 +9,12 @@ let date = new Date();
 let login = false;
 let roomId = document.querySelector('#roomId');
 let connectingError = document.createElement('div');
-connectingError.classList.add('hidden', 'chat-message');
+connectingError.classList.add('hidden', 'text-danger', 'text-center');
 connectingError.id = 'connectionError';
 messageArea.scrollTop = messageArea.scrollHeight;
 if (!stompClient)
     connect();
 messageForm.addEventListener('submit', sendMessage, true);
-
 
 function connect() {
     id = document.querySelector('#id').textContent.trim();
@@ -67,44 +66,98 @@ function sendMessage(event) {
 
 function onMessageReceived(payload) {
     let receivedMessage = JSON.parse(payload.body);
-    let messageDiv = document.createElement('div');
-    if (id !== receivedMessage.id)
-        messageDiv.classList.add('chat-message');
-    else
-        messageDiv.classList.add('mychat-message');
-    let messageAuthor = document.createElement('a');
-    let messageContent = document.createElement('span');
-    let date = new Date(receivedMessage.timestamp);
-    let month = date.getMonth();
-    month += 1;
-    let dateElement = document.createElement('div');
-    let currentHours = date.getHours();
-    currentHours = ("0" + currentHours).slice(-2);
-    let currentMinutes = date.getMinutes();
-    currentMinutes = ("0" + currentMinutes).slice(-2);
-    dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
-    dateElement.classList.add('time');
-    if (receivedMessage.type === 'JOIN') {
-
-    } else if (receivedMessage.type === 'LEAVE') {
-
-    } else {
+    if (receivedMessage.type === 'CHAT') {
+        let date = new Date(receivedMessage.timestamp);
+        let month = date.getMonth();
+        let currentHours = date.getHours();
+        let currentMinutes = date.getMinutes();
+        let div1 = document.createElement('div');
+        let div2 = document.createElement('div');
+        let div3 = document.createElement('div');
+        let div4 = document.createElement('div');
+        let div5 = document.createElement('div');
+        let div6 = document.createElement('div');
+        let div7 = document.createElement('div');
+        let div8 = document.createElement('div');
+        let dateElement = document.createElement('span');
+        let messageLink = document.createElement('a');
+        let authorImg = document.createElement('img');
+        let messageContent = document.createElement('p');
+        month += 1;
+        currentHours = ("0" + currentHours).slice(-2);
+        currentMinutes = ("0" + currentMinutes).slice(-2);
+        div1.classList.add('row');
+        div1.style.padding = '10px';
         if (id !== receivedMessage.id) {
-            messageAuthor.innerText = receivedMessage.sender;
-            messageAuthor.setAttribute('href', "/user/" + receivedMessage.id);
-            messageDiv.appendChild(messageAuthor);
+            div1.classList.add('opponents_message');
+            div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+            messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+            authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+            authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+            authorImg.style.width = '50px';
+            authorImg.style.height = '50px';
+            messageLink.appendChild(authorImg);
+            div2.appendChild(messageLink);
+            div3.classList.add('col-sm-7', 'col-xl-6');
+            div4.classList.add('row');
+            div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
+            div5.style.padding = '5px';
+            div6.classList.add('d-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+            messageContent.classList.add('message');
+            messageContent.style.marginLeft = '5px';
+            messageContent.style.width = '100%';
+            messageContent.style.fontSize = '14px';
+            messageContent.innerText = receivedMessage.content;
+            div6.appendChild(messageContent);
+            div5.appendChild(div6);
+            div4.appendChild(div5);
+            div3.appendChild(div4);
+            div7.classList.add('row');
+            div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
+            dateElement.classList.add('.date');
+            dateElement.style.fontSize = '11px';
+            dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+            div8.appendChild(dateElement);
+            div7.appendChild(div8);
+            div1.appendChild(div2);
+            div1.appendChild(div3);
+            div1.appendChild(div7);
+            messageArea.appendChild(div1);
+        } else {
+            div1.classList.add('my_message');
+            div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+            div3.classList.add('row');
+            div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
+            div4.style.padding = '5px';
+            div5.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+            messageContent.classList.add('message', 'user_message');
+            messageContent.style.marginRight = '0';
+            messageContent.style.marginLeft = '0';
+            messageContent.style.fontSize = '14px';
+            messageContent.innerText = receivedMessage.content;
+            div5.appendChild(messageContent);
+            div4.appendChild(div5);
+            div3.appendChild(div4);
+            div6.classList.add('row');
+            div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
+            dateElement.classList.add('.date');
+            dateElement.style.fontSize = '11px';
+            dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+            div7.appendChild(dateElement);
+            div6.appendChild(div7);
+            div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+            messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+            authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+            authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+            authorImg.style.width = '50px';
+            authorImg.style.height = '50px';
+            messageLink.appendChild(authorImg);
+            div8.appendChild(messageLink);
+            div2.appendChild(div3);
+            div2.appendChild(div6);
+            div1.appendChild(div2);
+            div1.appendChild(div8);
+            messageArea.appendChild(div1);
         }
-
-        messageContent.innerText = receivedMessage.content;
-        messageDiv.appendChild(messageContent);
-        messageDiv.appendChild(dateElement);
-        if (id === receivedMessage.id) {
-            let editDelete = document.createElement('div');
-            editDelete.classList.add('editanddeletebuttons');
-            messageDiv.appendChild(editDelete);
-        }
-        messageArea.appendChild(messageDiv);
-        messageArea.appendChild(document.createElement('br'));
-        messageArea.scrollTop = messageArea.scrollHeight;
     }
 }

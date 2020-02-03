@@ -6,10 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface FriendshipEntityRepository extends JpaRepository<FriendshipEntity, Long> {
 
-    //    @Query(value = "SELECT * from blocked_users where user_id = :id ORDER BY id desc limit 1", nativeQuery = true)
     @Query("SELECT f from FriendshipEntity f where f.firstUser.id=:id and f.secondUser.id=:id2 or f.firstUser.id=:id2 and f.secondUser.id=:id")
     FriendshipEntity findById(@Param("id") Long id, @Param("id2") Long id2);
+
+
+    @Query("select f from FriendshipEntity f where f.firstUser.id=:id or f.secondUser.id=:id and f.status='friends'")
+    List<FriendshipEntity> getUserFriends(@Param("id") Long id);
 }

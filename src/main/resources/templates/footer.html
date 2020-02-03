@@ -5,22 +5,34 @@
     <title>Title</title>
 </head>
 <body>
-<div class="zoom">
-    <footer class="bg-light padding text-center ftr" th:fragment="foot">
-        <div class="container-fluid ftr">
-            <div class="row padding text-center">
-                <div class="col-12 contact-marg">
-                    <h4>Наши контакты</h4>
-                </div>
-                <div class="col-12 social padding">
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="https://vk.com/blinktalk" target="_blank"><i class="fab fa-vk"></i></a>
-                    <a href="https://github.com/ReDF-d/BlinkTalk" target="_blank"><i class="fab fa-github"></i></a>
-                </div>
-            </div>
+<div class="footer-basic" th:fragment="foot">
+    <footer>
+        <!-- Start: Social Icons -->
+        <div class="social">
+            <a href="#">
+                <i class="fa fa-star fa-vk"></i>
+            </a>
+            <a href="https://github.com/ReDF-d/BlinkTalk" target="_blank">
+                <i class="fa fa-star fa-github icon"></i>
+            </a>
+            <a href="#">
+                <i class="fa fa-star fa-instagram"></i>
+            </a>
         </div>
-        <script th:src="@{~/js/background.js}"></script>
+        <!-- End: Social Icons -->
+        <div class="row">
+            <div class="col text-center" style="padding-top: 5px;"><a class="rules" th:href="@{/terms}">Правила
+                пользования</a></div>
+        </div>
+        <!-- Start: Copyright -->
+        <p class="copyright">BlinkTalk © 2020</p>
+        <!-- End: Copyright -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+        <script th:src="@{~/js/script.min.js}"></script>
+        <script th:src="@{~/js/searchValidate.js}"></script>
     </footer>
 </div>
+<!-- End: Footer Basic -->
 </body>
 </html>

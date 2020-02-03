@@ -9,7 +9,7 @@ public interface RoomDAO {
 
     RoomEntity create(String room);
 
-    RoomEntity create(String room, List<UserEntity> roomMembers);
+    RoomEntity create(String room, List<UserEntity> roomMembers, String title);
 
     RoomEntity save(RoomEntity room);
 
@@ -19,5 +19,5 @@ public interface RoomDAO {
 
     RoomEntity createAndSave(String room);
 
-    RoomEntity createAndSave(String room, List<UserEntity> roomMembers);
+    RoomEntity createAndSave(String room, List<UserEntity> roomMembers, String title);
 }

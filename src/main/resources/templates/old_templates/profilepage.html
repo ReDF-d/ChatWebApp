@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="header::links"></div>
+    <title th:text=""></title>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+<header th:replace="header :: head"></header>
+<main class="bground" id="main">
+    <div class="row d-flex justify-content-center" style="padding-top: 5%;">
+        <div class="profileborder col-4 align-self-center">
+            <div class="content">
+                <div class="container">
+                    <div class="row  d-flex justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="text-center card-box">
+                                <div class="member-card pt-2 pb-2 pl-2 pr-2">
+                                    <div class="thumb-lg member-thumb mx-auto"><img
+                                            alt="profile-image"
+                                            class="rounded-circle img-thumbnail"
+                                            th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"></div>
+                                    <div>
+                                        <h4 th:text="${user.getUsername()}"></h4>
+                                    </div>
+                                    <div th:if="${user.getIsLocked() == true}">
+                                        <h4 style="color: red">Пользователь заблокирован</h4>
+                                    </div>
+                                    <form id="add-friend-form" name="add-friend" th:action="@{/user/${user.getId()}}"
+                                          th:method="post">
+                                        <div sec:authorize="isAuthenticated()"
+                                             th:if="${#httpServletRequest.getRequestURI() != url}">
+                                            <button class="btn btn-success mt-3 btn-rounded waves-effect w-md waves-light"
+                                                    id="add-friend" th:text="${friends}" type="button">
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <div th:if="${#httpServletRequest.getRequestURI() != url and #authorization.expression('hasAuthority(''ADMIN'')')}">
+                                        <button class="btn btn-info" id="admin-edit" type="button">
+                                            <span class="glyphicon glyphicon-pencil"></span> Редактировать данные
+                                            пользователя
+                                        </button>
+                                    </div>
+                                    <div th:if="${#httpServletRequest.getRequestURI() == url}">
+                                        <form id="profile-form" th:action="@{/user/${user.getId()}}" th:method="put">
+                                            <button class="btn btn-info" id="profile-button" type="button">
+                                                <span class="glyphicon glyphicon-pencil"></span> Редактировать
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <form id="send-message-form" th:action="@{/user/${user.getId()}}" th:method="patch">
+                                        <button class="btn btn-success mt-3 btn-rounded waves-effect w-md waves-light"
+                                                id="button-chat"
+                                                sec:authorize="isAuthenticated()"
+                                                th:if="${isFriend and #httpServletRequest.getRequestURI() != url}"
+                                                type="button">Написать сообщение
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer th:replace="footer :: foot"></footer>
+<script th:src="@{~/js/profile.js}"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.redf.chatwebapp.controller;
 
+import com.redf.chatwebapp.dao.RoomDAOImpl;
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.*;
 
@@ -26,39 +29,44 @@ public class SignupController {
     private UserService userService;
     private UserDAOImpl userDAO;
     private RoomEntityRepository roomEntityRepository;
+    private RoomDAOImpl roomDAO;
+
 
     @Contract(pure = true)
     @Autowired
-    public SignupController(UserDAOImpl userDAO, UserService userService, RoomEntityRepository roomEntityRepository) {
+    public SignupController(UserDAOImpl userDAO, UserService userService, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO) {
         setUserDAO(userDAO);
         setUserService(userService);
         setRoomEntityRepository(roomEntityRepository);
+        setRoomDAO(roomDAO);
     }
+
 
     @ModelAttribute("user")
     public UserRegistrationDto userRegistrationDto() {
         return new UserRegistrationDto();
     }
 
+
     @GetMapping
     public String signUp() {
         return "signup";
     }
 
-    @PostMapping
-    public String registerUserAccount(@NotNull @ModelAttribute("user") @Valid UserRegistrationDto userDto,
-                                      BindingResult result) {
 
+    @PostMapping
+    public String registerUserAccount(HttpServletRequest request, @NotNull @ModelAttribute("user") @Valid UserRegistrationDto userDto,
+                                      BindingResult result) throws ServletException {
         UserEntity existing = getUserDAO().findByLogin(userDto.getLogin());
         if (existing != null)
             result.rejectValue("login", "emailExists", "Извините, но аккаунт с такой почтой уже зарегистрирован");
-
         if (result.hasErrors()) {
             return "signup";
         }
         register(userDto);
         createAvatar(getUserService().findByLogin(userDto.getLogin()).getId());
-        getRoomEntityRepository().findRoomById(1).addRoomMember(getUserService().findByLogin(userDto.getLogin()));
+        addUserToGlobalChat(getUserService().findByLogin(userDto.getLogin()));
+        request.login(userDto.getLogin(), userDto.getPassword());
         return "redirect:chats";
     }
 
@@ -66,6 +74,12 @@ public class SignupController {
     private void register(UserRegistrationDto userRegistrationDto) {
         getUserService().createAndSave(userRegistrationDto);
     }
+
+
+    private void addUserToGlobalChat(UserEntity user) {
+        getRoomDAO().update(getRoomEntityRepository().findRoomById(1).addRoomMember(user));
+    }
+
 
     private void createAvatar(Long id) {
         InputStream is = null;
@@ -103,21 +117,34 @@ public class SignupController {
         this.userService = userService;
     }
 
+
     @Contract(pure = true)
     private UserDAOImpl getUserDAO() {
         return userDAO;
     }
 
+
     private void setUserDAO(UserDAOImpl userDAO) {
         this.userDAO = userDAO;
     }
+
 
     @Contract(pure = true)
     private RoomEntityRepository getRoomEntityRepository() {
         return roomEntityRepository;
     }
 
+
     private void setRoomEntityRepository(RoomEntityRepository roomEntityRepository) {
         this.roomEntityRepository = roomEntityRepository;
+    }
+
+    @Contract(pure = true)
+    private RoomDAOImpl getRoomDAO() {
+        return roomDAO;
+    }
+
+    private void setRoomDAO(RoomDAOImpl roomDAO) {
+        this.roomDAO = roomDAO;
     }
 }

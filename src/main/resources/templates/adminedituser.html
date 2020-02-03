@@ -1,152 +1,165 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+<html th:lang="ru" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <div th:replace="header::links"></div>
     <title>Изменить данные пользователя</title>
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+    <div th:replace="header::links"></div>
 </head>
+
 <body>
-<header th:replace="header :: head"></header>
-<main class="bground" id="main">
-    <div class="row d-flex justify-content-center" style="padding-top: 5%;">
-        <div class="profileborder col-4 align-self-center">
-            <div class="content">
-                <div class="container">
-                    <div class="row  d-flex justify-content-center">
-                        <div class="col-lg-10">
-                            <div class="text-center card-box">
-                                <div class="member-card pt-2 pb-2 pl-2 pr-2">
-                                    <div class="thumb-lg member-thumb mx-auto">
-                                        <img alt="profile-image" class="rounded-circle img-thumbnail"
-                                             th:src="@{${'~/media/avatars/avatar' + userUpdating?.getId() + '.png'}}">
-                                    </div>
-                                    <div class="control-label"
-                                         th:text="'Логин пользователя - ' + ${userUpdating?.getLogin()}"></div>
-                                    <div class="control-label"
-                                         th:text="'Имя пользователя - ' + ${userUpdating?.getUsername()}"></div>
-                                    <div>
-                                        <form class="form-horizontal" enctype="multipart/form-data"
-                                              role="form"
-                                              th:action="@{/adminpanel/edituser/{id}(id=${userUpdating?.getId()})}"
-                                              th:method="post"
-                                              th:name="updateForm" th:object="${userDto}">
-                                            <div class="form-group">
-                                                <label class="edit-input" for="avatar"><i aria-hidden="true"
-                                                                                          class="fas fa-cloud-upload-alt"></i>Изменить
-                                                    аватар пользователя</label>
-                                                <div>
-                                                    <input class="form-control" id="avatar" name="avatar"
-                                                           th:field="*{avatar}"
-                                                           type="file">
-                                                    <p class="error-message signup-error"
-                                                       th:if="${!tooLarge.getMessage().equals('')}"
-                                                       th:text="${tooLarge.getMessage()}"></p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="form-group"
-                                                         th:classappend="${#fields.hasErrors('login')}? 'has-error':''">
-                                                        <label class=" control-label" for="login">Изменить электронную
-                                                            почту</label>
-                                                        <div>
-                                                            <input class="form-control" id="login" name="login"
-                                                                   placeholder="example@email.com"
-                                                                   th:autofocus th:field="*{login}"
-                                                                   type="text">
-                                                            <p class="error-message signup-error"
-                                                               th:class="signup-error"
-                                                               th:each="error:${#fields.errors('login')}"
-                                                               th:text="${error}">Ошибка</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="form-group"
-                                                             th:classappend="${#fields.hasErrors('username')}? 'has-error':''">
-                                                            <label class=" control-label" for="username">Изменить имя
-                                                                пользователя
-                                                            </label>
-                                                            <div class="">
-                                                                <input autocomplete="off" class="form-control"
-                                                                       id="username"
-                                                                       name="username"
-                                                                       placeholder="Имя пользователя" th:autofocus
-                                                                       th:field="*{username}"
-                                                                       type="text">
-                                                                <p class="error-message signup-error"
-                                                                   th:class="signup-error"
-                                                                   th:each="error:${#fields.errors('username')}"
-                                                                   th:text="${error}">Ошибка</p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <div>
-                                                                <label class=" control-label" for="password">Изменить
-                                                                    пароль пользователя</label>
-                                                                <input class="form-control" id="password"
-                                                                       name="password"
-                                                                       placeholder="Пароль" th:field="*{password}"
-                                                                       type="password">
-                                                                <p class="error-message signup-error"
-                                                                   th:class="signup-error"
-                                                                   th:each="error : ${#fields.errors('password')}"
-                                                                   th:text="${error}">Ошибка</p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group"
-                                                             th:if="${not #lists.contains(roles, 'ADMIN')}">
-                                                            <div>
-                                                                <label for="makeAdmin">Выдать права
-                                                                    администратора</label>
-                                                                <input class="form-control" id="makeAdmin"
-                                                                       name="makeAdmin"
-                                                                       th:field="*{makeAdmin}"
-                                                                       type="checkbox">
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group"
-                                                             th:if="${userUpdating?.getIsLocked() == false && userUpdating.getId() != #authentication.getPrincipal().getId()}">
-                                                            <div>
-                                                                <label for="markBanned" style="color:red">Заблокировать
-                                                                    учетную запись</label>
-                                                                <input class="form-control" id="markBanned"
-                                                                       name="markBanned" onchange="handleChange()"
-                                                                       th:field="*{markBanned}" type="checkbox">
-                                                                <label for="banDate" hidden id="banDateLabel">Время
-                                                                    блокировки</label>
-                                                                <input class="form-control" hidden id="banDate"
-                                                                       name="banDate" th:field="*{dateTimeLocal}"
-                                                                       type="datetime-local">
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group"
-                                                             th:if="${userUpdating?.getIsLocked() == true}">
-                                                            <div>
-                                                                <label for="unban">Разблокировать учетную запись</label>
-                                                                <input class="form-control" id="unban" name="unban"
-                                                                       th:default="checked" th:field="*{markUnbanned}"
-                                                                       type="checkbox">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p><input th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
-                                                          type="hidden"/></p>
-                                                <div class="regbtn">
-                                                    <button class="btn btn-success" type="submit">Подтвердить</button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
+<header th:replace="header::head"></header>
+<div class="container-fluid img" style="padding: 0px;">
+    <div class="row d-flex d-sm-flex justify-content-center align-items-center justify-content-sm-center align-items-md-center"
+         style="margin: 0px;">
+        <div class="col-11 col-sm-7 col-md-6 col-lg-5 col-xl-4 offset-md-3 profile_card" style="margin: 100px;">
+            <form enctype="multipart/form-data"
+                  role="form"
+                  th:action="@{/adminpanel/edituser/{id}(id=${userUpdating.getId()})}"
+                  th:method="post"
+                  th:name="updateForm" th:object="${userDto}">
+                <div class="row text-center">
+                    <div class="col">
+                        <span th:text="'Профиль ' + ${userUpdating.getUsername()}"></span>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 15px;">
+                    <div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8 offset-2 offset-sm-2 offset-md-2 offset-lg-2 offset-xl-2 d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center">
+                        <img class="rounded-circle" style="width: 140px;"
+                             th:src="@{${'~/media/avatars/avatar' + userUpdating.getId() + '.png'}}">
+                    </div>
+                    <div class="col offset-xl-0 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                         style="padding: 0px;">
+                        <input accept="image/*" id="avatar" name="avatar" style="margin-top: 5px;margin-bottom: 10px;"
+                               th:field="*{avatar}" type="file">
+                        <p class="text-danger"
+                           th:if="${!tooLarge.getMessage().equals('')}"
+                           th:text="${tooLarge.getMessage()}"></p>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center edit_card_element"
+                     style="margin: 3px;">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <span>Введите новую почту</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <input id="login" name="login" placeholder="E-Mail" th:field="*{login}" type="text">
+                                <p class="text-danger"
+                                   th:each="error:${#fields.errors('login')}"
+                                   th:text="${error}">Ошибка</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <span>Введите новый ник</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <input id="username" name="username" placeholder="Имя пользователя"
+                                       th:field="*{username}" type="text">
+                                <p class="text-danger"
+                                   th:each="error:${#fields.errors('username')}"
+                                   th:text="${error}">Ошибка</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <span>Введите новый пароль</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <input id="password" name="password" placeholder="Пароль" th:field="*{password}"
+                                       type="text">
+                                <p class="text-danger"
+                                   th:each="error:${#fields.errors('password')}"
+                                   th:text="${error}">Ошибка</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;"
+                     th:if="${userUpdating.getIsLocked() == false && userUpdating.getId() != #authentication.getPrincipal().getId()}">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-check text-center">
+                                    <input class="form-check-input" id="markBanned" name="markBanned"
+                                           onchange="handleChange()" th:field="*{markBanned}"
+                                           type="checkbox">
+                                    <label class="form-check-label" for="markBanned" style="color: rgb(247,3,3);">Заблокировать&nbsp;</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" hidden id="banDateLabel">
+                            <div class="col">
+                                <span style="font-size: 12px;color: rgb(54,54,54);">Время блокировки</span>
+                            </div>
+                            <div class="row">
+                                <div class="col d-xl-flex justify-content-xl-center align-items-xl-center">
+                                    <input id="banDate"
+                                           name="banDate" th:field="*{dateTimeLocal}"
+                                           type="datetime-local">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;" th:if="${userUpdating?.getIsLocked() == true}">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <span>Разблокировать учётную запись</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <input id="unban" name="unban"
+                                       th:default="checked" th:field="*{markUnbanned}"
+                                       type="checkbox">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 5px;margin-bottom: 5px;">
+                    <div class="col d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                         th:if="${not #lists.contains(roles, 'ADMIN')}">
+                        <div class="form-check">
+                            <input class="form-check-input" id="makeAdmin" th:field="*{makeAdmin}" type="checkbox">
+                            <label class="form-check-label" for="makeAdmin" style="color: rgb(0,41,255);">Выдать права
+                                администратора</label>
+                        </div>
+                    </div>
+                </div>
+                <p><input th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                          type="hidden"/></p>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center">
+                    <div class="col-xl-12 offset-xl-0 text-center" style="margin-top: 10px;margin-bottom: 30px;">
+                        <button class="btn btn-success" type="submit">Сохранить изменения</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-</main>
+</div>
 <script th:src="@{~/js/adminEditProfile.js}"></script>
-<footer th:replace="footer :: foot"></footer>
+<footer th:replace="footer::foot"></footer>
 </body>
 </html>

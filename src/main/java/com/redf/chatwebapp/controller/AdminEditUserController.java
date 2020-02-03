@@ -70,15 +70,18 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     public AdminEditUserController() {
     }
 
+
     @Contract(pure = true)
     private static SimpleDateFormat getSdf() {
         return sdf;
     }
 
+
     @ModelAttribute("tooLarge")
     public AvatarTooLargeException avatarTooLargeException(String message) {
         return new AvatarTooLargeException(message);
     }
+
 
     @GetMapping
     public ModelAndView getUserPage(@PathVariable String id) {
@@ -130,13 +133,14 @@ public class AdminEditUserController implements HandlerExceptionResolver {
         }
     }
 
+
     @PostMapping
     public ModelAndView updateUserProfile(@NotNull @ModelAttribute("userDto") UserUpdateDto userUpdateDto, BindingResult result) {
         UserEntity user = getUserEntityRepository().findByLogin(getUser().getLogin());
         UserDetails userDetails = new UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword(), user.getRoles(), !user.getIsLocked());
         getUserUpdateValidator().validateAllFields(result, userUpdateDto, userDetails, "ADMIN");
         if (result.hasErrors()) {
-            return new ModelAndView("redirect:adminedituser");
+            return new ModelAndView("redirect:/adminedituser");
         }
         userUpdateDto.setId(userDetails.getId());
         userUpdateDto.setRoles(getRoleList(userDetails.getAuthorities(), userUpdateDto));
@@ -156,8 +160,9 @@ public class AdminEditUserController implements HandlerExceptionResolver {
             getUserUpdateValidator().saveAvatar(userUpdateDto);
         setUser(getUserDAO().findByLogin(userUpdateDto.getLogin()));
         setAuthentication(getUser());
-        return new ModelAndView("redirect:/user/" + getUser().getId());
+        return new ModelAndView("redirect:/adminpanel/edituser/" + getUser().getId());
     }
+
 
     @Override
     public ModelAndView resolveException(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, Object object, @NotNull Exception exc) {
@@ -177,45 +182,55 @@ public class AdminEditUserController implements HandlerExceptionResolver {
         return user;
     }
 
+
     public void setUser(UserEntity user) {
         this.user = user;
     }
+
 
     @Contract(pure = true)
     private SessionRegistry getSessionRegistry() {
         return sessionRegistry;
     }
 
+
     private void setSessionRegistry(SessionRegistry sessionRegistry) {
         this.sessionRegistry = sessionRegistry;
     }
+
 
     @Contract(pure = true)
     private UserDAOImpl getUserDAO() {
         return userDAO;
     }
 
+
     private void setUserDAO(UserDAOImpl userDAO) {
         this.userDAO = userDAO;
     }
+
 
     @Contract(pure = true)
     private RoleEntityRepository getRoleEntityRepository() {
         return roleEntityRepository;
     }
 
+
     private void setRoleEntityRepository(RoleEntityRepository roleEntityRepository) {
         this.roleEntityRepository = roleEntityRepository;
     }
+
 
     @Contract(pure = true)
     private UserService getUserService() {
         return userService;
     }
 
+
     private void setUserService(UserService userService) {
         this.userService = userService;
     }
+
 
     @Contract(pure = true)
     private UserUpdateValidatorImpl getUserUpdateValidator() {
@@ -227,19 +242,23 @@ public class AdminEditUserController implements HandlerExceptionResolver {
         this.userUpdateValidator = userUpdateValidator;
     }
 
+
     @Contract(pure = true)
     private UserUpdateDto getUserUpdateDto() {
         return userUpdateDto;
     }
 
+
     private void setUserUpdateDto(UserUpdateDto userUpdateDto) {
         this.userUpdateDto = userUpdateDto;
     }
+
 
     @Contract(pure = true)
     private UserEntityRepository getUserEntityRepository() {
         return userEntityRepository;
     }
+
 
     private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;

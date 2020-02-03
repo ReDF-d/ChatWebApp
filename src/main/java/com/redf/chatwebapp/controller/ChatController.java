@@ -1,12 +1,19 @@
 package com.redf.chatwebapp.controller;
 
+import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautify;
+import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautiyfier;
+import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.MessageDAOImpl;
 import com.redf.chatwebapp.dao.entities.MessageEntity;
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
+import com.redf.chatwebapp.dao.repo.MessageEntityRepository;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
 import com.redf.chatwebapp.dao.utils.UserDetails;
+import com.redf.chatwebapp.dto.ChatCreateDto;
+import com.redf.chatwebapp.dto.ChatMemberDto;
 import com.redf.chatwebapp.messaging.ChatMessage;
+import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +40,7 @@ import java.util.List;
 @Controller
 @Transactional
 @RequestMapping("/chat/{id}")
-public class ChatController {
+public class ChatController implements RoomBeautiyfier {
 
     private static boolean savePermitted = true;
 
@@ -41,17 +48,19 @@ public class ChatController {
     private MessageDAOImpl messageDAO;
     private RoomEntity room;
     private RoomEntityRepository roomEntityRepository;
-
-
-    //private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
+    private ArrayList<RoomEntity> rooms;
+    private FriendshipDAOImpl friendshipDAO;
+    private MessageEntityRepository messageEntityRepository;
 
 
     @Contract(pure = true)
     @Autowired
-    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository) {
+    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO) {
         this.messageDAO = messageDAO;
         setRoom(room);
         setRoomEntityRepository(roomEntityRepository);
+        setMessageEntityRepository(messageEntityRepository);
+        setFriendshipDao(friendshipDAO);
     }
 
 
@@ -59,6 +68,18 @@ public class ChatController {
     @SendTo("/topic/chat/{id}")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage, @DestinationVariable("id") String id) {
         return chatMessage;
+    }
+
+
+    @ModelAttribute("chatMemberDto")
+    public ChatMemberDto getChatMemberDto() {
+        return new ChatMemberDto();
+    }
+
+
+    @ModelAttribute("createDto")
+    public ChatCreateDto getChatDto() {
+        return new ChatCreateDto();
     }
 
 
@@ -108,25 +129,35 @@ public class ChatController {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (room != null && checkMembership(room, userDetails.getId())) {
             setRoom(room);
+            ArrayList<RoomBeautify> roomsBeautify = new ArrayList<>();
+            setRooms((ArrayList<RoomEntity>) getRoomEntityRepository().findRoomsByMemberId(userDetails.getId()));
+            addRooms(getRooms(), roomsBeautify, userDetails.getId(), getMessageEntityRepository());
             ModelAndView modelAndView = new ModelAndView("chat");
             modelAndView.addObject("roomId", id);
+            modelAndView.addObject("friends", getFriendshipDAO().getUserFriends(userDetails.getId()));
+            modelAndView.addObject("friendsToAdd", getFriendsToAddWithoutMembership(getFriendshipDAO().getUserFriends(userDetails.getId()), getRoom()));
+            modelAndView.addObject("chats", roomsBeautify);
             return modelAndView;
         } else
             return new ModelAndView("redirect:/home");
     }
 
+
     public RoomEntity getRoom() {
         return room;
     }
+
 
     private void setRoom(RoomEntity room) {
         this.room = room;
     }
 
+
     @Contract(pure = true)
     private RoomEntityRepository getRoomEntityRepository() {
         return roomEntityRepository;
     }
+
 
     private void setRoomEntityRepository(RoomEntityRepository roomEntityRepository) {
         this.roomEntityRepository = roomEntityRepository;
@@ -141,5 +172,42 @@ public class ChatController {
             }
         }
         return false;
+    }
+
+
+    private ArrayList<UserEntity> getFriendsToAddWithoutMembership(ArrayList<UserEntity> friends, @NotNull RoomEntity room) {
+        return (ArrayList<UserEntity>) CollectionUtils.subtract(friends, room.getRoomMembers());
+    }
+
+
+    public ArrayList<RoomEntity> getRooms() {
+        return rooms;
+    }
+
+
+    public void setRooms(ArrayList<RoomEntity> rooms) {
+        this.rooms = rooms;
+    }
+
+
+    @Contract(pure = true)
+    private MessageEntityRepository getMessageEntityRepository() {
+        return messageEntityRepository;
+    }
+
+
+    private void setMessageEntityRepository(MessageEntityRepository messageEntityRepository) {
+        this.messageEntityRepository = messageEntityRepository;
+    }
+
+
+    @Contract(pure = true)
+    private FriendshipDAOImpl getFriendshipDAO() {
+        return friendshipDAO;
+    }
+
+
+    private void setFriendshipDao(FriendshipDAOImpl friendshipDao) {
+        this.friendshipDAO = friendshipDao;
     }
 }

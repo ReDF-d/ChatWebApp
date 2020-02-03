@@ -10,7 +10,7 @@ import javax.validation.constraints.Pattern;
 })
 public class UserRegistrationDto {
 
-    @Pattern(regexp = "^[A-Za-z0-9_-]{3,16}$", flags = Pattern.Flag.UNICODE_CASE, message = "В имени пользователя допускаются только латинские буквы и цифры.")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{3,16}$", flags = Pattern.Flag.UNICODE_CASE, message = "В имени пользователя допускаются только латинские буквы и цифры, оно не должно иметь меньше 3 символов")
     @NotEmpty(message = "Имя пользователя не может быть пусто")
     private String username;
 

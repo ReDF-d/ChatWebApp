@@ -1,28 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+<html lang="ru" style="overflow-x: hidden;" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 <head>
-    <div th:replace="header::links"></div>
     <title>Главная</title>
+    <div th:replace="header::links"></div>
 </head>
 <body>
-<div class="zoom">
+<!-- Start: 1 Row 1 Column -->
     <header th:replace="header :: head"></header>
-    <main class="bground" id="main">
-        <div class="container-fluid">
-            <div class="row padding text-center alert">
-                <div class="col-12 mrgn">
-                    <h1 class="display-2 wlcm">
-                        Добро пожаловать!
-                    </h1>
-                    <br>
-                    <button class="btn btn-success btn-lg" id="button-chat" type="submit">Начать чат</button>
+<div class="d-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center img login-dark">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center welcome">
+                <h1 class="d-md-flex justify-content-md-center align-items-md-center hello" style="font-size: 65px;">
+                    Добро пожаловать!</h1>
+                <a class="btn btn-primary btn-success start_button" th:href="@{/chats}" type="button">Начать чат</a>
                 </div>
             </div>
         </div>
-    </main>
-    <footer th:replace="footer :: foot"></footer>
 </div>
-
+<!-- End: 1 Row 1 Column -->
+<!-- Start: Footer Basic -->
+<footer th:replace="footer :: foot"></footer>
 </body>
 </html>

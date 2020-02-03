@@ -3,12 +3,12 @@ package com.redf.chatwebapp.controller;
 
 import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.RoomDAOImpl;
-import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.FriendshipEntity;
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.FriendshipEntityRepository;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
+import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dao.utils.UserDetails;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ import java.util.List;
 public class ProfilePageController {
 
 
-    private UserDAOImpl userDAO;
+    private UserService userService;
     private FriendshipDAOImpl friendshipDAO;
     private FriendshipEntityRepository friendshipEntityRepository;
     private boolean friends = false;
@@ -40,12 +40,15 @@ public class ProfilePageController {
     private RoomDAOImpl roomDAO;
 
 
+    private ArrayList<FriendshipEntity> userFriends;
+
+
     @Contract(pure = true)
     @Autowired
-    ProfilePageController(UserDAOImpl userDAO, FriendshipDAOImpl friendshipDAO, FriendshipEntityRepository friendshipEntityRepository, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO) {
+    ProfilePageController(UserService userService, FriendshipDAOImpl friendshipDAO, FriendshipEntityRepository friendshipEntityRepository, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO) {
         setFriendshipEntityRepository(friendshipEntityRepository);
         setFriendshipDAO(friendshipDAO);
-        setUserDAO(userDAO);
+        setUserService(userService);
         setRoomEntityRepository(roomEntityRepository);
         setRoomDAO(roomDAO);
     }
@@ -53,7 +56,7 @@ public class ProfilePageController {
 
     @GetMapping
     public ModelAndView getUserPage(@PathVariable String id) {
-        UserEntity user = getUserDAO().findById(Long.parseLong(id));
+        UserEntity user = getUserService().findById(Long.parseLong(id));
         this.id = Long.parseLong(id);
         if (isAuthenticated())
             setPrincipal((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -79,6 +82,8 @@ public class ProfilePageController {
             } else
                 modelAndView.addObject("friends", "Добавить " + user.getUsername() + " в друзья");
         }
+        setUserFriends((ArrayList<FriendshipEntity>) getFriendshipEntityRepository().getUserFriends(user.getId()));
+        modelAndView.addObject("friendsCount", "Друзей:" + getUserFriends().size());
         return modelAndView;
     }
 
@@ -92,8 +97,8 @@ public class ProfilePageController {
     @PatchMapping
     public String sendMessage() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserEntity principal = getUserDAO().findById(userDetails.getId());
-        UserEntity owner = getUserDAO().findById(id);
+        UserEntity principal = getUserService().findById(userDetails.getId());
+        UserEntity owner = getUserService().findById(id);
         if (getFriendshipEntityRepository().findById(principal.getId(), owner.getId()) != null) {
             RoomEntity room = getRoomEntityRepository().findDialogueByMembers(principal.getId(), principal.getId());
             if (room != null)
@@ -102,7 +107,7 @@ public class ProfilePageController {
                 List<UserEntity> members = new ArrayList<>();
                 members.add(principal);
                 members.add(owner);
-                getRoomDAO().createAndSave("dialogue", members);
+                getRoomDAO().createAndSave("dialogue", members, null);
                 room = getRoomEntityRepository().findDialogueByMembers(principal.getId(), principal.getId());
                 return "redirect:/chat/" + room.getId();
             }
@@ -113,7 +118,7 @@ public class ProfilePageController {
 
     @PostMapping
     public String addFriend() {
-        UserEntity user = getUserDAO().findById(this.id);
+        UserEntity user = getUserService().findById(this.id);
         if (isPending() || isFriends()) {
             FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(user.getId(), getPrincipal().getId());
             if (isFriends()) {
@@ -133,7 +138,7 @@ public class ProfilePageController {
                 setFriends(true);
             }
         } else
-            getFriendshipDAO().createAndSave(getUserDAO().findById(getPrincipal().getId()), getUserDAO().findById(this.id), "pending", getPrincipal().getId().intValue());
+            getFriendshipDAO().createAndSave(getUserService().findById(getPrincipal().getId()), getUserService().findById(this.id), "pending", getPrincipal().getId().intValue());
         return "redirect:/user/" + this.id;
     }
 
@@ -164,19 +169,33 @@ public class ProfilePageController {
         if (friendshipEntity != null) {
             if (!friendshipEntity.getStatus().equals("friends"))
                 setPending(true);
-            else
+            else if (friendshipEntity.getStatus().equals("friends"))
                 setFriends(true);
         }
     }
 
+
     @Contract(pure = true)
-    private UserDAOImpl getUserDAO() {
-        return userDAO;
+    private ArrayList<FriendshipEntity> getUserFriends() {
+        return userFriends;
     }
 
-    private void setUserDAO(UserDAOImpl userDAO) {
-        this.userDAO = userDAO;
+
+    private void setUserFriends(ArrayList<FriendshipEntity> userFriends) {
+        this.userFriends = userFriends;
     }
+
+
+    @Contract(pure = true)
+    private UserService getUserService() {
+        return userService;
+    }
+
+
+    private void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
 
     @Contract(pure = true)
     private FriendshipDAOImpl getFriendshipDAO() {
@@ -232,10 +251,12 @@ public class ProfilePageController {
         this.friends = friends;
     }
 
+
     @Contract(pure = true)
     private RoomEntityRepository getRoomEntityRepository() {
         return roomEntityRepository;
     }
+
 
     private void setRoomEntityRepository(RoomEntityRepository roomEntityRepository) {
         this.roomEntityRepository = roomEntityRepository;
@@ -245,6 +266,7 @@ public class ProfilePageController {
     private RoomDAOImpl getRoomDAO() {
         return roomDAO;
     }
+
 
     private void setRoomDAO(RoomDAOImpl roomDAO) {
         this.roomDAO = roomDAO;

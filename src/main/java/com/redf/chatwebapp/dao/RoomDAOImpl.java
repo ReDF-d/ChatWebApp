@@ -40,9 +40,11 @@ public class RoomDAOImpl implements RoomDAO, TransactionHandler {
 
     @NotNull
     @Override
-    public RoomEntity create(@NotNull String roomType, @NotNull List<UserEntity> roomMembers) {
+    public RoomEntity create(@NotNull String roomType, @NotNull List<UserEntity> roomMembers, String title) {
         this.room.setRoomType(roomType);
         this.room.setRoomMembers(roomMembers);
+        if (title != null)
+            this.room.setTitle(title);
         return this.room;
     }
 
@@ -54,8 +56,8 @@ public class RoomDAOImpl implements RoomDAO, TransactionHandler {
 
 
     @Override
-    public RoomEntity createAndSave(@NotNull String roomType, @NotNull List<UserEntity> roomMembers) {
-        return save(create(roomType, roomMembers));
+    public RoomEntity createAndSave(@NotNull String roomType, @NotNull List<UserEntity> roomMembers, String title) {
+        return save(create(roomType, roomMembers, title));
     }
 
 

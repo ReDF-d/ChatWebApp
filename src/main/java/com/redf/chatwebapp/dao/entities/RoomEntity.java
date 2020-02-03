@@ -17,6 +17,7 @@ public class RoomEntity extends AbstractEntity {
     private int id;
     private String roomType;
     private List<UserEntity> roomMembers = new ArrayList<>();
+    private String title;
 
 
     public RoomEntity() {
@@ -57,6 +58,14 @@ public class RoomEntity extends AbstractEntity {
         this.roomType = roomType;
     }
 
+    @Column(name = "title")
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -72,8 +81,14 @@ public class RoomEntity extends AbstractEntity {
         this.roomMembers = roomMembers;
     }
 
-
-    public void addRoomMember(UserEntity user) {
+    public RoomEntity addRoomMember(UserEntity user) {
         getRoomMembers().add(user);
+        return this;
+    }
+
+
+    public RoomEntity addRoomMembers(List<UserEntity> users) {
+        users.forEach(this::addRoomMember);
+        return this;
     }
 }

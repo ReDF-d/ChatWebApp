@@ -75,7 +75,7 @@ public class EditPageController implements HandlerExceptionResolver {
             modelAndView.addObject("tooLarge", avatarTooLargeException(""));
             return modelAndView;
         }
-        return new ModelAndView("home");
+        return new ModelAndView("redirect:/home");
     }
 
 
@@ -85,13 +85,13 @@ public class EditPageController implements HandlerExceptionResolver {
         userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         userUpdateValidator.validateAllFields(result, userDto, userDetails, "USER");
         if (result.hasErrors()) {
-            return new ModelAndView("editprofile");
+            ModelAndView modelAndView = new ModelAndView("editprofile");
+            modelAndView.addObject("tooLarge", avatarTooLargeException(""));
+            return modelAndView;
         }
         userDto.setId(userDetails.getId());
         if (!userDto.getAvatar().isEmpty())
             userUpdateValidator.saveAvatar(userDto);
-        else
-            System.out.println("NULL");
         userDto.setRoles(getRoleList(userDetails.getAuthorities()));
         update(userDto);
         existing = userDAO.findByLogin(userDto.getLogin());
