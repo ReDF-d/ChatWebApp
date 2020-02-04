@@ -147,6 +147,7 @@ public class ChatController implements RoomBeautiyfier {
             modelAndView.addObject("chats", roomsBeautify);
             modelAndView.addObject("onlineUsers", getOnlineUsers());
             modelAndView.addObject("offlineUsers", getOfflineUsers());
+            modelAndView.addObject("roomType", room.getRoomType());
             return modelAndView;
         } else
             return new ModelAndView("redirect:/home");
@@ -195,6 +196,7 @@ public class ChatController implements RoomBeautiyfier {
     }
 
 
+    @SuppressWarnings("unchecked")
     private ArrayList<UserEntity> getFriendsToAddWithoutMembership(ArrayList<UserEntity> friends, @NotNull RoomEntity room) {
         return (ArrayList<UserEntity>) CollectionUtils.subtract(friends, room.getRoomMembers());
     }

@@ -88,7 +88,7 @@ public class ProfilePageController {
 
     @PutMapping
     public String getEditPage() {
-        return "redirect:/edit";
+        return "redirect:/user/edit";
     }
 
 

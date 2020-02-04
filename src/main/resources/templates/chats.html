@@ -23,7 +23,7 @@
                         <a th:href="@{/chat/{id}(id=${chat.getId()})}">
                             <div class="row d-sm-flex d-md-flex justify-content-sm-center justify-content-md-center justify-content-xl-start align-items-xl-center row_bottom_border"
                                  style="margin: 0px;padding: 10px;">
-                                <div class="col-4 col-sm-3 col-md-2 col-lg-2 col-xl-1 offset-xl-1 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center">
+                                <div class="col-4 col-sm-3 col-md-2 col-lg-2 col-xl-1 offset-xl-1 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center" style="padding: 0px;">
                                     <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
                                          style="width: 80px;height: 80px;"
                                          th:if="${chat.getLastMessage() != null}"
