@@ -9,6 +9,8 @@ let date = new Date();
 let login = false;
 let roomId = document.querySelector('#roomId');
 let connectingError = document.createElement('div');
+
+
 connectingError.classList.add('hidden', 'text-danger', 'text-center');
 connectingError.id = 'connectionError';
 messageArea.scrollTop = messageArea.scrollHeight;
@@ -16,12 +18,13 @@ if (!stompClient)
     connect();
 messageForm.addEventListener('submit', sendMessage, true);
 
+
 function connect() {
     id = document.querySelector('#id').textContent.trim();
     username = document.querySelector('#username').innerText.trim();
     login = document.querySelector('#login').textContent.trim();
     if (username) {
-        let socket = new SockJS('/ws');
+        let socket = new SockJS('http://' + window.location.host + '/ws');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, onConnected, onError);
     }

@@ -64,6 +64,10 @@
                                 th:classappend="${#httpServletRequest.getRequestURI() == '/chats' ? 'active':''}">
                                 <a class="nav-link" th:href="@{/chats}">Чаты</a>
                             </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()"
+                                th:classappend="${#httpServletRequest.getRequestURI() == '/friends' ? 'active':''}">
+                                <a class="nav-link" th:href="@{/friends}">Друзья</a>
+                            </li>
                             <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()">
                                 <a class="nav-link active"
                                    id="username"

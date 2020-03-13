@@ -18,9 +18,9 @@
                     <img class="rounded-circle" style="width: 170px;"
                          th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"></div>
                 <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 offset-0 offset-xl-0 text-left d-flex d-sm-flex justify-content-center align-items-start justify-content-sm-center align-items-sm-start">
-                    <form id="profile-form" th:action="@{/user/${user.getId()}}" th:method="put">
+                    <form id="profile-form" th:action="@{/user/{id}(id=${user.getId()})}" th:method="put">
                         <button class="btn" id="profile-button" style="padding: 0px;"
-                                th:if="${#httpServletRequest.getRequestURI() == url}" type="button">
+                                th:if="${#httpServletRequest.getRequestURI() == url}" type="submit">
                             <i class="fas fa-cog" style="font-size: 30px;margin: 0px;"></i>
                         </button>
                     </form>
@@ -39,17 +39,19 @@
             </div>
             <div class="row">
                 <div class="col-md-12 col-xl-12 offset-md-0 text-center" style="margin-top: 30px;">
-                    <form id="add-friend-form" name="add-friend" th:action="@{/user/${user.getId()}}" th:method="post">
+                    <form id="add-friend-form" name="add-friend" th:action="@{/user/{id}(id=${user.getId()})}"
+                          th:method="post">
                         <button class="btn btn-success" id="add-friend" sec:authorize="isAuthenticated()"
                                 th:if="${#httpServletRequest.getRequestURI() != url}" th:text="${friends}"
-                                type="submit"></button>
+                                type="submit">
+                        </button>
                     </form>
                 </div>
                 <div class="col-xl-12 offset-xl-0 text-center" style="margin-top: 10px;margin-bottom: 30px;">
-                    <form id="send-message-form" th:action="@{/user/${user.getId()}}" th:method="patch">
+                    <form id="send-message-form" th:action="@{/user/{id}(id=${user.getId()})}" th:method="patch">
                         <button class="btn btn-info" id="button-chat"
                                 th:if="${isFriend == true and #httpServletRequest.getRequestURI() != url}"
-                                type="button">Написать сообщение
+                                type="submit">Написать сообщение
                         </button>
                     </form>
                 </div>

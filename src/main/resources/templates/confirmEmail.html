@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html th:lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Подтверждение электронной почты</title>
+    <div th:replace="header::links"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+
+<body>
+<header th:replace="header::head"></header>
+<div class="container-fluid img">
+    <div class="row d-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
+         style="margin: 0;">
+        <div class="col">
+            <div class="row d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                 style="margin: 20vh 0 0;">
+                <div class="col-sm-8 col-md-6 col-lg-5 col-xl-4 search_result_form" style="padding: 0 0 0 0;">
+                    <div class="row" style="margin: 0;">
+                        <div class="col-md-12 col-xl-12 offset-md-6 d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center"
+                             style="padding: 0;margin-left: 0;height: 20vh;">
+                            <div class="row" style="margin: 0;">
+                                <div class="col text-center" style="padding: 0;margin: 10px 15px;">
+                                    <span class="online_status" style="font-size: 24px;"
+                                          th:text="'На вашу почту ' + ${email} + ' было выслано письмо для завершения процесса регистрации'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="footer::foot"></footer>
+</body>
+</html>

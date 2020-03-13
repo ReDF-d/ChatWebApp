@@ -2,6 +2,8 @@ package com.redf.chatwebapp.dao.entities;
 
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.stereotype.Component;
 
@@ -58,16 +60,20 @@ public class RoomEntity extends AbstractEntity {
         this.roomType = roomType;
     }
 
+
     @Column(name = "title")
     public String getTitle() {
         return title;
     }
 
+
     public void setTitle(String title) {
         this.title = title;
     }
 
+
     @ManyToMany(fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(
             name = "room_members",
             joinColumns = {@JoinColumn(name = "room_id")},
@@ -80,6 +86,7 @@ public class RoomEntity extends AbstractEntity {
     public void setRoomMembers(List<UserEntity> roomMembers) {
         this.roomMembers = roomMembers;
     }
+
 
     public RoomEntity addRoomMember(UserEntity user) {
         getRoomMembers().add(user);

@@ -85,12 +85,11 @@ public class FriendshipDAOImpl implements FriendshipDAO, TransactionHandler {
 
 
     @Override
-    public ArrayList<UserEntity> getUserFriends(Long id) {
+    public ArrayList<UserEntity> getUserFriends(Long id, List<FriendshipEntity> entityList) {
         ArrayList<UserEntity> friends = new ArrayList<>();
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity principal = getUserService().findById(userDetails.getId());
-        List<FriendshipEntity> friendshipEntities = getFriendshipEntityRepository().getUserFriends(id);
-        friendshipEntities.forEach(friendshipEntity -> {
+        entityList.forEach(friendshipEntity -> {
             if (!friendshipEntity.getFirstUser().getId().equals(principal.getId()))
                 friends.add(friendshipEntity.getFirstUser());
             if (!friendshipEntity.getSecondUser().getId().equals(principal.getId()))

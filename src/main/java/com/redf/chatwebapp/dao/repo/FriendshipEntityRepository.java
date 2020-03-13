@@ -17,4 +17,7 @@ public interface FriendshipEntityRepository extends JpaRepository<FriendshipEnti
 
     @Query("select f from FriendshipEntity f where f.firstUser.id=:id or f.secondUser.id=:id and f.status='friends'")
     List<FriendshipEntity> getUserFriends(@Param("id") Long id);
+
+    @Query("select f from FriendshipEntity f where (f.firstUser.id=:id or f.secondUser.id=:id) and f.status='pending' and f.lastAction<>:id")
+    List<FriendshipEntity> getUserFriendRequests(@Param("id") Long id);
 }

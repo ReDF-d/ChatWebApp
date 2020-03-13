@@ -6,17 +6,20 @@ import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
 import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dto.UserRegistrationDto;
+import com.redf.chatwebapp.event.OnRegistrationCompleteEvent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.*;
@@ -30,15 +33,17 @@ public class SignupController {
     private UserDAOImpl userDAO;
     private RoomEntityRepository roomEntityRepository;
     private RoomDAOImpl roomDAO;
+    private ApplicationEventPublisher eventPublisher;
 
 
     @Contract(pure = true)
     @Autowired
-    public SignupController(UserDAOImpl userDAO, UserService userService, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO) {
+    public SignupController(UserDAOImpl userDAO, UserService userService, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO, ApplicationEventPublisher eventPublisher) {
         setUserDAO(userDAO);
         setUserService(userService);
         setRoomEntityRepository(roomEntityRepository);
         setRoomDAO(roomDAO);
+        setEventPublisher(eventPublisher);
     }
 
 
@@ -55,29 +60,32 @@ public class SignupController {
 
 
     @PostMapping
-    public String registerUserAccount(HttpServletRequest request, @NotNull @ModelAttribute("user") @Valid UserRegistrationDto userDto,
-                                      BindingResult result) throws ServletException {
+    public ModelAndView registerUserAccount(HttpServletRequest request, @NotNull @ModelAttribute("user") @Valid UserRegistrationDto userDto,
+                                            BindingResult result, RedirectAttributes redirectAttributes) {
         UserEntity existing = getUserDAO().findByLogin(userDto.getLogin());
         if (existing != null)
             result.rejectValue("login", "emailExists", "Извините, но аккаунт с такой почтой уже зарегистрирован");
         if (result.hasErrors()) {
-            return "signup";
+            return new ModelAndView("signup");
         }
         register(userDto);
         createAvatar(getUserService().findByLogin(userDto.getLogin()).getId());
-        addUserToGlobalChat(getUserService().findByLogin(userDto.getLogin()));
-        request.login(userDto.getLogin(), userDto.getPassword());
-        return "redirect:chats";
+        UserEntity registered = getUserService().findByLogin(userDto.getLogin());
+        try {
+            String appUrl = request.getContextPath();
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent
+                    (registered, appUrl, request.getLocale()));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ModelAndView("signup");
+        }
+        redirectAttributes.addFlashAttribute("email", registered.getLogin());
+        return new ModelAndView("redirect:/confirmEmail");
     }
 
 
     private void register(UserRegistrationDto userRegistrationDto) {
         getUserService().createAndSave(userRegistrationDto);
-    }
-
-
-    private void addUserToGlobalChat(UserEntity user) {
-        getRoomDAO().update(getRoomEntityRepository().findRoomById(1).addRoomMember(user));
     }
 
 
@@ -139,12 +147,23 @@ public class SignupController {
         this.roomEntityRepository = roomEntityRepository;
     }
 
+
     @Contract(pure = true)
     private RoomDAOImpl getRoomDAO() {
         return roomDAO;
     }
 
+
     private void setRoomDAO(RoomDAOImpl roomDAO) {
         this.roomDAO = roomDAO;
+    }
+
+    @Contract(pure = true)
+    private ApplicationEventPublisher getEventPublisher() {
+        return eventPublisher;
+    }
+
+    private void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
     }
 }

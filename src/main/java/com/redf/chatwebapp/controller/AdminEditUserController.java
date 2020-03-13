@@ -1,5 +1,5 @@
 package com.redf.chatwebapp.controller;
-/*
+
 
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
@@ -114,7 +114,7 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     public String updateUserProfile(@NotNull @ModelAttribute("userDto") UserUpdateDto userUpdateDto, BindingResult result, @PathVariable String id) {
         setUser(getUserDAO().findById(Long.parseLong(id)));
         UserEntity user = getUserEntityRepository().findByLogin(getUser().getLogin());
-        UserDetails userDetails = new UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword(), user.getRoles(), !user.getIsLocked());
+        UserDetails userDetails = new UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword(), user.getRoles(), !user.getIsLocked(), user.isEnabled());
         getUserUpdateValidator().validateAllFields(result, userUpdateDto, userDetails, "ADMIN");
         if (result.hasErrors()) {
             return "redirect:/adminedituser";
@@ -241,4 +241,4 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
     }
-}*/
+}

@@ -4,6 +4,7 @@ import com.redf.chatwebapp.dao.entities.FriendshipEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public interface FriendshipDAO {
@@ -18,5 +19,5 @@ public interface FriendshipDAO {
 
     void createAndSave(UserEntity firstUser, UserEntity secondUser, String status, int lastAction);
 
-    ArrayList<UserEntity> getUserFriends(Long id);
+    ArrayList<UserEntity> getUserFriends(Long id, List<FriendshipEntity> entityList);
 }

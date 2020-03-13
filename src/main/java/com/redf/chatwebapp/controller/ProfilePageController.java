@@ -12,6 +12,7 @@ import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dao.utils.UserDetails;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -57,7 +58,7 @@ public class ProfilePageController {
     @GetMapping
     public ModelAndView getUserPage(@PathVariable String id) {
         UserEntity user = getUserService().findById(Long.parseLong(id));
-        this.id = Long.parseLong(id);
+        setId(Long.parseLong(id));
         ModelAndView modelAndView = new ModelAndView("profilepage");
         if (isAuthenticated())
             setPrincipal((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -88,17 +89,18 @@ public class ProfilePageController {
 
     @PutMapping
     public String getEditPage() {
-        return "redirect:/edit";
+        return "redirect:/user/edit";
     }
 
 
     @PatchMapping
-    public String sendMessage() {
+    public String sendMessage(@PathVariable String id) {
+        setId(Long.parseLong(id));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity principal = getUserService().findById(userDetails.getId());
-        UserEntity owner = getUserService().findById(id);
+        UserEntity owner = getUserService().findById(getId());
         if (getFriendshipEntityRepository().findById(principal.getId(), owner.getId()) != null) {
-            RoomEntity room = getRoomEntityRepository().findDialogueByMembers(principal.getId(), principal.getId());
+            RoomEntity room = getDialogueByIds(principal.getId(), owner.getId());
             if (room != null)
                 return "redirect:/chat/" + room.getId();
             else {
@@ -106,7 +108,8 @@ public class ProfilePageController {
                 members.add(principal);
                 members.add(owner);
                 getRoomDAO().createAndSave("dialogue", members, null);
-                room = getRoomEntityRepository().findDialogueByMembers(principal.getId(), principal.getId());
+                room = getDialogueByIds(principal.getId(), owner.getId());
+                assert room != null;
                 return "redirect:/chat/" + room.getId();
             }
         }
@@ -115,8 +118,13 @@ public class ProfilePageController {
 
 
     @PostMapping
-    public String addFriend() {
-        UserEntity user = getUserService().findById(this.id);
+    public String addFriend(@PathVariable String id) {
+        setId(Long.parseLong(id));
+        UserEntity user = getUserService().findById(getId());
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity principal = getUserService().findById(userDetails.getId());
+        initFriendsFields(getId(), principal.getId());
+        setPrincipal(userDetails);
         if (isPending() || isFriends()) {
             FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(user.getId(), getPrincipal().getId());
             if (isFriends()) {
@@ -136,8 +144,8 @@ public class ProfilePageController {
                 setFriends(true);
             }
         } else
-            getFriendshipDAO().createAndSave(getUserService().findById(getPrincipal().getId()), getUserService().findById(this.id), "pending", getPrincipal().getId().intValue());
-        return "redirect:/user/" + this.id;
+            getFriendshipDAO().createAndSave(getUserService().findById(getPrincipal().getId()), getUserService().findById(getId()), "pending", getPrincipal().getId().intValue());
+        return "redirect:/user/" + getId();
     }
 
 
@@ -172,6 +180,22 @@ public class ProfilePageController {
         }
     }
 
+
+    @Nullable
+    private RoomEntity getDialogueByIds(Long id1, Long id2) {
+        ArrayList<RoomEntity> roomEntities = (ArrayList<RoomEntity>) getRoomEntityRepository().findDialogueByMembers(id1, id2);
+        long roomId = 0;
+        short counter = 0;
+        for (RoomEntity room : roomEntities) {
+            if (room.getId() == roomId)
+                return room;
+            else if (counter == 0) {
+                roomId = room.getId();
+                counter++;
+            }
+        }
+        return null;
+    }
 
     @Contract(pure = true)
     private ArrayList<FriendshipEntity> getUserFriends() {
@@ -268,5 +292,16 @@ public class ProfilePageController {
 
     private void setRoomDAO(RoomDAOImpl roomDAO) {
         this.roomDAO = roomDAO;
+    }
+
+
+    @Contract(pure = true)
+    private Long getId() {
+        return id;
+    }
+
+
+    private void setId(Long id) {
+        this.id = id;
     }
 }

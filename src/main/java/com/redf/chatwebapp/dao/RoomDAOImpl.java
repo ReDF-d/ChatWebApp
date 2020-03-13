@@ -67,6 +67,7 @@ public class RoomDAOImpl implements RoomDAO, TransactionHandler {
         return room;
     }
 
+
     @Override
     public void update(@NotNull RoomEntity room) {
         performTransaction(TransactionHandler.Transactions.UPDATE, room);

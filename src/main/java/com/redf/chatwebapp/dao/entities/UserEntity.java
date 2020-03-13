@@ -29,6 +29,9 @@ public class UserEntity extends AbstractEntity implements Serializable {
     private List<RoleEntity> roles = new ArrayList<>();
     private Set<MessageEntity> messages = new HashSet<>();
     private Set<RoomEntity> rooms = new HashSet<>();
+    private boolean enabled;
+    private EmailVerificationToken emailVerificationToken;
+
 
     @Contract(pure = true)
     public UserEntity() {
@@ -40,6 +43,7 @@ public class UserEntity extends AbstractEntity implements Serializable {
         setPassword(password);
         setUsername(username);
         setRoles(roles);
+        setEnabled(false);
     }
 
 
@@ -102,6 +106,7 @@ public class UserEntity extends AbstractEntity implements Serializable {
         this.isLocked = isLocked;
     }
 
+
     @OneToMany(mappedBy = "user")
     @Fetch(FetchMode.JOIN)
     public Set<MessageEntity> getMessages() {
@@ -137,5 +142,27 @@ public class UserEntity extends AbstractEntity implements Serializable {
 
     public void setRooms(Set<RoomEntity> rooms) {
         this.rooms = rooms;
+    }
+
+
+    @Column(name = "enabled")
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+
+    @OneToOne(mappedBy = "user")
+    public EmailVerificationToken getEmailVerificationToken() {
+        return emailVerificationToken;
+    }
+
+
+    public void setEmailVerificationToken(EmailVerificationToken emailVerificationToken) {
+        this.emailVerificationToken = emailVerificationToken;
     }
 }

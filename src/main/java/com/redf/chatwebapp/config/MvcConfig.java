@@ -32,6 +32,9 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/404").setViewName("404");
         registry.addViewController("/search").setViewName("searchUsers");
         registry.addViewController("/chats").setViewName("chats");
+        registry.addViewController("/friends").setViewName("friendlist");
+        registry.addViewController("/confirmEmail").setViewName("confirmEmail");
+        registry.addViewController("/registrationConfirm").setViewName("registrationConfirmSuccess");
     }
 
 

@@ -3,10 +3,12 @@ package com.redf.chatwebapp.dao.services;
 
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.BlockedUserEntity;
+import com.redf.chatwebapp.dao.entities.EmailVerificationToken;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.BlockedUserEntityRepository;
 import com.redf.chatwebapp.dao.repo.UserEntityRepository;
+import com.redf.chatwebapp.dao.repo.VerificationTokenRepository;
 import com.redf.chatwebapp.dto.UserRegistrationDto;
 import com.redf.chatwebapp.dto.UserUpdateDto;
 import com.redf.chatwebapp.exception.AuthenticationException;
@@ -28,14 +30,16 @@ public class UserService implements UserDetailsService {
     private UserDAOImpl userDAO;
     private UserEntityRepository userEntityRepository;
     private BlockedUserEntityRepository blockedUserEntityRepository;
+    private VerificationTokenRepository tokenRepository;
 
 
     @Contract(pure = true)
     @Autowired
-    UserService(UserDAOImpl userDAO, UserEntityRepository userEntityRepository, BlockedUserEntityRepository blockedUserEntityRepository) {
+    UserService(UserDAOImpl userDAO, UserEntityRepository userEntityRepository, BlockedUserEntityRepository blockedUserEntityRepository, VerificationTokenRepository tokenRepository) {
         setUserDAO(userDAO);
         setUserEntityRepository(userEntityRepository);
         setBlockedUserEntityRepository(blockedUserEntityRepository);
+        setTokenRepository(tokenRepository);
     }
 
 
@@ -91,11 +95,13 @@ public class UserService implements UserDetailsService {
                     if ((blockedUser.getEnds().getTime() - System.currentTimeMillis()) < 0) {
                         user.setIsLocked(false);
                         updateUser(user);
-                        return new com.redf.chatwebapp.dao.utils.UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword().trim(), user.getRoles(), !user.getIsLocked());
+                        return new com.redf.chatwebapp.dao.utils.UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword().trim(), user.getRoles(), !user.getIsLocked(), user.isEnabled());
                     } else throw new AuthenticationException("User blocked");
                 } else throw new AuthenticationException("User blocked");
-            } else
-                return new com.redf.chatwebapp.dao.utils.UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword().trim(), user.getRoles(), !user.getIsLocked());
+            } else if (!user.isEnabled())
+                throw new AuthenticationException("User not enabled");
+            else
+                return new com.redf.chatwebapp.dao.utils.UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword().trim(), user.getRoles(), !user.getIsLocked(), user.isEnabled());
         } else throw new AuthenticationException("User not found");
     }
 
@@ -109,6 +115,7 @@ public class UserService implements UserDetailsService {
     private UserDAOImpl getUserDAO() {
         return userDAO;
     }
+
 
     public UserEntity findById(@NotNull Long id) {
         return getUserDAO().findById(id);
@@ -139,5 +146,32 @@ public class UserService implements UserDetailsService {
 
     private void setBlockedUserEntityRepository(BlockedUserEntityRepository blockedUserEntityRepository) {
         this.blockedUserEntityRepository = blockedUserEntityRepository;
+    }
+
+
+    public UserEntity getUserByToken(String EmailVerificationToken) {
+        return tokenRepository.findByToken(EmailVerificationToken).getUser();
+    }
+
+
+    public EmailVerificationToken getVerificationToken(String EmailVerificationToken) {
+        return tokenRepository.findByToken(EmailVerificationToken);
+    }
+
+
+    public void createVerificationToken(UserEntity user, String token) {
+        EmailVerificationToken emailToken = new EmailVerificationToken(token, user);
+        getTokenRepository().save(emailToken);
+        user.setEmailVerificationToken(emailToken);
+        getUserDAO().update(user);
+    }
+
+    @Contract(pure = true)
+    private VerificationTokenRepository getTokenRepository() {
+        return tokenRepository;
+    }
+
+    private void setTokenRepository(VerificationTokenRepository tokenRepository) {
+        this.tokenRepository = tokenRepository;
     }
 }

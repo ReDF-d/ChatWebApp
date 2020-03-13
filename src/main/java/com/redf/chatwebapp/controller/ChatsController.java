@@ -6,6 +6,7 @@ import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautiyfier;
 import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
+import com.redf.chatwebapp.dao.repo.FriendshipEntityRepository;
 import com.redf.chatwebapp.dao.repo.MessageEntityRepository;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
 import com.redf.chatwebapp.dao.services.UserService;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Contract;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/chats")
+@Transactional
 public class ChatsController implements RoomBeautiyfier {
 
     private RoomEntityRepository roomEntityRepository;
@@ -32,24 +35,28 @@ public class ChatsController implements RoomBeautiyfier {
     private ArrayList<RoomEntity> rooms;
     private MessageEntityRepository messageEntityRepository;
     private FriendshipDAOImpl friendshipDAO;
+    private FriendshipEntityRepository friendshipEntityRepository;
 
 
     @Autowired
-    public ChatsController(RoomEntityRepository roomEntityRepository, UserService userService, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO) {
+    public ChatsController(RoomEntityRepository roomEntityRepository, UserService userService, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO, FriendshipEntityRepository friendshipEntityRepository) {
         setRoomEntityRepository(roomEntityRepository);
         setUserService(userService);
         setMessageEntityRepository(messageEntityRepository);
         setFriendshipDAO(friendshipDAO);
+        setFriendshipEntityRepository(friendshipEntityRepository);
     }
 
 
     ChatsController() {
     }
 
+
     @ModelAttribute("createDto")
     public ChatCreateDto getChatDto() {
         return new ChatCreateDto();
     }
+
 
     @GetMapping
     public ModelAndView getChatsPage() {
@@ -59,7 +66,7 @@ public class ChatsController implements RoomBeautiyfier {
         setRooms((ArrayList<RoomEntity>) getRoomEntityRepository().findRoomsByMemberId(principal.getId()));
         addRooms(getRooms(), roomsBeautify, principal.getId(), getMessageEntityRepository());
         ModelAndView modelAndView = new ModelAndView("chats");
-        modelAndView.addObject("friends", getFriendshipDAO().getUserFriends(principal.getId()));
+        modelAndView.addObject("friends", getFriendshipDAO().getUserFriends(principal.getId(), getFriendshipEntityRepository().getUserFriends(principal.getId())));
         modelAndView.addObject("chats", roomsBeautify);
         return modelAndView;
     }
@@ -86,10 +93,12 @@ public class ChatsController implements RoomBeautiyfier {
         this.userService = userService;
     }
 
+
     @Contract(pure = true)
     private ArrayList<RoomEntity> getRooms() {
         return rooms;
     }
+
 
     private void setRooms(ArrayList<RoomEntity> rooms) {
         this.rooms = rooms;
@@ -114,5 +123,16 @@ public class ChatsController implements RoomBeautiyfier {
 
     private void setFriendshipDAO(FriendshipDAOImpl friendshipDAO) {
         this.friendshipDAO = friendshipDAO;
+    }
+
+
+    @Contract(pure = true)
+    private FriendshipEntityRepository getFriendshipEntityRepository() {
+        return friendshipEntityRepository;
+    }
+
+
+    private void setFriendshipEntityRepository(FriendshipEntityRepository friendshipEntityRepository) {
+        this.friendshipEntityRepository = friendshipEntityRepository;
     }
 }
