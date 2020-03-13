@@ -1,5 +1,5 @@
 package com.redf.chatwebapp.controller;
-/*
+
 
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
@@ -11,7 +11,6 @@ import com.redf.chatwebapp.dao.utils.UserDetails;
 import com.redf.chatwebapp.dto.UserUpdateDto;
 import com.redf.chatwebapp.dto.UserUpdateValidatorImpl;
 import com.redf.chatwebapp.exception.AvatarTooLargeException;
-
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,4 +241,4 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
     }
-}*/
+}
