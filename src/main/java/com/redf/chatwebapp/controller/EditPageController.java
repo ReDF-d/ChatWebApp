@@ -1,6 +1,6 @@
 package com.redf.chatwebapp.controller;
 
-/*
+
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
@@ -145,4 +145,4 @@ public class EditPageController implements HandlerExceptionResolver {
         }
         return modelAndView;
     }
-}*/
+}
