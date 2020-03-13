@@ -150,6 +150,7 @@ public class ChatController implements RoomBeautiyfier {
             modelAndView.addObject("chats", roomsBeautify);
             modelAndView.addObject("onlineUsers", getOnlineUsers());
             modelAndView.addObject("offlineUsers", getOfflineUsers());
+            modelAndView.addObject("roomType", room.getRoomType());
             return modelAndView;
         } else
             return new ModelAndView("redirect:/home");
