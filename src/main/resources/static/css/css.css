@@ -747,3 +747,21 @@ body {
 .chat_welcome_h1 {
     Color: #fff
 }
+
+
+[type="file"] {
+    height: 0;
+    overflow: hidden;
+    width: 0;
+}
+
+[type="file"] + label {
+    cursor: pointer;
+    font-size: 12px;
+    margin: 10px 0px;
+&.btn-1 {
+     transition: none;
+
+
+}
+}

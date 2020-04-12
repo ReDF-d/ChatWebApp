@@ -19,8 +19,10 @@
         <div class="col-11 col-md-11 col-lg-11 col-xl-11 chats_body" id="chats_body"
              style="background-color: rgba(255,255,255,0.81);">
             <div class="row">
-                <div class="col offset-lg-0 column_bottom_border" style="padding: 10px 15px;"><span
+                <div class="col-3 column_bottom_border" style="padding: 10px 15px;"><span
                         style="font-size: 24px;"><strong>Ваши чаты</strong></span></div>
+                <div class="col-7 d-flex justify-content-center column_bottom_border" style="padding: 10px 15px;"><span
+                        style="font-size: 24px;"><strong>Название чата</strong></span></div>
             </div>
             <div class="row">
                 <div class="col-sm-3 col-md-3 col-lg-3 col-xl-3" style="padding: 0px 0px 0px 0px;">
@@ -30,7 +32,7 @@
                             <th:block th:each="chat : ${chats}">
                                 <a th:href="@{/chat/{id}(id=${chat.getId()})}">
                                     <div class="row row_bottom_border" th:classappend="${#strings.equals(#strings.toString(chat.getId()), roomId)} ? selected_chat" style="margin: 0px;padding: 10px;">
-                                        <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-2 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
+                                        <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-2 d-flex justify-content-center align-items-center"
                                              style="padding: 0;">
                                             <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center your_chats_img"
                                                  th:if="${chat.getLastMessage() != null}"
@@ -43,6 +45,13 @@
                                             <div class="row">
                                                 <div class="col your_chats_username">
                                                     <span th:text="${chat.getTitle()}"></span></div>
+                                                <div class="col d-flex justify-content-end">
+                                                    <div>
+                                                        <i class="fas fa-times"></i>
+                                                    </div>
+
+                                                </div>
+
                                             </div>
                                             <div class="row">
                                                 <div class="col-xl-12 your_chats_message_preview">
@@ -84,7 +93,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-6 col-lg-6 col-xl-7 phonehider column_leftborder">
+                <div class="col-6 col-xl-7 phonehider column_leftborder">
                     <div class="row chat_window column_rightborder" style="height: 70vh;">
                         <div class="col-sm-12 offset-lg-0" id="messageArea">
                             <th:block th:each="message : ${messages}">
@@ -132,7 +141,7 @@
                                                        style="margin-right: 0;font-size: 14px;margin-left: 0;"
                                                        th:text="${message.getMessageText()}">
                                                     </p>
-                                                    <img class="message user_message"
+                                                    <img class="message user_message " style="max-width: 300px; max-height: 300px;"
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
                                                 </div>
@@ -158,19 +167,23 @@
                     </div>
                     <form enctype="multipart/form-data" id="messageSendForm" name="messageSendForm">
                         <div class="row d-md-flex align-items-md-end">
-                            <div class="col-sm-10 col-md-11 col-xl-11 offset-xl-0 d-sm-flex"
+                            <div class="col-sm-9 col-md-9 col-lg-10 offset-xl-0 d-flex justify-content-end "
                                  style="padding: 0px 0px 0px 15px;">
-                                <input id="file" type="file">
+
                                 <input id="message" placeholder="Введите сообщение"
                                        style="width: 100%;margin: 10px 0px;" type="text">
                             </div>
-                            <div class="col-sm-2 col-md-1 col-xl-1 d-xl-flex justify-content-xl-start"
-                                 style="margin: 10px 0px;padding: 0px;">
-                                <button class="btn btn-success btn-sm text-white d-xl-flex social" id="send"
+
+                            <div class="col col-lg-2 col-md-3" style="padding: 0px;">
+                                <input type="file" accept="image/*" name="file" id="file">
+                                <label for="file" class="btn-1 btn btn-light" /><i class="fas fa-paperclip"></i></label>
+                                <button class="btn btn-success btn-sm text-white social" id="send"
                                         type="submit">
                                     <i class="icon ion-android-send"></i>
                                 </button>
                             </div>
+
+
                         </div>
                     </form>
                 </div>
