@@ -9,13 +9,14 @@ import java.util.ArrayList;
 
 public class RoomBeautify {
 
+
     private long id;
     private String title;
     private MessageEntity lastMessage;
     private MessageEntityRepository messageEntityRepository;
 
 
-    public RoomBeautify(long id, String title, MessageEntityRepository messageEntityRepository) {
+    RoomBeautify(long id, String title, MessageEntityRepository messageEntityRepository) {
         setMessageEntityRepository(messageEntityRepository);
         setId(id);
         setTitle(title);
@@ -26,23 +27,28 @@ public class RoomBeautify {
             setLastMessage(null);
     }
 
+
     @Contract(pure = true)
     public long getId() {
         return id;
     }
 
+
     private void setId(long id) {
         this.id = id;
     }
+
 
     @Contract(pure = true)
     public String getTitle() {
         return title;
     }
 
+
     private void setTitle(String title) {
         this.title = title;
     }
+
 
     public MessageEntity getLastMessage() {
         return lastMessage;

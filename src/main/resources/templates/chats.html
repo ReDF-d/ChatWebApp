@@ -41,9 +41,11 @@
                                     </div>
                                     <div class="row">
                                         <div class="col your_chats_message_preview">
-                                            <span th:if="${chat.getLastMessage() != null}"
-                                                  th:text="${chat.getLastMessage().getMessageText()}">
+                                            <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('text')}"
+                                                  th:text="${chat.getLastMessage().getUsername() + ': ' + chat.getLastMessage().getMessageText()}">
                                             </span>
+                                            <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('image')}"
+                                                  th:text="${chat.getLastMessage().getUsername() + ': ' + 'Фотография'}"></span>
                                             <span th:if="${chat.getLastMessage() == null}"
                                                   th:text="''"></span>
                                         </div>

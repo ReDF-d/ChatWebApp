@@ -1,5 +1,5 @@
 package com.redf.chatwebapp.controller;
-
+/*
 
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
@@ -241,4 +241,4 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
     }
-}
+}*/

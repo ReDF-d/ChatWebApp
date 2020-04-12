@@ -20,14 +20,16 @@ public class MessageEntity extends AbstractEntity implements Serializable {
     private UserEntity user;
     private String username;
     private RoomEntity room;
+    private String messageType;
 
 
-    public MessageEntity(String messageText, UserEntity user, Timestamp time, RoomEntity room) {
+    public MessageEntity(String messageText, UserEntity user, Timestamp time, RoomEntity room, String messageType) {
         setMessageText(messageText);
         setUser(user);
         setTime(time);
         setRoomEntity(room);
         setUsername(user.getUsername());
+        setMessageType(messageType);
     }
 
 
@@ -107,5 +109,16 @@ public class MessageEntity extends AbstractEntity implements Serializable {
 
     public void setRoomEntity(RoomEntity room) {
         this.room = room;
+    }
+
+    @Basic
+    @Column(name = "message_type")
+    public String getMessageType() {
+        return messageType;
+    }
+
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
     }
 }

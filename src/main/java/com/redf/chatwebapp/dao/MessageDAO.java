@@ -17,7 +17,7 @@ public interface MessageDAO {
 
     @Nullable
     @Contract(pure = true)
-    MessageEntity create(String messageText, String login, String author, Timestamp time, RoomEntity room);
+    MessageEntity create(String messageText, String login, String author, Timestamp time, RoomEntity room, String messageType);
 
     void save(MessageEntity message);
 
@@ -25,7 +25,7 @@ public interface MessageDAO {
 
     void delete(MessageEntity message);
 
-    void createAndSave(String author, String login, String messageText, Timestamp time, RoomEntity room);
+    void createAndSave(String author, String login, String messageText, Timestamp time, RoomEntity room, String messageType);
 
     List<MessageEntity> getAllMessagesFromRoom(int id);
 }

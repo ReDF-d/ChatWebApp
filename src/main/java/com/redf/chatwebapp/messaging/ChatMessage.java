@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 
 @Component
 public class ChatMessage {
+    private String roomId;
     private MessageType type;
     private String id;
     private String content;
@@ -67,9 +68,18 @@ public class ChatMessage {
         this.login = login;
     }
 
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
     public enum MessageType {
         CHAT,
         JOIN,
-        LEAVE
+        LEAVE,
+        IMAGE
     }
 }

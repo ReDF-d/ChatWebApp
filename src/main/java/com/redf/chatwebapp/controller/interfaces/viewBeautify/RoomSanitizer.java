@@ -4,11 +4,12 @@ import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.repo.MessageEntityRepository;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public interface RoomBeautiyfier {
+public interface RoomSanitizer {
 
 
-    default void addRooms(ArrayList<RoomEntity> rooms, ArrayList<RoomBeautify> roomsBeautify, Long id, MessageEntityRepository messageEntityRepository) {
+    default void addRooms(ArrayList<RoomEntity> rooms, List<RoomBeautify> roomsBeautify, Long id, MessageEntityRepository messageEntityRepository) {
         rooms.forEach(roomEntity -> {
             if (roomEntity.getRoomType().equals("dialogue")) {
                 roomEntity.getRoomMembers().forEach(userEntity -> {

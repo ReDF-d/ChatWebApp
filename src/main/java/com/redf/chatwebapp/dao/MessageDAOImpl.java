@@ -53,20 +53,21 @@ public class MessageDAOImpl implements MessageDAO, TransactionHandler {
 
     @NotNull
     @Override
-    public MessageEntity create(@NotNull String author, @NotNull String login, @NotNull String messageText, @NotNull Timestamp time, @NotNull RoomEntity room) {
+    public MessageEntity create(@NotNull String author, @NotNull String login, @NotNull String messageText, @NotNull Timestamp time, @NotNull RoomEntity room, @NotNull String messageType) {
         UserEntity authorEntity = userService.findByLogin(login);
         getMessage().setUsername(author);
         getMessage().setMessageText(messageText);
         getMessage().setTime(time);
         getMessage().setUser(authorEntity);
         getMessage().setRoomEntity(room);
+        getMessage().setMessageType(messageType);
         return getMessage();
     }
 
 
     @Override
-    public void createAndSave(@NotNull String author, @NotNull String login, @NotNull String messageText, @NotNull Timestamp time, @NotNull RoomEntity room) {
-        save(create(author, login, messageText, time, room));
+    public void createAndSave(@NotNull String author, @NotNull String login, @NotNull String messageText, @NotNull Timestamp time, @NotNull RoomEntity room, @NotNull String messageType) {
+        save(create(author, login, messageText, time, room, messageType));
     }
 
 

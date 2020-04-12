@@ -1,7 +1,7 @@
 package com.redf.chatwebapp.controller;
 
 import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautify;
-import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautiyfier;
+import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomSanitizer;
 import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.MessageDAOImpl;
 import com.redf.chatwebapp.dao.entities.MessageEntity;
@@ -16,6 +16,7 @@ import com.redf.chatwebapp.dto.ChatCreateDto;
 import com.redf.chatwebapp.dto.ChatMemberDto;
 import com.redf.chatwebapp.messaging.ChatMessage;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,26 +25,29 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 @Controller
 @Transactional
 @RequestMapping("/chat/{id}")
-public class ChatController implements RoomBeautiyfier {
+public class ChatController implements RoomSanitizer {
 
     private static boolean savePermitted = true;
 
@@ -58,11 +62,12 @@ public class ChatController implements RoomBeautiyfier {
     private ArrayList<UserEntity> onlineUsers;
     private ArrayList<UserEntity> offlineUsers;
     private FriendshipEntityRepository friendshipEntityRepository;
+    private SimpMessagingTemplate messagingTemplate;
 
 
     @Contract(pure = true)
     @Autowired
-    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO, UserService userService, SessionRegistry sessionRegistry, FriendshipEntityRepository friendshipEntityRepository) {
+    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO, UserService userService, SessionRegistry sessionRegistry, FriendshipEntityRepository friendshipEntityRepository, SimpMessagingTemplate messagingTemplate) {
         this.messageDAO = messageDAO;
         setRoom(room);
         setRoomEntityRepository(roomEntityRepository);
@@ -71,6 +76,7 @@ public class ChatController implements RoomBeautiyfier {
         setUserService(userService);
         setSessionRegistry(sessionRegistry);
         setFriendshipEntityRepository(friendshipEntityRepository);
+        setMessagingTemplate(messagingTemplate);
     }
 
 
@@ -118,9 +124,53 @@ public class ChatController implements RoomBeautiyfier {
             String messageText = chatMessage.getContent().trim();
             Timestamp timestamp = chatMessage.getTimestamp();
             RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
-            messageDAO.createAndSave(author, login, messageText, timestamp, roomEntity);
+            String messageType = "text";
+            messageDAO.createAndSave(author, login, messageText, timestamp, roomEntity, messageType);
             savePermitted = true;
         }
+    }
+
+
+    @PostMapping
+    public void saveAndSendFile(@RequestParam(value = "file") MultipartFile file, @RequestParam(value = "id") String senderId, @RequestParam(value = "timestamp") String timestamp, @DestinationVariable("id") String roomId) {
+        try {
+            final String PATH = "./media/img/" + roomId;
+            File directory = new File(PATH);
+            if (!directory.exists()) {
+                boolean created = directory.mkdir();
+            }
+            String random = UUID.randomUUID().toString();
+            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+            Path path = Paths.get(PATH, random + "." + extension);
+            Files.write(path, file.getBytes());
+            while (!savePermitted)
+                Thread.sleep(1);
+            savePermitted = false;
+            UserEntity user = getUserService().findById(Long.parseLong(senderId));
+            RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
+            messageDAO.createAndSave(user.getUsername(), user.getLogin(), path.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
+            savePermitted = true;
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setId(senderId);
+            chatMessage.setSender(user.getUsername());
+            chatMessage.setLogin(user.getLogin());
+            chatMessage.setContent(path.toString());
+            chatMessage.setTimestamp(parseTimestampFromMilliseconds(timestamp));
+            chatMessage.setRoomId(roomId);
+            chatMessage.setType(ChatMessage.MessageType.IMAGE);
+            getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
+    @NotNull
+    private Timestamp parseTimestampFromMilliseconds(String timestampInString) {
+        Date date = new Date(Long.parseLong(timestampInString));
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formatted = format.format(date);
+        return Timestamp.valueOf(formatted);
     }
 
 
@@ -244,7 +294,7 @@ public class ChatController implements RoomBeautiyfier {
         List<Object> principals = getSessionRegistry().getAllPrincipals();
         List<UserEntity> loggedUsers = new ArrayList<>();
         principals.forEach(p -> {
-            if (p instanceof UserDetails)
+            if (p instanceof UserDetails && !getSessionRegistry().getAllSessions(p, false).isEmpty())
                 loggedUsers.add(getUserService().findById(((UserDetails) p).getId()));
         });
         ArrayList<UserEntity> offlineUsers = (ArrayList<UserEntity>) CollectionUtils.subtract(members, loggedUsers);
@@ -293,5 +343,13 @@ public class ChatController implements RoomBeautiyfier {
 
     private void setFriendshipEntityRepository(FriendshipEntityRepository friendshipEntityRepository) {
         this.friendshipEntityRepository = friendshipEntityRepository;
+    }
+
+    public SimpMessagingTemplate getMessagingTemplate() {
+        return messagingTemplate;
+    }
+
+    public void setMessagingTemplate(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
     }
 }

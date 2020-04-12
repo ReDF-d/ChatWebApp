@@ -2,7 +2,7 @@ package com.redf.chatwebapp.controller;
 
 
 import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautify;
-import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautiyfier;
+import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomSanitizer;
 import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
@@ -23,12 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 @Controller
 @RequestMapping("/chats")
 @Transactional
-public class ChatsController implements RoomBeautiyfier {
+public class ChatsController implements RoomSanitizer {
 
     private RoomEntityRepository roomEntityRepository;
     private UserService userService;
@@ -62,7 +63,7 @@ public class ChatsController implements RoomBeautiyfier {
     public ModelAndView getChatsPage() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity principal = getUserService().findById(userDetails.getId());
-        ArrayList<RoomBeautify> roomsBeautify = new ArrayList<>();
+        List<RoomBeautify> roomsBeautify = new ArrayList<>();
         setRooms((ArrayList<RoomEntity>) getRoomEntityRepository().findRoomsByMemberId(principal.getId()));
         addRooms(getRooms(), roomsBeautify, principal.getId(), getMessageEntityRepository());
         ModelAndView modelAndView = new ModelAndView("chats");
