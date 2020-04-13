@@ -2,6 +2,7 @@ package com.redf.chatwebapp.dao.repo;
 
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -22,4 +23,8 @@ public interface RoomEntityRepository extends JpaRepository<RoomEntity, Long> {
 
     @Query("select r from RoomEntity r join r.roomMembers rm where rm.id = :id")
     List<RoomEntity> findRoomsByMemberId(@Param("id") Long id);
+
+    @Modifying
+    @Query(value = "DELETE from room_members where user_id = :id and room_id = :roomId", nativeQuery = true)
+    void deleteRoomMember(@Param("id") Long id, @Param("roomId") Long roomId);
 }

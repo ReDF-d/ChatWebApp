@@ -1,5 +1,5 @@
 package com.redf.chatwebapp.controller;
-/*
+
 
 import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
@@ -49,10 +49,10 @@ public class EditPageController implements HandlerExceptionResolver {
     @Contract(pure = true)
     @Autowired
     public EditPageController(UserDAOImpl userDAO, UserService userService, RoleEntityRepository roleEntityRepository, UserUpdateValidatorImpl userUpdateValidator) {
-        this.userDAO = userDAO;
-        this.userService = userService;
-        this.roleEntityRepository = roleEntityRepository;
-        this.userUpdateValidator = userUpdateValidator;
+        setUserDAO(userDAO);
+        setUserService(userService);
+        setRoleEntityRepository(roleEntityRepository);
+        setUserUpdateValidator(userUpdateValidator);
     }
 
 
@@ -74,27 +74,26 @@ public class EditPageController implements HandlerExceptionResolver {
             modelAndView.addObject("user", userUpdateDto());
             modelAndView.addObject("tooLarge", avatarTooLargeException(""));
             return modelAndView;
-        }
-        return new ModelAndView("redirect:/home");
+        } else return new ModelAndView("redirect:/home");
     }
 
 
     @PostMapping(consumes = "multipart/form-data")
     public ModelAndView updateUserProfile(@NotNull @ModelAttribute("user") UserUpdateDto userDto, @NotNull BindingResult result) {
         UserEntity existing;
-        userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userUpdateValidator.validateAllFields(result, userDto, userDetails, "USER");
+        setUserDetails((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        getUserUpdateValidator().validateAllFields(result, userDto, getUserDetails(), "USER");
         if (result.hasErrors()) {
             ModelAndView modelAndView = new ModelAndView("editprofile");
             modelAndView.addObject("tooLarge", avatarTooLargeException(""));
             return modelAndView;
         }
-        userDto.setId(userDetails.getId());
+        userDto.setId(getUserDetails().getId());
         if (!userDto.getAvatar().isEmpty())
-            userUpdateValidator.saveAvatar(userDto);
-        userDto.setRoles(getRoleList(userDetails.getAuthorities()));
+            getUserUpdateValidator().saveAvatar(userDto);
+        userDto.setRoles(getRoleList(getUserDetails().getAuthorities()));
         update(userDto);
-        existing = userDAO.findByLogin(userDto.getLogin());
+        existing = getUserDAO().findByLogin(userDto.getLogin());
         reloadUserDetails(existing);
         setAuthentication();
         return new ModelAndView("redirect:/user/" + existing.getId());
@@ -102,31 +101,31 @@ public class EditPageController implements HandlerExceptionResolver {
 
 
     private void setAuthentication() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(getUserDetails(), getUserDetails().getPassword(), getUserDetails().getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
 
     private ArrayList<RoleEntity> getRoleList(@NotNull Collection<? extends GrantedAuthority> authorities) {
         ArrayList<RoleEntity> roles = new ArrayList<>();
-        roles.add(roleEntityRepository.findByRoleName("USER"));
+        roles.add(getRoleEntityRepository().findByRoleName("USER"));
         if (authorities.stream().anyMatch(ga -> ga.getAuthority().equals("ADMIN")))
-            roles.add(roleEntityRepository.findByRoleName("ADMIN"));
+            roles.add(getRoleEntityRepository().findByRoleName("ADMIN"));
         return roles;
     }
 
 
     private void reloadUserDetails(@NotNull UserEntity existing) {
-        userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userDetails.setUsername(existing.getUsername());
-        userDetails.setLogin(existing.getLogin());
-        userDetails.setPassword(existing.getPassword());
-        userDetails.setRoles(existing.getRoles());
+        setUserDetails((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        getUserDetails().setUsername(existing.getUsername());
+        getUserDetails().setLogin(existing.getLogin());
+        getUserDetails().setPassword(existing.getPassword());
+        getUserDetails().setRoles(existing.getRoles());
     }
 
 
     private void update(@NotNull UserUpdateDto updateDto) {
-        userService.updateUser(updateDto);
+        getUserService().updateUser(updateDto);
     }
 
 
@@ -145,4 +144,56 @@ public class EditPageController implements HandlerExceptionResolver {
         }
         return modelAndView;
     }
-}*/
+
+
+    @Contract(pure = true)
+    private RoleEntityRepository getRoleEntityRepository() {
+        return roleEntityRepository;
+    }
+
+
+    private void setRoleEntityRepository(RoleEntityRepository roleEntityRepository) {
+        this.roleEntityRepository = roleEntityRepository;
+    }
+
+
+    @Contract(pure = true)
+    private UserService getUserService() {
+        return userService;
+    }
+
+
+    private void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+
+    @Contract(pure = true)
+    private UserDAOImpl getUserDAO() {
+        return userDAO;
+    }
+
+
+    private void setUserDAO(UserDAOImpl userDAO) {
+        this.userDAO = userDAO;
+    }
+
+
+    @Contract(pure = true)
+    private UserDetails getUserDetails() {
+        return userDetails;
+    }
+
+    private void setUserDetails(UserDetails userDetails) {
+        this.userDetails = userDetails;
+    }
+
+    @Contract(pure = true)
+    private UserUpdateValidatorImpl getUserUpdateValidator() {
+        return userUpdateValidator;
+    }
+
+    private void setUserUpdateValidator(UserUpdateValidatorImpl userUpdateValidator) {
+        this.userUpdateValidator = userUpdateValidator;
+    }
+}

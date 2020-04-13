@@ -120,6 +120,7 @@ public class UserDAOImpl implements UserDAO, TransactionHandler {
                 getBlockedUserDAOImpl().createAndSave(getUser(), updateDto.getStarted(), updateDto.getEnds());
         } else
             getUser().setIsLocked(!updateDto.isMarkUnbanned());
+        getUser().setEnabled(true);
         performTransaction(Transactions.UPDATE, getUser());
     }
 

@@ -34,7 +34,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -131,6 +133,15 @@ public class ChatController implements RoomSanitizer {
     }
 
 
+    @PostMapping(params = {"userId", "roomId"})
+    public String exitChat(@RequestParam(value = "userId") String userId, @RequestParam(value = "roomId") String roomId, HttpServletResponse response) throws IOException {
+        Long parsedRoomId = Long.parseLong(roomId.replaceAll("\\D+", ""));
+        Long parsedUserId = Long.parseLong(userId);
+        getRoomEntityRepository().deleteRoomMember(parsedUserId, parsedRoomId);
+        return null;
+    }
+
+
     @PostMapping
     public void saveAndSendFile(@RequestParam(value = "file") MultipartFile file, @RequestParam(value = "id") String senderId, @RequestParam(value = "timestamp") String timestamp, @DestinationVariable("id") String roomId) {
         try {
@@ -168,7 +179,7 @@ public class ChatController implements RoomSanitizer {
     @NotNull
     private Timestamp parseTimestampFromMilliseconds(String timestampInString) {
         Date date = new Date(Long.parseLong(timestampInString));
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         String formatted = format.format(date);
         return Timestamp.valueOf(formatted);
     }
@@ -201,6 +212,7 @@ public class ChatController implements RoomSanitizer {
             modelAndView.addObject("onlineUsers", getOnlineUsers());
             modelAndView.addObject("offlineUsers", getOfflineUsers());
             modelAndView.addObject("roomType", room.getRoomType());
+            modelAndView.addObject("title", room.getTitle());
             return modelAndView;
         } else
             return new ModelAndView("redirect:/home");
@@ -345,11 +357,12 @@ public class ChatController implements RoomSanitizer {
         this.friendshipEntityRepository = friendshipEntityRepository;
     }
 
-    public SimpMessagingTemplate getMessagingTemplate() {
+    @Contract(pure = true)
+    private SimpMessagingTemplate getMessagingTemplate() {
         return messagingTemplate;
     }
 
-    public void setMessagingTemplate(SimpMessagingTemplate messagingTemplate) {
+    private void setMessagingTemplate(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 }
