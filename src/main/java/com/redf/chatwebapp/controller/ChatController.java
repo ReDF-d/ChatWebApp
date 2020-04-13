@@ -138,6 +138,8 @@ public class ChatController implements RoomSanitizer {
         Long parsedRoomId = Long.parseLong(roomId.replaceAll("\\D+", ""));
         Long parsedUserId = Long.parseLong(userId);
         getRoomEntityRepository().deleteRoomMember(parsedUserId, parsedRoomId);
+        if (getRoomEntityRepository().findRoomById(parsedRoomId.intValue()).getRoomMembers().size() == 0)
+            getRoomEntityRepository().deleteRoomEntityById(parsedRoomId.intValue());
         return null;
     }
 

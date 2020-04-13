@@ -229,6 +229,8 @@ window.onload = function () {
                 messageContent.style.width = '100%';
                 messageContent.style.fontSize = '14px';
                 messageContent.src = receivedMessage.content.substr(1);
+                messageContent.style.maxWidth = '300px';
+                messageContent.style.maxHeight = '300px';
                 div6.appendChild(messageContent);
                 div5.appendChild(div6);
                 div4.appendChild(div5);
@@ -257,6 +259,8 @@ window.onload = function () {
                 messageContent.style.marginLeft = '0';
                 messageContent.style.fontSize = '14px';
                 messageContent.src = receivedMessage.content.substr(1);
+                messageContent.style.maxWidth = '300px';
+                messageContent.style.maxHeight = '300px';
                 div5.appendChild(messageContent);
                 div4.appendChild(div5);
                 div3.appendChild(div4);
