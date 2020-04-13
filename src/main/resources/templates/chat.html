@@ -34,22 +34,22 @@
                                     <div class="row row_bottom_border"
                                          style="margin: 0;padding: 10px;"
                                          th:classappend="${#strings.equals(#strings.toString(chat.getId()), roomId)} ? selected_chat">
-                                        <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-2 d-flex justify-content-center align-items-center"
+                                        <div class="col-3 col-md-12 col-sm-5 col-lg-3 col-xl-2 d-flex justify-content-center align-items-center"
                                              style="padding: 0;">
-                                            <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center your_chats_img"
+                                            <img class="rounded-circle your_chats_img"
                                                  th:if="${chat.getLastMessage() != null}"
                                                  th:src="@{${'~/media/avatars/avatar' + chat.getLastMessage().getUser().getId() + '.png'}}">
-                                            <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center your_chats_img"
+                                            <img class="rounded-circle your_chats_img"
                                                  th:if="${chat.getLastMessage() == null}"
                                                  th:src="@{'~/media/avatars/defaultAvatar.png'}">
                                         </div>
-                                        <div class="col-8 col-sm-12 col-md-7 col-xl-10">
+                                        <div class="col-9 col-sm-7 col-md-12 col-lg-9 col-xl-10">
                                             <div class="row">
                                                 <div class="col your_chats_username">
                                                     <span th:text="${chat.getTitle()}"></span></div>
-                                                <div class="col d-flex justify-content-end">
+                                                <div class="col-1 d-flex justify-content-end" style="padding: 0;">
                                                     <div>
-                                                        <button class="btn d-xl-flex justify-content-xl-center align-items-xl-center"
+                                                        <button class="btn d-flex justify-content-center align-items-center"
                                                                 onclick="openExitConfirm(event, this.id)"
                                                                 style="padding: 0;" th:id="${'exitChat' + chat.getId()}"
                                                                 type="button">
@@ -59,7 +59,7 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-xl-12 your_chats_message_preview">
+                                                <div class="col-12 your_chats_message_preview">
                                                     <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('text')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + chat.getLastMessage().getMessageText()}"></span>
                                                     <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('image')}"
@@ -68,7 +68,7 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-md-12 col-lg-12 col-xl-12 d-xl-flex justify-content-xl-end align-items-xl-center"
+                                                <div class="col-12 d-flex justify-content-end align-items-center"
                                                      style="font-size: 12px;">
                                                         <span class=".date" style="font-size: 12px;"
                                                               th:if="${chat.getLastMessage() != null}"
@@ -181,7 +181,7 @@
                                        style="width: 100%;margin: 10px 0;" type="text">
                             </div>
                             <div class="col col-lg-2 col-md-3" style="padding: 0;">
-                                <input type="file" accept="image/*" name="file" id="file">
+                                <input multiple type="file" accept="image/*" name="file" id="file">
                                 <label class="btn-1 btn btn-light" for="file"/><i class="fas fa-paperclip"></i></label>
                                 <button class="btn btn-success btn-sm text-white social" id="send"
                                         type="submit">
