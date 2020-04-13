@@ -121,6 +121,7 @@
                                                        th:text="${message.getMessageText()}">
                                                     </p>
                                                     <img class="message"
+                                                         style="max-width: 300px; max-height: 300px;"
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
                                                 </div>
