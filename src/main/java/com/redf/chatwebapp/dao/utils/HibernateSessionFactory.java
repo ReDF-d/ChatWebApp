@@ -45,6 +45,7 @@ public class HibernateSessionFactory {
         configuration.addAnnotatedClass(FriendshipEntity.class);
         configuration.addAnnotatedClass(RoomEntity.class);
         configuration.addAnnotatedClass(EmailVerificationToken.class);
+        configuration.addAnnotatedClass(OnlineUserEntity.class);
         return configuration.buildSessionFactory();
     }
 }

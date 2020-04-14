@@ -5,8 +5,6 @@
 <head>
     <title>Сообщения</title>
     <div th:replace="header::links"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <meta th:content="${_csrf.token}" th:name="${_csrf.parameterName}"/>
 </head>
 
@@ -181,7 +179,7 @@
                                        style="width: 100%;margin: 10px 0;" type="text">
                             </div>
                             <div class="col col-lg-2 col-md-3" style="padding: 0;">
-                                <input type="file" accept="image/*" name="file" id="file">
+                                <input accept="image/*" id="file" multiple name="file[]" type="file">
                                 <label class="btn-1 btn btn-light" for="file"/><i class="fas fa-paperclip"></i></label>
                                 <button class="btn btn-success btn-sm text-white social" id="send"
                                         type="submit">
@@ -415,10 +413,10 @@
         </div>
     </div>
 </div>
+<footer th:replace="footer::foot"></footer>
 <script th:src="@{~/js/chat.js}"></script>
 <script th:src="@{~/js/createChat.js}"></script>
 <script th:src="@{~/js/addChatMember.js}"></script>
 <script th:src="@{~/js/exitChat.js}"></script>
-<footer th:replace="footer::foot"></footer>
 </body>
 </html>

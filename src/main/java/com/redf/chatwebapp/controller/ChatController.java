@@ -32,6 +32,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
@@ -145,36 +146,47 @@ public class ChatController implements RoomSanitizer {
 
 
     @PostMapping
-    public void saveAndSendFile(@RequestParam(value = "file") MultipartFile file, @RequestParam(value = "id") String senderId, @RequestParam(value = "timestamp") String timestamp, @DestinationVariable("id") String roomId) {
+    @ResponseBody
+    public Object saveAndSendFile(MultipartHttpServletRequest request, @DestinationVariable("id") String roomId) {
         try {
+            //@RequestParam(value = "id") String senderId, @RequestParam(value = "timestamp") String timestamp
+            final String senderId = request.getParameter("id");
+            final String timestamp = request.getParameter("timestamp");
             final String PATH = "./media/img/" + roomId;
             File directory = new File(PATH);
             if (!directory.exists()) {
                 boolean created = directory.mkdir();
             }
-            String random = UUID.randomUUID().toString();
-            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-            Path path = Paths.get(PATH, random + "." + extension);
-            Files.write(path, file.getBytes());
-            while (!savePermitted)
-                Thread.sleep(1);
-            savePermitted = false;
-            UserEntity user = getUserService().findById(Long.parseLong(senderId));
-            RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
-            messageDAO.createAndSave(user.getUsername(), user.getLogin(), path.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
-            savePermitted = true;
-            ChatMessage chatMessage = new ChatMessage();
-            chatMessage.setId(senderId);
-            chatMessage.setSender(user.getUsername());
-            chatMessage.setLogin(user.getLogin());
-            chatMessage.setContent(path.toString());
-            chatMessage.setTimestamp(parseTimestampFromMilliseconds(timestamp));
-            chatMessage.setRoomId(roomId);
-            chatMessage.setType(ChatMessage.MessageType.IMAGE);
-            getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
+            Iterator<String> iterator = request.getFileNames();
+            MultipartFile file;
+            while (iterator.hasNext()) {
+                file = request.getFile(iterator.next());
+                assert file != null;
+                String random = UUID.randomUUID().toString();
+                String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+                Path path = Paths.get(PATH, random + "." + extension);
+                Files.write(path, file.getBytes());
+                while (!savePermitted)
+                    Thread.sleep(1);
+                savePermitted = false;
+                UserEntity user = getUserService().findById(Long.parseLong(senderId));
+                RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
+                messageDAO.createAndSave(user.getUsername(), user.getLogin(), path.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
+                savePermitted = true;
+                ChatMessage chatMessage = new ChatMessage();
+                chatMessage.setId(senderId);
+                chatMessage.setSender(user.getUsername());
+                chatMessage.setLogin(user.getLogin());
+                chatMessage.setContent(path.toString());
+                chatMessage.setTimestamp(parseTimestampFromMilliseconds(timestamp));
+                chatMessage.setRoomId(roomId);
+                chatMessage.setType(ChatMessage.MessageType.IMAGE);
+                getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return null;
     }
 
 

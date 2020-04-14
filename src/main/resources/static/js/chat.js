@@ -1,4 +1,4 @@
-window.onload = function () {
+$(document).ready(function () {
     'use strict';
     let messageInput = document.querySelector('#message');
     let messageArea = document.querySelector('#messageArea');
@@ -7,7 +7,7 @@ window.onload = function () {
     let username = null;
     let id = null;
     let date = new Date();
-    let login = false;
+    let login = null;
     let roomId = document.querySelector('#roomId');
     let connectingError = document.createElement('div');
     let chatWindow = $("#chatWindow");
@@ -35,6 +35,7 @@ window.onload = function () {
 
     function onConnected() {
         stompClient.subscribe('/topic/chat/' + roomId.textContent, onMessageReceived);
+        stompClient.subscribe('/topic/onlineTracker', onStatusChange);
         stompClient.send("/app/chat.addUser." + roomId.textContent,
             {},
             JSON.stringify({sender: username, type: 'JOIN'})
@@ -46,6 +47,15 @@ window.onload = function () {
         connectingError.style.visibility = "visible";
         connectingError.textContent = 'Невозможно подключится к серверу, попробуйте позже';
         messageArea.appendChild(connectingError);
+    }
+
+
+    function onStatusChange(payload) {
+        let statusChangeMessage = JSON.parse(payload.body);
+        if (statusChangeMessage.status === 'ONLINE')
+            alert('online');
+        else if (statusChangeMessage.status === 'OFFLINE')
+            alert('offline');
     }
 
 
@@ -69,8 +79,10 @@ window.onload = function () {
         let file = $('#file');
         if (file.val() && stompClient) {
             let form_data = new FormData();
-            let file_data = file.prop('files')[0];
-            form_data.append('file', file_data);
+            let file_data = file.prop('files');
+            for (let i = 0; i < file_data.length; i++) {
+                form_data.append('file' + i, file_data[i]);
+            }
             form_data.append('id', $('#id').text());
             form_data.append('timestamp', new Date().getTime().toString());
             form_data.append('roomId', roomId.textContent);
@@ -288,4 +300,10 @@ window.onload = function () {
             }
         }
     }
-};
+
+
+    window.addEventListener('paste', e => {
+        alert('caught');
+        document.getElementById('file').files = e.clipboardData.files;
+    });
+});

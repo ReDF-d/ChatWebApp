@@ -21,6 +21,7 @@ import java.util.Set;
 @Table(name = "users")
 public class UserEntity extends AbstractEntity implements Serializable {
 
+
     private Long id;
     private String login;
     private String password;
@@ -31,6 +32,7 @@ public class UserEntity extends AbstractEntity implements Serializable {
     private Set<RoomEntity> rooms = new HashSet<>();
     private boolean enabled;
     private EmailVerificationToken emailVerificationToken;
+    private OnlineUserEntity onlineUserEntity;
 
 
     @Contract(pure = true)
@@ -68,6 +70,7 @@ public class UserEntity extends AbstractEntity implements Serializable {
     public String getLogin() {
         return login;
     }
+
 
     public void setLogin(String login) {
         this.login = login;
@@ -164,5 +167,16 @@ public class UserEntity extends AbstractEntity implements Serializable {
 
     public void setEmailVerificationToken(EmailVerificationToken emailVerificationToken) {
         this.emailVerificationToken = emailVerificationToken;
+    }
+
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    public OnlineUserEntity getOnlineUserEntity() {
+        return onlineUserEntity;
+    }
+
+
+    public void setOnlineUserEntity(OnlineUserEntity onlineUserEntity) {
+        this.onlineUserEntity = onlineUserEntity;
     }
 }
