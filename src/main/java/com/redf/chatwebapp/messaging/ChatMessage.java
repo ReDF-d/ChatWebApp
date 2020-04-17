@@ -14,6 +14,20 @@ public class ChatMessage {
     private String login;
     private Timestamp timestamp;
 
+    public ChatMessage() {
+    }
+
+
+    public ChatMessage(String roomId, MessageType type, String id, String content, String sender, String login, Timestamp timestamp) {
+        setRoomId(roomId);
+        setType(type);
+        setId(id);
+        setContent(content);
+        setSender(sender);
+        setLogin(login);
+        setTimestamp(timestamp);
+    }
+
 
     public MessageType getType() {
         return type;

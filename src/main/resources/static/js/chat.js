@@ -52,10 +52,97 @@ $(document).ready(function () {
 
     function onStatusChange(payload) {
         let statusChangeMessage = JSON.parse(payload.body);
-        if (statusChangeMessage.status === 'ONLINE')
-            alert('online');
-        else if (statusChangeMessage.status === 'OFFLINE')
-            alert('offline');
+        if (statusChangeMessage.status === 'ONLINE' && id !== statusChangeMessage.id) {
+            let parent = document.getElementById('onlineUsers');
+            let a = document.createElement('a');
+            let div1 = document.createElement('div');
+            let div2 = document.createElement('div');
+            let img = document.createElement('img');
+            let div3 = document.createElement('div');
+            let div4 = document.createElement('div');
+            let div5 = document.createElement('div');
+            let span = document.createElement('span');
+            let offlineElement = document.getElementById('offline' + statusChangeMessage.id);
+            let offlineParent = document.getElementById('offlineUsers');
+            let checkOnline = document.getElementById('online' + statusChangeMessage.id);
+            if (!checkOnline) {
+                a.setAttribute('href', "/user/" + statusChangeMessage.id);
+                div1.classList.add('row', 'userStatus');
+                div1.style.padding = '10px';
+                div1.id = 'online' + statusChangeMessage.id;
+                div2.style.padding = '0px';
+                div2.classList.add('col-4', 'col-sm-7', 'col-md-5', 'col-lg-3', 'col-xl-3', 'offset-xl-0', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'justify-content-sm-center', 'align-items-sm-center', 'justify-content-md-center', 'align-items-md-center', 'justify-content-lg-center', 'align-items-lg-center');
+                img.classList.add('rounded-circle', 'd-lg-flex', 'justify-content-lg-center', 'align-items-lg-center');
+                img.src = '/media/avatars/avatar' + statusChangeMessage.id + '.png';
+                img.style.width = '35px';
+                img.style.height = '35px';
+                div2.appendChild(img);
+                div1.appendChild(div2);
+                div3.classList.add('col-8', 'col-sm-12', 'col-md-7', 'col-xl-7', 'offset-xl-0', 'd-xl-flex', 'justify-content-xl-start', 'align-items-xl-center');
+                div3.style.padding = '0px';
+                div4.classList.add('row');
+                div4.style.margin = '0px';
+                div5.classList.add('col-xl-12', 'offset-xl-0', 'your_chats_online_users');
+                div5.style.paddingLeft = '0px';
+                div5.style.paddingRight = '0px';
+                span.style.fontSize = '13px';
+                span.innerText = statusChangeMessage.username;
+                div5.appendChild(span);
+                div4.appendChild(div5);
+                div3.appendChild(div4);
+                div1.appendChild(div3);
+                a.appendChild(div1);
+                a.id = 'online' + statusChangeMessage.id;
+                parent.appendChild(a);
+                if (offlineElement)
+                    offlineParent.removeChild(offlineElement);
+            }
+        } else if (statusChangeMessage.status === 'OFFLINE' && id !== statusChangeMessage.id) {
+            let parent = document.getElementById('offlineUsers');
+            let a = document.createElement('a');
+            let div1 = document.createElement('div');
+            let div2 = document.createElement('div');
+            let img = document.createElement('img');
+            let div3 = document.createElement('div');
+            let div4 = document.createElement('div');
+            let div5 = document.createElement('div');
+            let span = document.createElement('span');
+            let onlineElement = document.getElementById('online' + statusChangeMessage.id);
+            let onlineParent = document.getElementById('onlineUsers');
+            let checkOffline = document.getElementById('offline' + statusChangeMessage.id);
+            if (!checkOffline) {
+                a.setAttribute('href', "/user/" + statusChangeMessage.id);
+                div1.classList.add('row', 'userStatus');
+                div1.style.padding = '10px';
+                div1.id = 'offline' + statusChangeMessage.id;
+                div2.style.padding = '0px';
+                div2.classList.add('col-4', 'col-sm-7', 'col-md-5', 'col-lg-3', 'col-xl-3', 'offset-xl-0', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'justify-content-sm-center', 'align-items-sm-center', 'justify-content-md-center', 'align-items-md-center', 'justify-content-lg-center', 'align-items-lg-center');
+                img.classList.add('rounded-circle', 'd-lg-flex', 'justify-content-lg-center', 'align-items-lg-center');
+                img.src = '/media/avatars/avatar' + statusChangeMessage.id + '.png';
+                img.style.width = '35px';
+                img.style.height = '35px';
+                div2.appendChild(img);
+                div1.appendChild(div2);
+                div3.classList.add('col-8', 'col-sm-12', 'col-md-7', 'col-xl-7', 'offset-xl-0', 'd-xl-flex', 'justify-content-xl-start', 'align-items-xl-center');
+                div3.style.padding = '0px';
+                div4.classList.add('row');
+                div4.style.margin = '0px';
+                div5.classList.add('col-xl-12', 'offset-xl-0', 'your_chats_online_users');
+                div5.style.paddingLeft = '0px';
+                div5.style.paddingRight = '0px';
+                span.style.fontSize = '13px';
+                span.innerText = statusChangeMessage.username;
+                div5.appendChild(span);
+                div4.appendChild(div5);
+                div3.appendChild(div4);
+                div1.appendChild(div3);
+                a.appendChild(div1);
+                a.id = 'offline' + statusChangeMessage.id;
+                parent.appendChild(a);
+                if (onlineElement)
+                    onlineParent.removeChild(onlineElement);
+            }
+        }
     }
 
 

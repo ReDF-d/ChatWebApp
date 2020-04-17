@@ -17,7 +17,7 @@ public interface RoomEntityRepository extends JpaRepository<RoomEntity, Long> {
     RoomEntity findRoomById(@Param("id") int id);
 
 
-    @Query("select r from RoomEntity r join r.roomMembers rm where rm.id in (:id1, :id2) and size(r.roomMembers) = 2 and r.roomType = 'dialogue'")
+    @Query("select r from RoomEntity r join r.roomMembers rm where rm.id in (:id1, :id2) and r.roomType = 'dialogue'")
     List<RoomEntity> findDialogueByMembers(@Param("id1") Long id1, @Param("id2") Long id2);
 
 

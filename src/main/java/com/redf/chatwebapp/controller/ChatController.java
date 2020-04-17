@@ -9,12 +9,14 @@ import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.FriendshipEntityRepository;
 import com.redf.chatwebapp.dao.repo.MessageEntityRepository;
+import com.redf.chatwebapp.dao.repo.OnlineUserEntityRepository;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
 import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dao.utils.UserDetails;
 import com.redf.chatwebapp.dto.ChatCreateDto;
 import com.redf.chatwebapp.dto.ChatMemberDto;
 import com.redf.chatwebapp.messaging.ChatMessage;
+import com.redf.chatwebapp.messaging.UserOnlineStatusChangeMessage;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Contract;
@@ -27,7 +29,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.inject.Singleton;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +49,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 
+@Singleton
 @Controller
 @Transactional
 @RequestMapping("/chat/{id}")
@@ -60,26 +63,29 @@ public class ChatController implements RoomSanitizer {
     private ArrayList<RoomEntity> rooms;
     private FriendshipDAOImpl friendshipDAO;
     private MessageEntityRepository messageEntityRepository;
-    private SessionRegistry sessionRegistry;
     private UserService userService;
-    private ArrayList<UserEntity> onlineUsers;
-    private ArrayList<UserEntity> offlineUsers;
+    private List<UserEntity> onlineUsers;
+    private List<UserEntity> offlineUsers;
     private FriendshipEntityRepository friendshipEntityRepository;
     private SimpMessagingTemplate messagingTemplate;
+    private OnlineUserEntityRepository onlineUserEntityRepository;
 
 
     @Contract(pure = true)
     @Autowired
-    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository, FriendshipDAOImpl friendshipDAO, UserService userService, SessionRegistry sessionRegistry, FriendshipEntityRepository friendshipEntityRepository, SimpMessagingTemplate messagingTemplate) {
+    public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository,
+                          FriendshipDAOImpl friendshipDAO, UserService userService, FriendshipEntityRepository friendshipEntityRepository,
+                          SimpMessagingTemplate messagingTemplate, OnlineUserEntityRepository onlineUserEntityRepository) {
         this.messageDAO = messageDAO;
         setRoom(room);
         setRoomEntityRepository(roomEntityRepository);
         setMessageEntityRepository(messageEntityRepository);
         setFriendshipDao(friendshipDAO);
         setUserService(userService);
-        setSessionRegistry(sessionRegistry);
         setFriendshipEntityRepository(friendshipEntityRepository);
         setMessagingTemplate(messagingTemplate);
+        setOnlineUserEntityRepository(onlineUserEntityRepository);
+        getOnlineUserEntityRepository().setAllUsersOffline();
     }
 
 
@@ -149,7 +155,6 @@ public class ChatController implements RoomSanitizer {
     @ResponseBody
     public Object saveAndSendFile(MultipartHttpServletRequest request, @DestinationVariable("id") String roomId) {
         try {
-            //@RequestParam(value = "id") String senderId, @RequestParam(value = "timestamp") String timestamp
             final String senderId = request.getParameter("id");
             final String timestamp = request.getParameter("timestamp");
             final String PATH = "./media/img/" + roomId;
@@ -173,14 +178,8 @@ public class ChatController implements RoomSanitizer {
                 RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
                 messageDAO.createAndSave(user.getUsername(), user.getLogin(), path.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
                 savePermitted = true;
-                ChatMessage chatMessage = new ChatMessage();
-                chatMessage.setId(senderId);
-                chatMessage.setSender(user.getUsername());
-                chatMessage.setLogin(user.getLogin());
-                chatMessage.setContent(path.toString());
-                chatMessage.setTimestamp(parseTimestampFromMilliseconds(timestamp));
-                chatMessage.setRoomId(roomId);
-                chatMessage.setType(ChatMessage.MessageType.IMAGE);
+                ChatMessage chatMessage = new ChatMessage(roomId, ChatMessage.MessageType.IMAGE,
+                        senderId, path.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
                 getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
             }
         } catch (Exception ex) {
@@ -249,7 +248,7 @@ public class ChatController implements RoomSanitizer {
     }
 
 
-    private void setOnlineUsers(ArrayList<UserEntity> users) {
+    private void setOnlineUsers(List<UserEntity> users) {
         this.onlineUsers = users;
     }
 
@@ -314,29 +313,34 @@ public class ChatController implements RoomSanitizer {
     }
 
 
-    @SuppressWarnings(value = "unchecked")
     private void initOnlineAndOfflineLists(int id) {
-        List<UserEntity> members = getRoomEntityRepository().findRoomById(id).getRoomMembers();
-        List<Object> principals = getSessionRegistry().getAllPrincipals();
         List<UserEntity> loggedUsers = new ArrayList<>();
-        principals.forEach(p -> {
-            if (p instanceof UserDetails && !getSessionRegistry().getAllSessions(p, false).isEmpty())
-                loggedUsers.add(getUserService().findById(((UserDetails) p).getId()));
+        List<UserEntity> offlineUsers = new ArrayList<>();
+        getOnlineUserEntityRepository().findAllUsersFromRoom((long) id).forEach(o -> {
+            if (o.isOnline().equals("ONLINE"))
+                loggedUsers.add(o.getUser());
+            else
+                offlineUsers.add(o.getUser());
+
         });
-        ArrayList<UserEntity> offlineUsers = (ArrayList<UserEntity>) CollectionUtils.subtract(members, loggedUsers);
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity principal = getUserService().findById(userDetails.getId());
+        if (!loggedUsers.contains(principal)) {
+            loggedUsers.add(principal);
+            UserOnlineStatusChangeMessage message = new UserOnlineStatusChangeMessage();
+            message.setId(principal.getId().toString());
+            message.setStatus(UserOnlineStatusChangeMessage.Status.ONLINE);
+            message.setUsername(principal.getUsername());
+            sendStatusChangeMessage(Integer.toString(id), message);
+        }
+        offlineUsers.remove(principal);
         setOfflineUsers(offlineUsers);
-        setOnlineUsers((ArrayList<UserEntity>) CollectionUtils.subtract(members, offlineUsers));
+        setOnlineUsers(loggedUsers);
     }
 
 
-    @Contract(pure = true)
-    private SessionRegistry getSessionRegistry() {
-        return sessionRegistry;
-    }
-
-
-    private void setSessionRegistry(SessionRegistry sessionRegistry) {
-        this.sessionRegistry = sessionRegistry;
+    private void sendStatusChangeMessage(String roomId, UserOnlineStatusChangeMessage message) {
+        getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, message);
     }
 
 
@@ -352,12 +356,12 @@ public class ChatController implements RoomSanitizer {
 
 
     @Contract(pure = true)
-    private ArrayList<UserEntity> getOfflineUsers() {
+    private List<UserEntity> getOfflineUsers() {
         return offlineUsers;
     }
 
 
-    private void setOfflineUsers(ArrayList<UserEntity> offlineUsers) {
+    private void setOfflineUsers(List<UserEntity> offlineUsers) {
         this.offlineUsers = offlineUsers;
     }
 
@@ -378,5 +382,13 @@ public class ChatController implements RoomSanitizer {
 
     private void setMessagingTemplate(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
+    }
+
+    public OnlineUserEntityRepository getOnlineUserEntityRepository() {
+        return onlineUserEntityRepository;
+    }
+
+    public void setOnlineUserEntityRepository(OnlineUserEntityRepository onlineUserEntityRepository) {
+        this.onlineUserEntityRepository = onlineUserEntityRepository;
     }
 }
