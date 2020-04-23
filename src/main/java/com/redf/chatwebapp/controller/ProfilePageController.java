@@ -187,7 +187,6 @@ public class ProfilePageController {
         long roomId = 0;
         //  short counter = 0;
         for (RoomEntity room : roomEntities) {
-            System.out.println(room.getId() + " ? " + roomId);
             if (room.getId() == roomId)
                 return room;
             else

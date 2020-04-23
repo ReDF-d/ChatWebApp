@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(window).on("load", async function () {
     'use strict';
     let messageInput = document.querySelector('#message');
     let messageArea = document.querySelector('#messageArea');
@@ -14,11 +14,10 @@ $(document).ready(function () {
 
     connectingError.classList.add('hidden', 'text-danger', 'text-center');
     connectingError.id = 'connectionError';
-    chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
     if (!stompClient)
         connect();
     messageForm.addEventListener('submit', sendMessage, true);
-
+    chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
 
     function connect() {
         id = document.querySelector('#id').textContent.trim();
@@ -30,6 +29,10 @@ $(document).ready(function () {
             stompClient.connect({}, onConnected, onError);
             stompClient.debug = true;
         }
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
 
@@ -227,10 +230,10 @@ $(document).ready(function () {
                 div4.classList.add('row');
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
-                div6.classList.add('d-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
                 messageContent.classList.add('message');
                 messageContent.style.marginLeft = '5px';
-                messageContent.style.width = '100%';
+                messageContent.style.wordBreak = 'break-all';
                 messageContent.style.fontSize = '14px';
                 messageContent.innerText = receivedMessage.content;
                 div6.appendChild(messageContent);
@@ -244,25 +247,47 @@ $(document).ready(function () {
                 dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
                 div8.appendChild(dateElement);
                 div7.appendChild(div8);
+                div3.appendChild(div7);
                 div1.appendChild(div2);
                 div1.appendChild(div3);
-                div1.appendChild(div7);
                 messageArea.appendChild(div1);
                 chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
             } else {
+                let editAndDeleteButtonsDiv = document.createElement('div');
+                let anotherEditAndDeleteDiv = document.createElement('div');
+                let deleteButton = document.createElement('button');
+                let deleteIcon = document.createElement('i');
+                let editButton = document.createElement('button');
+                let editIcon = document.createElement('i');
                 div1.classList.add('my_message');
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
+                editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
+                anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
+                deleteButton.style.border = 'none';
+                deleteButton.style.background = 'none';
+                deleteButton.style.paddingRight = '10px';
+                deleteIcon.classList.add('fas', 'fa-times');
+                editButton.style.border = 'none';
+                editButton.style.background = 'none';
+                editButton.style.paddingRight = '10px';
+                editIcon.classList.add('fas', 'fa-pencil-alt');
                 div4.style.padding = '5px';
-                div5.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+                div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
                 messageContent.classList.add('message', 'user_message');
                 messageContent.style.marginRight = '0';
                 messageContent.style.marginLeft = '0';
                 messageContent.style.fontSize = '14px';
                 messageContent.innerText = receivedMessage.content;
                 div5.appendChild(messageContent);
-                div4.appendChild(div5);
+                deleteButton.appendChild(deleteIcon);
+                editButton.appendChild(editIcon);
+                anotherEditAndDeleteDiv.appendChild(deleteButton);
+                anotherEditAndDeleteDiv.appendChild(editButton);
+                editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
+                editAndDeleteButtonsDiv.appendChild(div5);
+                div4.appendChild(editAndDeleteButtonsDiv);
                 div3.appendChild(div4);
                 div6.classList.add('row');
                 div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
@@ -287,6 +312,12 @@ $(document).ready(function () {
                 chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
             }
         } else if (receivedMessage.type === 'IMAGE') {
+            let editAndDeleteButtonsDiv = document.createElement('div');
+            let anotherEditAndDeleteDiv = document.createElement('div');
+            let deleteButton = document.createElement('button');
+            let deleteIcon = document.createElement('i');
+            let editButton = document.createElement('button');
+            let editIcon = document.createElement('i');
             let date = new Date(receivedMessage.timestamp);
             let month = date.getMonth();
             let currentHours = date.getHours();
@@ -322,7 +353,7 @@ $(document).ready(function () {
                 div4.classList.add('row');
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
-                div6.classList.add('d-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
                 messageContent.classList.add('message');
                 messageContent.style.marginLeft = '5px';
                 messageContent.style.width = '100%';
@@ -341,9 +372,9 @@ $(document).ready(function () {
                 dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
                 div8.appendChild(dateElement);
                 div7.appendChild(div8);
+                div3.appendChild(div7);
                 div1.appendChild(div2);
                 div1.appendChild(div3);
-                div1.appendChild(div7);
                 messageArea.appendChild(div1);
                 chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
             } else {
@@ -352,7 +383,7 @@ $(document).ready(function () {
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
                 div4.style.padding = '5px';
-                div5.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+                div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
                 messageContent.classList.add('message', 'user_message');
                 messageContent.style.marginRight = '0';
                 messageContent.style.marginLeft = '0';
@@ -360,8 +391,24 @@ $(document).ready(function () {
                 messageContent.src = receivedMessage.content.substr(1);
                 messageContent.style.maxWidth = '300px';
                 messageContent.style.maxHeight = '300px';
+                editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
+                anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
+                deleteButton.style.border = 'none';
+                deleteButton.style.background = 'none';
+                deleteButton.style.paddingRight = '10px';
+                deleteIcon.classList.add('fas', 'fa-times');
+                editButton.style.border = 'none';
+                editButton.style.background = 'none';
+                editButton.style.paddingRight = '10px';
+                editIcon.classList.add('fas', 'fa-pencil-alt');
+                deleteButton.appendChild(deleteIcon);
+                editButton.appendChild(editIcon);
+                anotherEditAndDeleteDiv.appendChild(deleteButton);
+                anotherEditAndDeleteDiv.appendChild(editButton);
+                editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
                 div5.appendChild(messageContent);
-                div4.appendChild(div5);
+                editAndDeleteButtonsDiv.appendChild(div5);
+                div4.appendChild(editAndDeleteButtonsDiv);
                 div3.appendChild(div4);
                 div6.classList.add('row');
                 div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
