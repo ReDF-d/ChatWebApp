@@ -766,3 +766,38 @@ body {
 
 }
 
+.edit_chatname{
+    border: none;
+    background: none;
+    opacity: 0;
+    transition: 150ms;
+}
+
+
+.edit_chatname_main:hover ~ .edit_chatname{
+        opacity: 1;
+        transition: 150ms;
+}
+
+.edit_chatname:hover{
+    opacity: 1;
+    transition: 150ms;
+}
+
+
+.edit_message{
+    border: none;
+    background: none;
+    opacity: 0;
+    transition: 150ms;
+}
+
+.edit_message_main:hover > .edit_message{
+    opacity: 0.6;
+    transition: 150ms;
+}
+
+.edit_message:hover{
+    opacity: 1;
+    transition: 150ms;
+}
