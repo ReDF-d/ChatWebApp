@@ -39,7 +39,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -182,11 +181,16 @@ public class ChatController implements RoomSanitizer {
         try {
             final String senderId = request.getParameter("id");
             final String timestamp = request.getParameter("timestamp");
-            final String PATH = "./media/img/" + roomId;
-            File directory = new File(PATH);
-            if (!directory.exists()) {
-                boolean created = directory.mkdir();
-            }
+            // final String PATH = "./media/img/" + roomId;
+
+            Path path = Paths.get("./media/img/" + roomId);
+            Files.createDirectories(path.getParent());
+            Files.createFile(path);
+
+            // File directory = new File(PATH);
+            //if (!directory.exists()) {
+            //       boolean created = directory.mkdir();
+            //   }
             Iterator<String> iterator = request.getFileNames();
             MultipartFile file;
             while (iterator.hasNext()) {
@@ -194,7 +198,7 @@ public class ChatController implements RoomSanitizer {
                 assert file != null;
                 String random = UUID.randomUUID().toString();
                 String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-                Path path = Paths.get(PATH, random + "." + extension);
+                Path pathtoImg = Paths.get(path.toString(), random + "." + extension);
                 Files.write(path, file.getBytes());
                 while (!savePermitted)
                     Thread.sleep(1);

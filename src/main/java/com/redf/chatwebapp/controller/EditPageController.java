@@ -1,4 +1,4 @@
-package com.redf.chatwebapp.controller;
+/*package com.redf.chatwebapp.controller;
 
 
 import com.redf.chatwebapp.dao.UserDAOImpl;
@@ -196,4 +196,4 @@ public class EditPageController implements HandlerExceptionResolver {
     private void setUserUpdateValidator(UserUpdateValidatorImpl userUpdateValidator) {
         this.userUpdateValidator = userUpdateValidator;
     }
-}
+}*/
