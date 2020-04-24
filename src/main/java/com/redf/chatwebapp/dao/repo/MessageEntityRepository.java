@@ -14,4 +14,7 @@ public interface MessageEntityRepository extends JpaRepository<MessageEntity, Lo
 
     @Query(value = "SELECT * from messages where room_id = :id ORDER BY time", nativeQuery = true)
     List<MessageEntity> findAllFromRoom(@Param("id") int id);
+
+
+    MessageEntity findByMessageId(int id);
 }

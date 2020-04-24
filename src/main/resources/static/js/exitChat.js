@@ -6,7 +6,6 @@ let confirmChatExit = document.getElementById('confirmChatExitForm');
 let chatExitConfirmButton = document.getElementById('chatExitConfirmButton');
 let chatExitRefuseButton = document.getElementById('chatExitRefuseButton');
 
-
 function openExitConfirm(e, id) {
     e.preventDefault();
     selectedRoomId = id;

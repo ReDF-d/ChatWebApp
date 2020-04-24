@@ -16,6 +16,7 @@ import com.redf.chatwebapp.dao.utils.UserDetails;
 import com.redf.chatwebapp.dto.ChatCreateDto;
 import com.redf.chatwebapp.dto.ChatMemberDto;
 import com.redf.chatwebapp.messaging.ChatMessage;
+import com.redf.chatwebapp.messaging.EditChatTitleMessage;
 import com.redf.chatwebapp.messaging.UserOnlineStatusChangeMessage;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -88,11 +89,7 @@ public class ChatController implements RoomSanitizer {
         getOnlineUserEntityRepository().setAllUsersOffline();
     }
 
-
-    @MessageMapping("/chat.sendMessage.{id}")
-    @SendTo("/topic/chat/{id}")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage, @DestinationVariable("id") String id) {
-        return chatMessage;
+    public ChatController() {
     }
 
 
@@ -122,8 +119,17 @@ public class ChatController implements RoomSanitizer {
     }
 
 
-    @MessageMapping("/chat.saveMessage.{id}")
-    public void saveMessage(@NotNull @Payload ChatMessage chatMessage, @DestinationVariable("id") String id) throws InterruptedException {
+    @MessageMapping("/chat.editChatTitle.{id}")
+    public void editChatTitle(@NotNull @Payload EditChatTitleMessage message, @DestinationVariable("id") String id) {
+        RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(message.getRoomId()));
+        room.setTitle(message.getTitle());
+        getRoomEntityRepository().save(room);
+    }
+
+
+    @MessageMapping("/chat.saveAndSendMessage.{id}")
+    @SendTo("/topic/chat/{id}")
+    public ChatMessage saveAndSendMessage(@NotNull @Payload ChatMessage chatMessage, @DestinationVariable("id") String id) throws InterruptedException {
         if (chatMessage.getType().equals(ChatMessage.MessageType.CHAT)) {
             while (!savePermitted)
                 Thread.sleep(1);
@@ -134,9 +140,28 @@ public class ChatController implements RoomSanitizer {
             Timestamp timestamp = chatMessage.getTimestamp();
             RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
             String messageType = "text";
-            messageDAO.createAndSave(author, login, messageText, timestamp, roomEntity, messageType);
+            MessageEntity message = messageDAO.createAndSave(author, login, messageText, timestamp, roomEntity, messageType);
             savePermitted = true;
+            chatMessage.setMessageId(String.valueOf(message.getMessageId()));
+            return chatMessage;
         }
+        if (chatMessage.getType().equals(ChatMessage.MessageType.UPDATE)) {
+            MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
+            if (message != null) {
+                message.setMessageText(chatMessage.getContent());
+                getMessageEntityRepository().save(message);
+                chatMessage.setMessageId(String.valueOf(message.getMessageId()));
+                chatMessage.setContent(message.getMessageText());
+                chatMessage.setTimestamp(message.getTime());
+                return chatMessage;
+            }
+        }
+        if (chatMessage.getType().equals(ChatMessage.MessageType.DELETE)) {
+            MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
+            getMessageEntityRepository().delete(message);
+            return chatMessage;
+        }
+        return null;
     }
 
 
@@ -176,9 +201,9 @@ public class ChatController implements RoomSanitizer {
                 savePermitted = false;
                 UserEntity user = getUserService().findById(Long.parseLong(senderId));
                 RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
-                messageDAO.createAndSave(user.getUsername(), user.getLogin(), path.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
+                MessageEntity message = messageDAO.createAndSave(user.getUsername(), user.getLogin(), path.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
                 savePermitted = true;
-                ChatMessage chatMessage = new ChatMessage(roomId, ChatMessage.MessageType.IMAGE,
+                ChatMessage chatMessage = new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.IMAGE,
                         senderId, path.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
                 getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
             }

@@ -66,14 +66,15 @@ public class MessageDAOImpl implements MessageDAO, TransactionHandler {
 
 
     @Override
-    public void createAndSave(@NotNull String author, @NotNull String login, @NotNull String messageText, @NotNull Timestamp time, @NotNull RoomEntity room, @NotNull String messageType) {
-        save(create(author, login, messageText, time, room, messageType));
+    public MessageEntity createAndSave(@NotNull String author, @NotNull String login, @NotNull String messageText, @NotNull Timestamp time, @NotNull RoomEntity room, @NotNull String messageType) {
+        return save(create(author, login, messageText, time, room, messageType));
     }
 
 
     @Override
-    public void save(@NotNull MessageEntity message) {
+    public MessageEntity save(@NotNull MessageEntity message) {
         performTransaction(Transactions.SAVE, message);
+        return message;
     }
 
 

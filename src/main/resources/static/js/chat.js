@@ -1,23 +1,41 @@
-$(window).on("load", async function () {
-    'use strict';
-    let messageInput = document.querySelector('#message');
-    let messageArea = document.querySelector('#messageArea');
-    let messageForm = document.querySelector('#messageSendForm');
-    let stompClient = null;
-    let username = null;
-    let id = null;
-    let date = new Date();
-    let login = null;
+'use strict';
+$(window).on("load", function () {
+    let messageInput;
+    let messageArea;
+    let stompClient;
+    let username;
+    let id;
+    let date;
+    let login;
+    let connectingError;
+    let chatWindow;
+    let currentEditMessageId;
+    messageInput = document.querySelector('#message');
+    messageArea = document.querySelector('#messageArea');
+    stompClient = null;
+    username = null;
+    id = null;
+    date = new Date();
+    login = null;
+    let cancelEdit = document.getElementById('cancelEdit');
+    let editButton = document.getElementById('edit');
+    let sendButton = document.getElementById('send');
+    let editChatTitleButton = document.getElementById('editChatTitle');
+    let confirmEditChatTitle = document.getElementById('confirmEditChatTitle');
+    let editChatTitleInput = document.getElementById('editChatTitleInput');
+    let chatTitle = document.getElementById('chatTitle');
     let roomId = document.querySelector('#roomId');
-    let connectingError = document.createElement('div');
-    let chatWindow = $("#chatWindow");
+    connectingError = document.createElement('div');
+    chatWindow = $("#chatWindow");
+    currentEditMessageId = null;
 
     connectingError.classList.add('hidden', 'text-danger', 'text-center');
     connectingError.id = 'connectionError';
     if (!stompClient)
         connect();
-    messageForm.addEventListener('submit', sendMessage, true);
     chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+    messageInput.focus();
+
 
     function connect() {
         id = document.querySelector('#id').textContent.trim();
@@ -31,22 +49,24 @@ $(window).on("load", async function () {
         }
     }
 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    $('#messageSendForm').bind("keypress", function (e) {
+        if (e.keyCode === 13 && currentEditMessageId === null)
+            sendMessage(e);
+        else if (e.keyCode === 13 && currentEditMessageId !== null)
+            sendEditedMessage(e);
+    });
+
+
+    $('#send').click(sendMessage(event));
 
 
     function onConnected() {
         stompClient.subscribe('/topic/chat/' + roomId.textContent, onMessageReceived);
         stompClient.subscribe('/topic/onlineTracker', onStatusChange);
-        stompClient.send("/app/chat.addUser." + roomId.textContent,
-            {},
-            JSON.stringify({sender: username, type: 'JOIN'})
-        );
     }
 
 
-    function onError(error) {
+    function onError() {
         connectingError.style.visibility = "visible";
         connectingError.textContent = 'Невозможно подключится к серверу, попробуйте позже';
         messageArea.appendChild(connectingError);
@@ -155,6 +175,7 @@ $(window).on("load", async function () {
         if (messageContent && stompClient) {
             let chatMessage = {
                 roomId: roomId.textContent,
+                messageId: '',
                 id: id,
                 sender: username,
                 login: login,
@@ -162,8 +183,7 @@ $(window).on("load", async function () {
                 type: 'CHAT',
                 timestamp: date
             };
-            stompClient.send("/app/chat.sendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
-            stompClient.send("/app/chat.saveMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
+            stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
             messageInput.value = '';
         }
         let file = $('#file');
@@ -218,6 +238,7 @@ $(window).on("load", async function () {
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
                 div1.classList.add('opponents_message');
+                div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
                 authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
@@ -236,6 +257,7 @@ $(window).on("load", async function () {
                 messageContent.style.wordBreak = 'break-all';
                 messageContent.style.fontSize = '14px';
                 messageContent.innerText = receivedMessage.content;
+                messageContent.id = 'messageContent' + receivedMessage.messageId;
                 div6.appendChild(messageContent);
                 div5.appendChild(div6);
                 div4.appendChild(div5);
@@ -260,6 +282,7 @@ $(window).on("load", async function () {
                 let editButton = document.createElement('button');
                 let editIcon = document.createElement('i');
                 div1.classList.add('my_message');
+                div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
@@ -268,10 +291,14 @@ $(window).on("load", async function () {
                 deleteButton.style.border = 'none';
                 deleteButton.style.background = 'none';
                 deleteButton.style.paddingRight = '10px';
+                deleteButton.classList.add('deleteButton');
                 deleteIcon.classList.add('fas', 'fa-times');
                 editButton.style.border = 'none';
                 editButton.style.background = 'none';
                 editButton.style.paddingRight = '10px';
+                editButton.classList.add('editButton');
+                deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
+                editButton.id = 'editMessage' + receivedMessage.messageId;
                 editIcon.classList.add('fas', 'fa-pencil-alt');
                 div4.style.padding = '5px';
                 div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
@@ -280,6 +307,7 @@ $(window).on("load", async function () {
                 messageContent.style.marginLeft = '0';
                 messageContent.style.fontSize = '14px';
                 messageContent.innerText = receivedMessage.content;
+                messageContent.id = 'messageContent' + receivedMessage.messageId;
                 div5.appendChild(messageContent);
                 deleteButton.appendChild(deleteIcon);
                 editButton.appendChild(editIcon);
@@ -341,6 +369,7 @@ $(window).on("load", async function () {
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
                 div1.classList.add('opponents_message');
+                div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
                 authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
@@ -361,6 +390,7 @@ $(window).on("load", async function () {
                 messageContent.src = receivedMessage.content.substr(1);
                 messageContent.style.maxWidth = '300px';
                 messageContent.style.maxHeight = '300px';
+                messageContent.id = 'messageContent' + receivedMessage.messageId;
                 div6.appendChild(messageContent);
                 div5.appendChild(div6);
                 div4.appendChild(div5);
@@ -379,6 +409,7 @@ $(window).on("load", async function () {
                 chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
             } else {
                 div1.classList.add('my_message');
+                div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
@@ -396,6 +427,10 @@ $(window).on("load", async function () {
                 deleteButton.style.border = 'none';
                 deleteButton.style.background = 'none';
                 deleteButton.style.paddingRight = '10px';
+                deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
+                editButton.id = 'editMessage' + receivedMessage.messageId;
+                deleteButton.classList.add('deleteButton');
+                editButton.classList.add('editButton');
                 deleteIcon.classList.add('fas', 'fa-times');
                 editButton.style.border = 'none';
                 editButton.style.background = 'none';
@@ -419,6 +454,7 @@ $(window).on("load", async function () {
                 div6.appendChild(div7);
                 div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                messageLink.id = 'messageContent' + receivedMessage.messageId;
                 authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
                 authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                 authorImg.style.width = '50px';
@@ -432,12 +468,134 @@ $(window).on("load", async function () {
                 messageArea.appendChild(div1);
                 chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
             }
+        } else if (receivedMessage.type === 'UPDATE') {
+            let message = document.getElementById('messageContent' + receivedMessage.messageId);
+            message.textContent = receivedMessage.content;
+        } else if (receivedMessage.type === 'DELETE') {
+            let message = document.getElementById('message' + receivedMessage.messageId);
+            messageArea.removeChild(message);
+        }
+    }
+
+    window.addEventListener('paste', e => {
+        document.getElementById('file').files = e.clipboardData.files;
+    });
+
+
+    function sendEditedMessage(event) {
+        event.preventDefault();
+        let fileButton = document.getElementById('fileLabel');
+        let sendButton = document.getElementById('send');
+        let editButton = document.getElementById('edit');
+        let cancelEditButton = document.getElementById('cancelEdit');
+        let messageContent = messageInput.value.trim();
+        if (messageContent && stompClient) {
+            let chatMessage = {
+                roomId: roomId.textContent,
+                messageId: currentEditMessageId,
+                id: id,
+                sender: username,
+                login: login,
+                content: messageInput.value,
+                type: 'UPDATE',
+                timestamp: date
+            };
+            stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
+            messageInput.value = '';
+            fileButton.style.display = 'inline-block';
+            sendButton.style.display = 'inline-block';
+            editButton.style.display = 'none';
+            cancelEditButton.style.display = 'none';
+            currentEditMessageId = null;
         }
     }
 
 
-    window.addEventListener('paste', e => {
-        alert('caught');
-        document.getElementById('file').files = e.clipboardData.files;
+    $(document).on("click", '.editButton', function (event) {
+        event.preventDefault();
+        let messageId = event.currentTarget.id.match(/\d+/g);
+        messageInput.value = document.getElementById('messageContent' + messageId).textContent;
+        let fileButton = document.getElementById('fileLabel');
+        let sendButton = document.getElementById('send');
+        let editButton = document.getElementById('edit');
+        let cancelEditButton = document.getElementById('cancelEdit');
+        fileButton.style.display = 'none';
+        sendButton.style.display = 'none';
+        editButton.style.display = 'inline-block';
+        cancelEditButton.style.display = 'inline-block';
+        currentEditMessageId = messageId.toString();
+    });
+
+
+    $(document).on("click", '.deleteButton', function (event) {
+        event.preventDefault();
+        let messageId = event.currentTarget.id.match(/\d+/g);
+        let chatMessage = {
+            roomId: roomId.textContent,
+            messageId: messageId.toString(),
+            id: id,
+            sender: username,
+            login: login,
+            content: messageInput.value,
+            type: 'DELETE',
+            timestamp: date
+        };
+        stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
+    });
+
+
+    cancelEdit.addEventListener('click', function (event) {
+        event.preventDefault();
+        let fileButton = document.getElementById('fileLabel');
+        let sendButton = document.getElementById('send');
+        let editButton = document.getElementById('edit');
+        let cancelEditButton = document.getElementById('cancelEdit');
+        fileButton.style.display = 'inline-block';
+        sendButton.style.display = 'inline-block';
+        editButton.style.display = 'none';
+        cancelEditButton.style.display = 'none';
+        messageInput.value = '';
+        currentEditMessageId = null;
+    });
+
+
+    sendButton.addEventListener('click', function (event) {
+        sendMessage(event);
+    });
+
+
+    editButton.addEventListener('click', function (event) {
+        sendEditedMessage(event);
+    });
+
+
+    editChatTitleButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        chatTitle.style.display = 'none';
+        editChatTitleButton.style.display = 'none';
+        editChatTitleInput.style.display = 'inline-block';
+        editChatTitleInput.value = chatTitle.innerText;
+        editChatTitleInput.focus();
+        confirmEditChatTitle.style.display = 'inline-block';
+    });
+
+
+    confirmEditChatTitle.addEventListener('click', function (event) {
+        event.preventDefault();
+        let inputValue = editChatTitleInput.value;
+        if (inputValue !== null && inputValue.trim() !== "") {
+            let editChatTitleMessage = {
+                roomId: roomId.textContent,
+                title: editChatTitleInput.value
+            };
+            stompClient.send("/app/chat.editChatTitle." + roomId.textContent, {}, JSON.stringify(editChatTitleMessage));
+            chatTitle.textContent = editChatTitleInput.value;
+            let chatListElem = document.getElementById('chatTitle' + roomId.textContent);
+            chatListElem.textContent = editChatTitleInput.value;
+        }
+        chatTitle.style.display = 'inline-block';
+        editChatTitleButton.style.display = 'inline-block';
+        editChatTitleInput.style.display = 'none';
+        confirmEditChatTitle.style.display = 'none';
     });
 });
