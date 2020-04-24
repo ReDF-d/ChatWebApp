@@ -199,7 +199,7 @@ public class ChatController implements RoomSanitizer {
                 String random = UUID.randomUUID().toString();
                 String extension = FilenameUtils.getExtension(file.getOriginalFilename());
                 Path pathtoImg = Paths.get(path.toString(), random + "." + extension);
-                Files.write(path, file.getBytes());
+                Files.write(pathtoImg, file.getBytes());
                 while (!savePermitted)
                     Thread.sleep(1);
                 savePermitted = false;
