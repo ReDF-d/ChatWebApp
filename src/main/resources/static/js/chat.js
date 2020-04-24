@@ -42,7 +42,7 @@ $(window).on("load", function () {
         username = document.querySelector('#username').innerText.trim();
         login = document.querySelector('#login').textContent.trim();
         if (username) {
-            let socket = new SockJS('http://' + window.location.host + '/ws');
+            let socket = new SockJS('https://' + window.location.host + '/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, onConnected, onError);
             stompClient.debug = true;

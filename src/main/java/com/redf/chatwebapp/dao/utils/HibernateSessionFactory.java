@@ -23,9 +23,9 @@ public class HibernateSessionFactory {
         Configuration configuration = new Configuration();
         Properties properties = new Properties();
         properties.setProperty(Environment.DRIVER, "org.postgresql.Driver");
-        properties.setProperty(Environment.URL, "jdbc:postgresql://localhost:5432/blinkdb");
-        properties.setProperty(Environment.USER, "root");
-        properties.setProperty(Environment.PASS, "root");
+        properties.setProperty(Environment.URL, System.getenv("DATABASE_URI"));//"jdbc:postgresql://localhost:5432/blinkdb");
+        properties.setProperty(Environment.USER, System.getenv("DATABASE_USER")); //"root");
+        properties.setProperty(Environment.PASS, System.getenv("DATABASE_PASSWORD")); //"root");
         properties.setProperty(Environment.DIALECT, "org.hibernate.dialect.PostgreSQL9Dialect");
         properties.setProperty(Environment.SHOW_SQL, "false");
         properties.setProperty(Environment.CONNECTION_PROVIDER, "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
