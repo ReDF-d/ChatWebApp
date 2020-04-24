@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html th:lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Регистрация</title>
+    <div th:replace="header::links"></div>
+</head>
+<body>
+    <header th:replace="header::head"></header>
+    <div class="d-flex d-md-flex justify-content-center align-items-center align-items-xl-center login-dark reg_form container-fluid img">
+        <form class="reg_form style_form" style="padding: 35px;" th:action="@{/signup}" th:method="post"
+              th:name="signupForm" th:object="${user}">
+            <h4 class="text-center">Регистрация</h4>
+            <div class="illustration"><i class="icon ion-ios-locked-outline"></i></div>
+            <div class="form-group">
+                <input class="form-control" name="email" placeholder="Электронная почта" th:field="*{login}"
+                       type="email">
+                <p th:class="text-danger"
+                   th:each="error:${#fields.errors('login')}" th:text="${error}">
+                    Ошибка</p>
+            </div>
+            <div class="form-group">
+                <input class="form-control" placeholder="Имя пользователя" th:field="*{username}" type="text">
+                <p th:class="text-danger"
+                   th:each="error:${#fields.errors('username')}" th:text="${error}">
+                    Ошибка</p>
+            </div>
+            <div class="form-group">
+                <input class="form-control" placeholder="Пароль" th:field="*{password}" type="password">
+                <p th:class="text-danger"
+                   th:each="error:${#fields.errors('password')}" th:text="${error}">
+                    Ошибка</p>
+            </div>
+            <div class="form-group">
+                <input class="form-control" placeholder="Подтверждение пароля" th:field="*{confirmPassword}"
+                       type="password">
+                <p th:class="text-danger"
+                   th:each="error:${#fields.errors('confirmPassword')}" th:text="${error}">
+                    Ошибка</p>
+            </div>
+            <p>
+                <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                       type="hidden"/>
+            </p>
+            <div class="form-group">
+                <input class="btn btn-primary btn-block btn-success start_button" th:value="Зарегистрироваться"
+                       type="submit">
+                <label class="forgot text-center reg">Уже зарегистрированы?
+                    <a class="forgot reg-op" th:href="@{/login}">Войти</a>
+                </label>
+            </div>
+            <label class="forgot text-center reg"> Регистрируясь, вы соглашаетесь с <a class="forgot reg-op"
+                                                                                       th:href="@{/terms}">Условиями
+                пользования</a>
+            </label>
+        </form>
+    </div>
+    <footer th:replace="footer::foot"></footer>
+</body>
+
+</html>

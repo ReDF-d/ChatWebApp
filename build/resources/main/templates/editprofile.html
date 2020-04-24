@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Редактировать данные</title>
+    <div th:replace="header::links"></div>
+</head>
+<body>
+<header th:replace="header::head"></header>
+<div class="container-fluid img" style="padding: 0px;">
+    <div class="row d-flex d-sm-flex justify-content-center align-items-center justify-content-sm-center align-items-md-center"
+         style="margin: 0px;">
+        <div class="col-11 col-sm-7 col-md-6 col-lg-5 col-xl-4 offset-md-3 profile_card" style="margin: 100px;">
+            <form enctype="multipart/form-data"
+                  th:action="@{/user/edit}"
+                  th:method="post"
+                  th:name="updateForm" th:object="${user}">
+                <div class="row" style="margin-top: 15px;">
+                    <div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8 offset-2 offset-sm-2 offset-md-2 offset-lg-2 offset-xl-2 d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center">
+                        <img class="rounded-circle"
+                             style="width: 140px;"
+                             th:src="@{${'~/media/avatars/avatar' + #authentication.getPrincipal().getId() + '.png'}}">
+                    </div>
+                    <div class="col offset-xl-0 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                         style="padding: 0px;">
+                        <input id="avatar" name="avatar" style="margin-top: 5px;margin-bottom: 10px;"
+                               th:field="*{avatar}" type="file">
+                    </div>
+                    <span class="text-danger"
+                          th:if="${!tooLarge.getMessage().equals('')}"
+                          th:text="${tooLarge.getMessage()}">
+                    </span>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col"><span>Введите новую почту</span></div>
+                        </div>
+                        <span class="text-danger"
+                              th:each="error:${#fields.errors('login')}"
+                              th:text="${error}"></span>
+                        <div class="row">
+                            <div class="col">
+                                <input id="email" name="login" placeholder="example@email.com" th:field="*{login}"
+                                       type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <span>Введите новое имя пользователя</span>
+                            </div>
+                        </div>
+                        <span class="text-danger"
+                              th:each="error:${#fields.errors('username')}"
+                              th:text="${error}"></span>
+                        <div class="row">
+                            <div class="col">
+                                <input id="username" name="username" placeholder="Имя пользователя"
+                                       th:field="*{username}"
+                                       type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <span>Введите старый пароль</span>
+                            </div>
+                        </div>
+                        <span class="text-danger"
+                              th:each="error:${#fields.errors('oldPassword')}"
+                              th:text="${error}"></span>
+                        <div class="row">
+                            <div class="col">
+                                <input id="oldPassword" name="oldPassword" placeholder="Старый пароль"
+                                       th:field="*{oldPassword}"
+                                       type="password"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center"
+                     style="margin: 3px;">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                        <div class="row">
+                            <div class="col">
+                                <span>Введите новый пароль</span>
+                            </div>
+                        </div>
+                        <span class="text-danger"
+                              th:each="error:${#fields.errors('password')}"
+                              th:text="${error}"></span>
+                        <div class="row">
+                            <div class="col">
+                                <input id="password" name="password" placeholder="Пароль" th:field="*{password}"
+                                       type="password"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center">
+                    <div class="col-xl-12 offset-xl-0 text-center user_profile_friends" style="margin: 3px;">
+                        <div class="row">
+                            <div class="col"><span>Подтвердите пароль</span></div>
+                        </div>
+                        <span class="text-danger"
+                              th:each="error:${#fields.errors('confirmPassword')}"
+                              th:text="${error}"></span>
+                        <div class="row">
+                            <div class="col">
+                                <input id="confirmPassword" name="confirmPassword" placeholder="Подтвердите пароль"
+                                       th:field="*{confirmPassword}" type="password"></div>
+                        </div>
+                    </div>
+                </div>
+                <p><input th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                          type="hidden"/></p>
+                <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center">
+                    <div class="col-xl-12 offset-xl-0 text-center" style="margin-top: 10px;margin-bottom: 30px;">
+                        <input class="btn btn-success" th:value="'Сохранить изменения'" type="submit">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="footer::foot"></footer>
+</body>
+</html>

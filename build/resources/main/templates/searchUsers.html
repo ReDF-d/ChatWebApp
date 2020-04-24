@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html th:lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Поиск</title>
+    <div th:replace="header::links"></div>
+</head>
+<body>
+<header th:replace="header::head"></header>
+<div class="container-fluid img">
+    <div class="row d-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
+         style="margin: 0px;">
+        <div class="col">
+            <div class="row d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                 style="margin: 0px;margin-top: 7vh;">
+                <div class="col-sm-7 col-md-5 col-lg-4 col-xl-3 search_result_form" style="padding: 0px 0px 0px 0px;">
+                    <div class="row" style="margin: 0px;">
+                        <div class="col-md-12 col-xl-12 offset-md-6" style="padding: 0px;margin-left: 0;height: 70vh;">
+                            <div class="row" style="margin: 0px;">
+                                <div class="col text-center" style="padding: 0px;margin-top: 10px;margin-bottom: 10px;">
+                                    <span class="online_status" style="font-size: 20px;"
+                                          th:text="'Поиск по запросу: ' + ${searchString} + '&nbsp;'"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-xl-12 offset-xl-0 your_chats_online_users text-center"
+                                 style="padding-left: 0;padding-right: 0;" th:if="${#lists.isEmpty(searchResult)}">
+                                <span style="font-size: 18px;">Пользователей по вашему запросу не найдено</span>
+                            </div>
+                            <div class="row" style="margin: 0px;">
+                                <div class="col your_chats_column" style="height: 63vh;">
+                                    <th:block th:each="user : ${searchResult}">
+                                        <a th:href="@{/user/{id}(id=${user.getId()})}">
+                                            <div class="row search_element" style="margin: 0px;padding: 10px;">
+                                                <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 offset-2 offset-sm-2 offset-md-2 offset-lg-2 offset-xl-2 d-flex d-sm-flex d-md-flex d-lg-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center" style="padding: 0px;">
+                                                    <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                                         style="width: 50px;height: 50px;"
+                                                         th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}">
+                                                </div>
+                                                <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 offset-sm-0 offset-xl-0 d-flex d-sm-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-xl-12 offset-xl-0 your_chats_online_users"
+                                                             style="padding-left: 0px;padding-right: 0px;">
+                                                            <span style="font-size: 18px;"
+                                                                  th:text="${user.getUsername()}"></span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="footer::foot"></footer>
+</body>
+</html>
