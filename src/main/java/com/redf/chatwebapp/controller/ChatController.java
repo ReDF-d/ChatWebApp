@@ -39,6 +39,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -119,10 +120,12 @@ public class ChatController implements RoomSanitizer {
 
 
     @MessageMapping("/chat.editChatTitle.{id}")
-    public void editChatTitle(@NotNull @Payload EditChatTitleMessage message, @DestinationVariable("id") String id) {
+    @SendTo("/topic/editChatTitle")
+    public EditChatTitleMessage editChatTitle(@NotNull @Payload EditChatTitleMessage message, @DestinationVariable("id") String id) {
         RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(message.getRoomId()));
         room.setTitle(message.getTitle());
         getRoomEntityRepository().save(room);
+        return message;
     }
 
 
@@ -181,16 +184,13 @@ public class ChatController implements RoomSanitizer {
         try {
             final String senderId = request.getParameter("id");
             final String timestamp = request.getParameter("timestamp");
-            // final String PATH = "./media/img/" + roomId;
-
-            Path path = Paths.get("./media/img/" + roomId);
-            Files.createDirectories(path.getParent());
-            Files.createFile(path);
-
-            // File directory = new File(PATH);
-            //if (!directory.exists()) {
-            //       boolean created = directory.mkdir();
-            //   }
+            final String PATH = "./media/img/" + roomId;
+            //Files.createDirectories(path.getParent());
+//            Files.createFile(path);
+            File directory = new File(PATH);
+            if (!directory.exists()) {
+                boolean created = directory.mkdir();
+            }
             Iterator<String> iterator = request.getFileNames();
             MultipartFile file;
             while (iterator.hasNext()) {
@@ -198,17 +198,17 @@ public class ChatController implements RoomSanitizer {
                 assert file != null;
                 String random = UUID.randomUUID().toString();
                 String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-                Path pathtoImg = Paths.get(path.toString(), random + "." + extension);
-                Files.write(pathtoImg, file.getBytes());
+                Path pathToImg = Paths.get(PATH, random + "." + extension);
+                Files.write(pathToImg, file.getBytes());
                 while (!savePermitted)
                     Thread.sleep(1);
                 savePermitted = false;
                 UserEntity user = getUserService().findById(Long.parseLong(senderId));
                 RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
-                MessageEntity message = messageDAO.createAndSave(user.getUsername(), user.getLogin(), path.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
+                MessageEntity message = messageDAO.createAndSave(user.getUsername(), user.getLogin(), pathToImg.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
                 savePermitted = true;
                 ChatMessage chatMessage = new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.IMAGE,
-                        senderId, path.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
+                        senderId, pathToImg.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
                 getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
             }
         } catch (Exception ex) {

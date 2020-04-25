@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface MessageEntityRepository extends JpaRepository<MessageEntity, Long> {
 
-    @Query(value = "SELECT * from messages where room_id = :id ORDER BY time", nativeQuery = true)
+    @Query(value = "SELECT * from messages where room_id = :id ORDER BY time asc", nativeQuery = true)
     List<MessageEntity> findAllFromRoom(@Param("id") int id);
 
 

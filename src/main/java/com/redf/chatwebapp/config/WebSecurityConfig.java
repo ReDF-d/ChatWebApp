@@ -95,6 +95,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionFixation().migrateSession()
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .and().cors().disable()
+                .authorizeRequests()
+                .antMatchers("/ws/**", "/notificationHub/**")
+                .permitAll();
     }
 }

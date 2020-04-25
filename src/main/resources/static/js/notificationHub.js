@@ -11,7 +11,7 @@ $(document).ready(function () {
 
 
     function connectOnlineTracker() {
-        let onlineTrackerSocket = new SockJS('https://' + window.location.host + '/notificationHub');
+        let onlineTrackerSocket = new SockJS('http://localhost:8080/notificationHub');
         onlineTrackerClient = Stomp.over(onlineTrackerSocket);
         onlineTrackerClient.debug = true;
         onlineTrackerClient.connect({}, onOnlineTrackerConnected(), onOnlineTrackerError());
