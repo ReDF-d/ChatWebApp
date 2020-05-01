@@ -46,7 +46,6 @@ public class HibernateSessionFactory {
         configuration.addAnnotatedClass(RoomEntity.class);
         configuration.addAnnotatedClass(EmailVerificationToken.class);
         configuration.addAnnotatedClass(OnlineUserEntity.class);
-        configuration.addAnnotatedClass(ForgotPasswordToken.class);
         return configuration.buildSessionFactory();
     }
 }

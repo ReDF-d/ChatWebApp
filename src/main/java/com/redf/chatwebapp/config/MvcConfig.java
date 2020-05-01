@@ -36,7 +36,6 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/friends").setViewName("friendlist");
         registry.addViewController("/confirmEmail").setViewName("confirmEmail");
         registry.addViewController("/registrationConfirm").setViewName("registrationConfirmSuccess");
-        registry.addViewController("/forgotPasswordEmailSent").setViewName("forgotPasswordEmailSent");
     }
 
 

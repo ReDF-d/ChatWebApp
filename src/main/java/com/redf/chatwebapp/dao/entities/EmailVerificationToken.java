@@ -19,7 +19,6 @@ public class EmailVerificationToken {
     private String token;
     private UserEntity user;
 
-
     public EmailVerificationToken(String token, UserEntity user) {
         setToken(token);
         setUser(user);
