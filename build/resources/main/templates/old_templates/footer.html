@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="zoom">
+    <footer class="bg-light padding text-center ftr" th:fragment="foot">
+        <div class="container-fluid ftr">
+            <div class="row padding text-center">
+                <div class="col-12 contact-marg">
+                    <h4>Наши контакты</h4>
+                </div>
+                <div class="col-12 social padding">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="https://vk.com/blinktalk" target="_blank"><i class="fab fa-vk"></i></a>
+                    <a href="https://github.com/ReDF-d/BlinkTalk" target="_blank"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <script th:src="@{~/js/background.js}"></script>
+        <script th:src="@{~/js/searchValidate.js}"></script>
+    </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html th:lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Сообщения</title>
+    <div th:replace="header::links"></div>
+</head>
+<body>
+<header th:replace="header::head"></header>
+<div class="container-fluid img">
+    <div class="row d-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
+         style="margin: 0;">
+        <div class="col col-lg-4 col-sm-6 cold-md-10  chats_body" id="chats_body"
+             style="background-color: rgba(255,255,255,0.81);">
+            <div class="row">
+                <div class="col offset-lg-0 column_bottom_border d-flex justify-content-center" style="padding: 10px 15px;"><span
+                        style="font-size: 24px;"><strong>Ваши чаты</strong></span></div>
+            </div>
+            <div class="row">
+                <div class="col-12 offset-sm-0 your_chats_column"
+                     style="padding: 0 0 0 0;height: 70vh;">
+                    <th:block th:each="chat : ${chats}">
+                        <a th:href="@{/chat/{id}(id=${chat.getId()})}">
+                            <div class="row d-flex justify-content-sm-center justify-content-md-center justify-content-xl-start align-items-xl-center row_bottom_border"
+                                 style="margin: 0px;padding: 10px;">
+                                <div class="col-3 d-flex justify-content-center align-items-center" style="padding: 0px;">
+                                    <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                         style="width: 50px;height: 50px;"
+                                         th:if="${chat.getLastMessage() != null}"
+                                         th:src="@{${'~/media/avatars/avatar' + chat.getLastMessage().getUser().getId() + '.png'}}">
+                                    <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                         style="width: 50px;height: 50px;"
+                                         th:if="${chat.getLastMessage() == null}"
+                                         th:src="@{'~/media/avatars/defaultAvatar.png'}">
+                                </div>
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-10 your_chats_username">
+                                            <span th:text="${chat.getTitle()}"></span>
+                                        </div>
+                                        <div class="col-2 d-flex justify-content-center" style="padding: 0;">
+                                            <div>
+                                                <button class="btn d-flex justify-content-center align-items-center"
+                                                        onclick="openExitConfirm(event, this.id)"
+                                                        style="padding: 0;" th:id="${'exitChat' + chat.getId()}"
+                                                        type="button">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col your_chats_message_preview">
+                                            <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('text')}"
+                                                  th:text="${chat.getLastMessage().getUsername() + ': ' + chat.getLastMessage().getMessageText()}">
+                                            </span>
+                                            <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('image')}"
+                                                  th:text="${chat.getLastMessage().getUsername() + ': ' + 'Фотография'}"></span>
+                                            <span th:if="${chat.getLastMessage() == null}"
+                                                  th:text="''"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 col-lg-12 col-xl-12 d-xl-flex justify-content-xl-start align-items-xl-center"
+                                             style="font-size: 12px;">
+                                                <span class=".date" style="font-size: 12px;"
+                                                      th:if="${chat.getLastMessage() != null}"
+                                                      th:text="${#dates.format(chat.getLastMessage().getTime(), 'dd-MM HH:mm')}">
+                                                </span>
+                                            <span th:if="${chat.getLastMessage() == null}"
+                                                  th:text="''">
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="row d-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center row_bottom_border_create_chat"
+                         style="margin: 0;padding: 10px;">
+                        <div class="col-8 col-sm-12 col-md-7 col-xl-5 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center">
+                            <div class="row">
+                                <div class="col">
+                                    <button class="btn" id="createChat" type="button">
+                                        <i class="fas fa-plus-circle"></i>&nbsp;Создать
+                                        чат
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9 col-md-7 col-lg-6 col-xl-4 new_chat_form" id="new_chat_form"
+             style="height: 30vh;margin-top: 7vh;">
+            <div class="row">
+                <div class="col-11 col-sm-11 col-md-11 col-lg-11 d-flex d-sm-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center"
+                     style="padding-left: 35px;">
+                    <span class="d-md-flex justify-content-md-center align-items-md-center"
+                                                       style="font-size: 21px;">Создание нового чата</span></div>
+                <div class="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                     style="padding: 0  ;">
+                    <button class="btn d-xl-flex justify-content-xl-center align-items-xl-center" id="closeCreate"
+                            style="padding: 0;"
+                            type="button">
+                        <i class="fa fa-close" style="font-size: 20px;"></i>
+                    </button>
+                </div>
+            </div>
+            <form th:action="@{/createChat}" th:method="post" th:object="${createDto}">
+                <div class="row">
+                    <div class="col d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
+                         style="margin-top: 10px;margin-bottom: 10px;">
+                        <input placeholder="Название чата(необязательно)" style="width: 15rem" th:field="*{title}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="row d-md-flex justify-content-md-center align-items-md-center">
+                    <div class="col-md-7 offset-md-2 d-md-flex justify-content-md-center" style="padding: 0;margin: 0;">
+                        <div class="dropdown d-flex d-sm-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center"
+                             style="margin-top: 10px;margin-bottom: 10px;">
+                            <button aria-expanded="false" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                    type="button">
+                                Выберите участников
+                            </button>
+                            <div class="dropdown-menu" role="menu">
+                                <div class="col-md-12 your_chats_column" style="height: 20vh;width: 14rem;">
+                                    <th:block th:each="friend : ${friends}">
+                                        <div class="row dropdown_row" style="margin-top: 5px;">
+                                            <div class="col-md-3 d-md-flex justify-content-md-center align-items-md-center"
+                                                 style="padding: 0;">
+                                                <img class="rounded-circle"
+                                                     style="width: 20px;"
+                                                     th:src="@{${'~/media/avatars/avatar' + friend.getId() + '.png'}}">
+                                            </div>
+                                            <div class="col-md-7 dropdown_username" style="padding: 0;">
+                                                <span th:text="${friend.getUsername()}"></span>
+                                            </div>
+                                            <div class="col-md-2 d-md-flex justify-content-md-center align-items-md-center"
+                                                 style="padding: 0;">
+                                                <input th:field="*{users}" th:value="${friend.getId()}" type="checkbox">
+                                            </div>
+                                        </div>
+                                    </th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-center align-items-center">
+                    <div class="col d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
+                         style="margin-top: 5vh;padding: 0;">
+                        <input class="btn btn-success" th:value="Создать" type="submit">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="footer::foot"></footer>
+<script th:src="@{~/js/createChat.js}"></script>
+</body>
+</html>

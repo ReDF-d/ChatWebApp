@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html style="overflow-x: hidden;" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport">
+</head>
+<body>
+<th:block th:fragment="links">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Actor" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{~/css/fontawesome5-overrides.min.css}">
+    <link rel="stylesheet" th:href="@{~/css/css.css}">
+</th:block>
+<div th:fragment="head">
+    <header>
+        <header class="vanish">
+            <nav class="navbar navbar-light navbar-expand-md vanish">
+                <div class="container-fluid">
+                    <a class="navbar-brand" th:href="@{/home}">
+                        <img alt="logo" class="logo" th:src="@{/img/logo2.png}">
+                    </a>
+                    <button class="navbar-toggler" data-target="#navbarResponsive" data-toggle="collapse" type="button">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarResponsive"
+                         style="flex-direction: row-reverse;transition: 700ms ease;">
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                                role="presentation"
+                                sec:authorize="isAuthenticated()">
+                                <form class="form-inline d-xl-flex justify-content-xl-center align-items-xl-center"
+                                      id="searchUser" th:action="@{/search}" th:method="post">
+                                    <input class="form-control" id="searchUserInput" placeholder="Найти пользователя"
+                                           style="padding: 1px 0 2px;" th:name="searchUsers"
+                                           type="text"/>
+                                    <button class="btn btn-light border rounded-0 border-secondary"
+                                            id="searchUserSubmit" style="padding: 6px 10px;"
+                                            type="button"><i class="fa fa-search"></i></button>
+                                </form>
+                            </li>
+                            <li class="nav-item" role="presentation"
+                                th:classappend="${#httpServletRequest.getRequestURI() == '/home' || #httpServletRequest.getRequestURI() == '/' ? 'active':''}">
+                                <a class="nav-link" th:href="@{/home}">Главная</a>
+                            </li>
+                            <li class="nav-item" role="presentation"
+                                th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                                <a class="nav-link" th:href="@{/adminpanel}">Панель администрирования</a>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAnonymous()"
+                                th:classappend="${#httpServletRequest.getRequestURI() == '/signup' ? 'active':''}">
+                                <a class="nav-link" th:href="@{/signup}">Зарегистрироваться</a>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAnonymous()"
+                                th:classappend="${#httpServletRequest.getRequestURI() == '/login' ? 'active':''}">
+                                <a class="nav-link" th:href="@{/login}">Войти</a>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()"
+                                th:classappend="${#httpServletRequest.getRequestURI() == '/chats' ? 'active':''}">
+                                <a class="nav-link" th:href="@{/chats}">Чаты</a>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()"
+                                th:classappend="${#httpServletRequest.getRequestURI() == '/friends' ? 'active':''}">
+                                <a class="nav-link" th:href="@{/friends}">Друзья</a>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()">
+                                <a class="nav-link active"
+                                   id="username"
+                                   th:href="@{/user/{id}(id=${#authentication.getPrincipal().getId()})}"
+                                   th:text="${#authentication.getPrincipal().getUsername()}"></a>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()">
+                                <form th:action="@{/logout}" th:method="post">
+                                    <input class="nav-link d-inline" style="
+                                         background:none;
+                                         color:inherit;
+                                         border:none;
+                                         font: inherit;" type="submit" value="Выйти">
+                                </form>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()">
+                                <span class="nav-link" hidden id="login"
+                                      th:text="${#authentication.getPrincipal().getLogin()}"></span>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="isAuthenticated()">
+                                <span class="nav-link" hidden id="id"
+                                      th:text="${#authentication.getPrincipal().getId()}"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    </header>
+</div>
+</body>
+</html>

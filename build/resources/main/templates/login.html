@@ -1,0 +1,39 @@
+<!DOCTYPE html >
+<html lang="ru" style="overflow-x: hidden;" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Авторизация</title>
+    <div th:replace="header::links"></div>
+</head>
+<body style="overflow-x: hidden;">
+<div th:replace="header::head"></div>
+<!-- Start: Login Form Dark -->
+<div class="d-flex d-md-flex justify-content-center align-items-center justify-content-md-center justify-content-xl-center login-dark img">
+    <form class="reg_form style_form" style="padding: 35px;" th:action="@{/login}" th:method="post">
+        <h2 class="sr-only">Login Form</h2>
+        <h4 class="text-center">Авторизация</h4>
+        <div class="illustration"><i class="icon ion-ios-locked-outline"></i></div>
+        <div class="text-center" th:if="${param.error}">
+            <p class="text-danger">Неверное имя пользователя или пароль, либо учетная
+                запись заблокирована</p>
+        </div>
+        <div class="text-center" th:if="${message}">
+            <p class="text-danger">Ссылка для подтверждения почты недействительна</p>
+        </div>
+        <div class="form-group">
+            <input class="form-control" placeholder="Электронная почта" th:name="username" type="email">
+        </div>
+        <div class="form-group">
+            <input class="form-control" placeholder="Пароль" th:name="password" type="password">
+        </div>
+        <div class="form-group">
+            <input class="btn btn-primary btn-block btn-success start_button" type="submit" value="Войти">
+        </div>
+        <a class="forgot text-center" th:href="@{/signup}">Зарегистрироваться&nbsp;</a></form>
+</div>
+<!-- End: Login Form Dark -->
+<!-- Start: Footer Basic -->
+<div th:replace="footer::foot"></div>
+</body>
+
+</html>

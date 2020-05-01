@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title th:text="'Профиль ' + ${user.getUsername()}"></title>
+    <div th:replace="header::links"></div>
+</head>
+
+<body>
+<header th:replace="header::head"></header>
+<div class="container-fluid img" style="padding: 0px;">
+    <div class="row d-flex d-sm-flex justify-content-center align-items-center justify-content-sm-center align-items-md-center"
+         style="margin: 0px;">
+        <div class="col-10 col-sm-6 col-md-5 col-lg-4 col-xl-3 offset-md-3 profile_card" style="margin: 100px;">
+            <div class="row" style="margin-top: 15px;">
+                <div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8 offset-2 offset-sm-2 offset-md-2 offset-lg-2 offset-xl-2 d-sm-flex d-md-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center">
+                    <img class="rounded-circle" style="width: 170px;"
+                         th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"></div>
+                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 offset-0 offset-xl-0 text-left d-flex d-sm-flex justify-content-center align-items-start justify-content-sm-center align-items-sm-start">
+                    <form id="profile-form" th:action="@{/user/{id}(id=${user.getId()})}" th:method="put">
+                        <button class="btn" id="profile-button" style="padding: 0px;"
+                                th:if="${#httpServletRequest.getRequestURI() == url}" type="submit">
+                            <i class="fas fa-cog" style="font-size: 30px;margin: 0px;"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12 text-center User_profile_name" style="margin-top: 10px;">
+                    <span th:text="${user.getUsername()}"></span>
+                </div>
+                <div class="col-xl-12 text-center User_profile_name text-danger" style="margin-top: 10px;">
+                    <span th:if="${user.getIsLocked() == true}">Пользователь заблокирован</span>
+                </div>
+                <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
+                    <span th:text="${friendsCount}"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-xl-12 offset-md-0 text-center" style="margin-top: 30px;">
+                    <form id="add-friend-form" name="add-friend" th:action="@{/user/{id}(id=${user.getId()})}"
+                          th:method="post">
+                        <button class="btn btn-success" id="add-friend" sec:authorize="isAuthenticated()"
+                                th:if="${#httpServletRequest.getRequestURI() != url}" th:text="${friends}"
+                                type="submit">
+                        </button>
+                    </form>
+                </div>
+                <div class="col-xl-12 offset-xl-0 text-center" style="margin-top: 10px;margin-bottom: 30px;">
+                    <form id="send-message-form" th:action="@{/user/{id}(id=${user.getId()})}" th:method="patch">
+                        <button class="btn btn-info" id="button-chat"
+                                th:if="${isFriend == true and #httpServletRequest.getRequestURI() != url}"
+                                type="submit">Написать сообщение
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="footer::foot"></footer>
+<script th:src="@{~/js/profile.js}"></script>
+</body>
+</html>

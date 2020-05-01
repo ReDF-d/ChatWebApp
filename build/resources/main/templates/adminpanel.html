@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html th:lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Панель администрирования</title>
+    <div th:replace="header::links"></div>
+</head>
+<body>
+<header th:replace="header::head"></header>
+<div class="container-fluid img" style="padding: 0px;">
+    <div class="row">
+        <div class="col" style="margin-top: 5vh;">
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center welcome_to_AP">Панель администратора</h3>
+                </div>
+            </div>
+            <div class="row admin_panel" style="margin: 20px;">
+                <div class="col">
+                    <div class="row">
+                        <div class="col-2 col-sm-2 col-md-2 d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center admin_panel_th">
+                            <span>ID</span></div>
+                        <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center admin_panel_th">
+                            <span>E-mail</span></div>
+                        <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center admin_panel_th">
+                            <span>Имя пользователя</span></div>
+                        <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center admin_panel_th">
+                            <span>Роль</span></div>
+                        <div class="col-2 col-sm-2 col-md-2 d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center admin_panel_th">
+                            <span>Редактировать</span></div>
+                    </div>
+                    <th:block th:each="user : ${users}">
+                        <div class="row row_with_user_information">
+                            <div class="col-2 col-sm-2 col-md-2 d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center admin_panel_td">
+                                <span th:text="${user.getId()}"></span></div>
+                            <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center admin_panel_td">
+                                <span th:text="${user.getLogin()}"></span></div>
+                            <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center admin_panel_td">
+                                <span th:text="${user.getUsername()}"></span></div>
+                            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center admin_panel_td">
+                                <span th:each="a, iterStat : ${user.getRoles()}"
+                                      th:text="${!iterStat.last} ? ${a.getRole()} + ',': ${a.getRole()}"></span></div>
+                            <div class="col-2 col-sm-2 col-md-2 d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center admin_panel_td">
+                                <a th:href="@{/adminpanel/edituser/{id}(id=${user.getId()})}">
+                                    <button class="btn btn-success" style="font-size: 12px;" type="submit">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="footer::foot"></footer>
+</body>
+</html>
