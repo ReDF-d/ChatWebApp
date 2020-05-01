@@ -15,6 +15,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{~/css/fontawesome5-overrides.min.css}">
     <link rel="stylesheet" th:href="@{~/css/css.css}">
+    <meta th:content="${_csrf.token}" th:name="${_csrf.parameterName}"/>
 </th:block>
 <div th:fragment="head">
     <header>

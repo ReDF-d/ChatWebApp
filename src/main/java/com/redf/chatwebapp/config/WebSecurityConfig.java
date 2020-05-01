@@ -78,7 +78,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/chat/**", "/createChat", "/chats", "/search")
+                .antMatchers("/chat/**", "/createChat", "/chats", "/search", "/friends")
                 .hasAnyAuthority("USER", "ADMIN")
                 .and()
                 .authorizeRequests()
@@ -95,6 +95,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionFixation().migrateSession()
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .and().cors().disable()
+                .authorizeRequests()
+                .antMatchers("/ws/**", "/notificationHub/**")
+                .permitAll();
     }
 }

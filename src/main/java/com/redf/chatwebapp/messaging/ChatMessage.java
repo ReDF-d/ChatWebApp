@@ -13,6 +13,22 @@ public class ChatMessage {
     private String sender;
     private String login;
     private Timestamp timestamp;
+    private String messageId;
+
+    public ChatMessage() {
+    }
+
+
+    public ChatMessage(String roomId, String messageId, MessageType type, String id, String content, String sender, String login, Timestamp timestamp) {
+        setRoomId(roomId);
+        setType(type);
+        setId(id);
+        setContent(content);
+        setSender(sender);
+        setLogin(login);
+        setTimestamp(timestamp);
+        setMessageId(messageId);
+    }
 
 
     public MessageType getType() {
@@ -76,10 +92,18 @@ public class ChatMessage {
         this.roomId = roomId;
     }
 
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
     public enum MessageType {
         CHAT,
-        JOIN,
-        LEAVE,
-        IMAGE
+        IMAGE,
+        UPDATE,
+        DELETE
     }
 }

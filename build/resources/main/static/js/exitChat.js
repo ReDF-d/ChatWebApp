@@ -1,14 +1,15 @@
 'use strict';
 
 let selectedRoomId;
+let selectedRoomIdParsedNumber;
 let confirmChatExit = document.getElementById('confirmChatExitForm');
 let chatExitConfirmButton = document.getElementById('chatExitConfirmButton');
 let chatExitRefuseButton = document.getElementById('chatExitRefuseButton');
 
-
 function openExitConfirm(e, id) {
     e.preventDefault();
     selectedRoomId = id;
+    selectedRoomIdParsedNumber = selectedRoomId.match(/\d+/g);
     formToHide.style.display = 'none';
     confirmChatExit.style.display = 'inline';
 }
@@ -27,7 +28,7 @@ if (chatExitConfirmButton != null) {
         exitChatData.append('roomId', selectedRoomId);
         let csrfToken = $("meta[name='_csrf']").attr("content");
         $.ajax({
-            url: "/chat/" + roomId.textContent,
+            url: "/chat/" + selectedRoomIdParsedNumber,
             type: "POST",
             headers: {"X-CSRF-TOKEN": csrfToken},
             data: exitChatData,

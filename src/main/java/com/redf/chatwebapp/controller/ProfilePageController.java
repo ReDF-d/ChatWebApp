@@ -128,12 +128,12 @@ public class ProfilePageController {
         if (isPending() || isFriends()) {
             FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(user.getId(), getPrincipal().getId());
             if (isFriends()) {
-                getFriendshipDAO().delete(friendshipEntity);
+                getFriendshipEntityRepository().delete(friendshipEntity);
                 setFriends(false);
                 setPending(false);
             }
             if (isPending() && friendshipEntity.getLastAction() == getPrincipal().getId().intValue()) {
-                getFriendshipDAO().delete(friendshipEntity);
+                getFriendshipEntityRepository().delete(friendshipEntity);
                 setFriends(false);
                 setPending(false);
             }
@@ -185,17 +185,16 @@ public class ProfilePageController {
     private RoomEntity getDialogueByIds(Long id1, Long id2) {
         ArrayList<RoomEntity> roomEntities = (ArrayList<RoomEntity>) getRoomEntityRepository().findDialogueByMembers(id1, id2);
         long roomId = 0;
-        short counter = 0;
+        //  short counter = 0;
         for (RoomEntity room : roomEntities) {
             if (room.getId() == roomId)
                 return room;
-            else if (counter == 0) {
+            else
                 roomId = room.getId();
-                counter++;
-            }
         }
         return null;
     }
+
 
     @Contract(pure = true)
     private ArrayList<FriendshipEntity> getUserFriends() {

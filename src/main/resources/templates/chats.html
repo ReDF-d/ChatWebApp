@@ -161,9 +161,27 @@
                 </div>
             </form>
         </div>
+        <!--ConfirmChatExitForm-->
+        <div class="col-5 col-lg-4 col-xl-4 exit_chat_form" id="confirmChatExitForm"
+             style="height: 20vh;margin-top: 15vh;">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-12 d-flex justify-content-center align-items-center" style="margin-top: 10px;">
+                    <span
+                            style="font-size: 25px;">Вы действительно хотите выйти из чата?
+                    </span>
+                </div>
+                <div class="row d-flex justify-content-center align-items-center" style="margin-top: 40px;">
+                    <button class="btn btn-danger" id="chatExitConfirmButton"
+                            style="margin-right: 20px; width: 80px; font-size: 20px;" th:text="Да"></button>
+                    <button class="btn btn-success" id="chatExitRefuseButton"
+                            style="margin-left: 20px; width: 80px; font-size: 20px;" th:text="Нет"></button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <footer th:replace="footer::foot"></footer>
 <script th:src="@{~/js/createChat.js}"></script>
+<script th:src="@{~/js/exitChat.js}"></script>
 </body>
 </html>

@@ -43,7 +43,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(recipientAddress);
         email.setSubject(subject);
-        email.setText("Ссылка для завершения процесса регистрации в BlinkTalk " + "\r\n" + "https://blinktalk.herokuapp.com/" + confirmationUrl);
+        email.setText("Ссылка для завершения процесса регистрации в BlinkTalk " + "\r\n" + "http://localhost:8080/" + confirmationUrl);
         getMailSender().send(email);
     }
 

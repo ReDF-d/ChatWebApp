@@ -19,13 +19,13 @@ public interface MessageDAO {
     @Contract(pure = true)
     MessageEntity create(String messageText, String login, String author, Timestamp time, RoomEntity room, String messageType);
 
-    void save(MessageEntity message);
+    MessageEntity save(MessageEntity message);
 
     void update(MessageEntity message);
 
     void delete(MessageEntity message);
 
-    void createAndSave(String author, String login, String messageText, Timestamp time, RoomEntity room, String messageType);
+    MessageEntity createAndSave(String author, String login, String messageText, Timestamp time, RoomEntity room, String messageType);
 
     List<MessageEntity> getAllMessagesFromRoom(int id);
 }

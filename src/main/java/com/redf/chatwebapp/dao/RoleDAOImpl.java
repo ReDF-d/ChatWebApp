@@ -20,7 +20,7 @@ public class RoleDAOImpl implements RoleDAO, TransactionHandler {
     @Autowired
     @Contract(pure = true)
     RoleDAOImpl(RoleEntity role) {
-        this.role = role;
+        setRole(role);
     }
 
 
@@ -32,8 +32,8 @@ public class RoleDAOImpl implements RoleDAO, TransactionHandler {
     @NotNull
     @Override
     public RoleEntity create(@NotNull String role) {
-        this.role.setRole(role);
-        return this.role;
+        getRole().setRole(role);
+        return getRole();
     }
 
     @Override
@@ -57,6 +57,16 @@ public class RoleDAOImpl implements RoleDAO, TransactionHandler {
     @Override
     public void delete(RoleEntity role) {
         performTransaction(Transactions.DELETE, role);
+    }
+
+
+    public RoleEntity getRole() {
+        return role;
+    }
+
+
+    public void setRole(RoleEntity role) {
+        this.role = role;
     }
 }
 
