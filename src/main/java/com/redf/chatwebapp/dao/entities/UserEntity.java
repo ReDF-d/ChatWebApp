@@ -33,6 +33,7 @@ public class UserEntity extends AbstractEntity implements Serializable {
     private boolean enabled;
     private EmailVerificationToken emailVerificationToken;
     private OnlineUserEntity onlineUserEntity;
+    private ForgotPasswordToken forgotPasswordToken;
 
 
     @Contract(pure = true)
@@ -178,5 +179,15 @@ public class UserEntity extends AbstractEntity implements Serializable {
 
     public void setOnlineUserEntity(OnlineUserEntity onlineUserEntity) {
         this.onlineUserEntity = onlineUserEntity;
+    }
+
+
+    @OneToOne(mappedBy = "user")
+    public ForgotPasswordToken getForgotPasswordToken() {
+        return forgotPasswordToken;
+    }
+
+    public void setForgotPasswordToken(ForgotPasswordToken forgotPasswordToken) {
+        this.forgotPasswordToken = forgotPasswordToken;
     }
 }
