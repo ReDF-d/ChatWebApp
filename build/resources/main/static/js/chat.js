@@ -42,7 +42,7 @@ $(window).on("load", function () {
         username = document.querySelector('#username').innerText.trim();
         login = document.querySelector('#login').textContent.trim();
         if (username) {
-            let socket = new SockJS('http://' + window.location.host + '/ws');
+            let socket = new SockJS('http://localhost:8080/ws'); // window.location.host
             stompClient = Stomp.over(socket);
             stompClient.connect({}, onConnected, onError);
             stompClient.debug = true;
@@ -63,10 +63,12 @@ $(window).on("load", function () {
     function onConnected() {
         stompClient.subscribe('/topic/chat/' + roomId.textContent, onMessageReceived);
         stompClient.subscribe('/topic/onlineTracker', onStatusChange);
+        stompClient.subscribe('/topic/editChatTitle', onTitleChange);
     }
 
 
-    function onError() {
+    function onError(error) {
+        console.log(error);
         connectingError.style.visibility = "visible";
         connectingError.textContent = 'Невозможно подключится к серверу, попробуйте позже';
         messageArea.appendChild(connectingError);
@@ -344,8 +346,6 @@ $(window).on("load", function () {
             let anotherEditAndDeleteDiv = document.createElement('div');
             let deleteButton = document.createElement('button');
             let deleteIcon = document.createElement('i');
-            let editButton = document.createElement('button');
-            let editIcon = document.createElement('i');
             let date = new Date(receivedMessage.timestamp);
             let month = date.getMonth();
             let currentHours = date.getHours();
@@ -428,18 +428,10 @@ $(window).on("load", function () {
                 deleteButton.style.background = 'none';
                 deleteButton.style.paddingRight = '10px';
                 deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
-                editButton.id = 'editMessage' + receivedMessage.messageId;
                 deleteButton.classList.add('deleteButton');
-                editButton.classList.add('editButton');
                 deleteIcon.classList.add('fas', 'fa-times');
-                editButton.style.border = 'none';
-                editButton.style.background = 'none';
-                editButton.style.paddingRight = '10px';
-                editIcon.classList.add('fas', 'fa-pencil-alt');
                 deleteButton.appendChild(deleteIcon);
-                editButton.appendChild(editIcon);
                 anotherEditAndDeleteDiv.appendChild(deleteButton);
-                anotherEditAndDeleteDiv.appendChild(editButton);
                 editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
                 div5.appendChild(messageContent);
                 editAndDeleteButtonsDiv.appendChild(div5);
@@ -589,13 +581,18 @@ $(window).on("load", function () {
                 title: editChatTitleInput.value
             };
             stompClient.send("/app/chat.editChatTitle." + roomId.textContent, {}, JSON.stringify(editChatTitleMessage));
-            chatTitle.textContent = editChatTitleInput.value;
-            let chatListElem = document.getElementById('chatTitle' + roomId.textContent);
-            chatListElem.textContent = editChatTitleInput.value;
         }
         chatTitle.style.display = 'inline-block';
         editChatTitleButton.style.display = 'inline-block';
         editChatTitleInput.style.display = 'none';
         confirmEditChatTitle.style.display = 'none';
     });
+
+
+    function onTitleChange(payload) {
+        let editChatTitleMessage = JSON.parse(payload.body);
+        chatTitle.textContent = editChatTitleMessage.title;
+        let chatListElem = document.getElementById('chatTitle' + roomId.textContent);
+        chatListElem.textContent = editChatTitleMessage.title;
+    }
 });
