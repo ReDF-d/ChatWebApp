@@ -25,8 +25,12 @@ public class ChangeForgotPasswordController {
     public ChangeForgotPasswordController() {
     }
 
+    @GetMapping
+    public String get(){
+        return "changeForgotPassword";
+    }
 
-    public ChangeForgotPasswordController(ForgotPasswordTokenRepository forgotPasswordTokenRepository, UserEntityRepository userEntityRepository) {
+    /*public ChangeForgotPasswordController(ForgotPasswordTokenRepository forgotPasswordTokenRepository, UserEntityRepository userEntityRepository) {
         setForgotPasswordTokenRepository(forgotPasswordTokenRepository);
         setUserEntityRepository(userEntityRepository);
     }
@@ -94,5 +98,5 @@ public class ChangeForgotPasswordController {
 
     private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
-    }
+    }*/
 }
