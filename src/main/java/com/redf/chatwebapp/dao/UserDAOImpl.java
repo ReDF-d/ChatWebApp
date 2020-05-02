@@ -135,19 +135,21 @@ public class UserDAOImpl implements UserDAO, TransactionHandler {
         return userEntityRepository.findByLogin(login);
     }
 
-    public BlockedUserDAOImpl getBlockedUserDAOImpl() {
+    @Contract(pure = true)
+    private BlockedUserDAOImpl getBlockedUserDAOImpl() {
         return blockedUserDAOImpl;
     }
 
-    public void setBlockedUserDAOImpl(BlockedUserDAOImpl blockedUserDAOImpl) {
+    private void setBlockedUserDAOImpl(BlockedUserDAOImpl blockedUserDAOImpl) {
         this.blockedUserDAOImpl = blockedUserDAOImpl;
     }
 
-    public RoleEntityRepository getRoleEntityRepository() {
+    @Contract(pure = true)
+    private RoleEntityRepository getRoleEntityRepository() {
         return roleEntityRepository;
     }
 
-    public void setRoleEntityRepository(RoleEntityRepository roleEntityRepository) {
+    private void setRoleEntityRepository(RoleEntityRepository roleEntityRepository) {
         this.roleEntityRepository = roleEntityRepository;
     }
 
@@ -159,11 +161,12 @@ public class UserDAOImpl implements UserDAO, TransactionHandler {
         this.user = user;
     }
 
-    public UserEntityRepository getUserEntityRepository() {
+    @Contract(pure = true)
+    private UserEntityRepository getUserEntityRepository() {
         return userEntityRepository;
     }
 
-    public void setUserEntityRepository(UserEntityRepository userEntityRepository) {
+    private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
     }
 }

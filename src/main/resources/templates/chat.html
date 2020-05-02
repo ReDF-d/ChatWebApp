@@ -24,7 +24,8 @@
                 <div class="col-7 d-flex justify-content-center column_bottom_border" style="padding: 10px 15px;">
                     <span class="edit_chatname_main" id="chatTitle" style="font-size: 24px;"
                           th:text="${title}"><strong></strong></span>
-                    <button class="edit_chatname" id="editChatTitle" th:if="${roomType.equals('group')}">
+                    <button class="edit_chatname" id="editChatTitle"
+                            th:if="${roomType.equals('group') && !roomId.equals('1')}">
                         <i class="fas fa-pencil-alt">
                         </i>
                     </button>

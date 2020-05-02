@@ -72,7 +72,7 @@ public class SignupController {
         createAvatar(getUserService().findByLogin(userDto.getLogin()).getId());
         UserEntity registered = getUserService().findByLogin(userDto.getLogin());
         try {
-            String appUrl = request.getContextPath();
+            String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent
                     (registered, appUrl, request.getLocale()));
         } catch (Exception e) {

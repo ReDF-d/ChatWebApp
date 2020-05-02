@@ -8,7 +8,6 @@ public class ForgotPasswordDto {
 
     private String password;
     private String confirmPassword;
-    private String token;
 
 
     public String getPassword() {
@@ -28,15 +27,5 @@ public class ForgotPasswordDto {
 
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
-    }
-
-
-    public String getToken() {
-        return token;
-    }
-
-
-    public void setToken(String token) {
-        this.token = token;
     }
 }

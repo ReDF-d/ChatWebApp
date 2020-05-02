@@ -89,6 +89,7 @@ public class ChatController implements RoomSanitizer {
         getOnlineUserEntityRepository().setAllUsersOffline();
     }
 
+
     public ChatController() {
     }
 
@@ -123,9 +124,12 @@ public class ChatController implements RoomSanitizer {
     @SendTo("/topic/editChatTitle")
     public EditChatTitleMessage editChatTitle(@NotNull @Payload EditChatTitleMessage message, @DestinationVariable("id") String id) {
         RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(message.getRoomId()));
-        room.setTitle(message.getTitle());
-        getRoomEntityRepository().save(room);
-        return message;
+        if (room.getId() != 1) {
+            room.setTitle(message.getTitle());
+            getRoomEntityRepository().save(room);
+            return message;
+        }
+        return null;
     }
 
 
