@@ -561,15 +561,16 @@ $(window).on("load", function () {
     });
 
 
-    editChatTitleButton.addEventListener('click', function (event) {
-        event.preventDefault();
-        chatTitle.style.display = 'none';
-        editChatTitleButton.style.display = 'none';
-        editChatTitleInput.style.display = 'inline-block';
-        editChatTitleInput.value = chatTitle.innerText;
-        editChatTitleInput.focus();
-        confirmEditChatTitle.style.display = 'inline-block';
-    });
+    if (typeof editChatTitleButton !== "undefined")
+        editChatTitleButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            chatTitle.style.display = 'none';
+            editChatTitleButton.style.display = 'none';
+            editChatTitleInput.style.display = 'inline-block';
+            editChatTitleInput.value = chatTitle.innerText;
+            editChatTitleInput.focus();
+            confirmEditChatTitle.style.display = 'inline-block';
+        });
 
 
     confirmEditChatTitle.addEventListener('click', function (event) {

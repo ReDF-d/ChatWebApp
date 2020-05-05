@@ -172,12 +172,12 @@ public class ChatController implements RoomSanitizer {
 
 
     @PostMapping(params = {"userId", "roomId"})
-    public String exitChat(@RequestParam(value = "userId") String userId, @RequestParam(value = "roomId") String roomId, HttpServletResponse response) throws IOException {
-        Long parsedRoomId = Long.parseLong(roomId.replaceAll("\\D+", ""));
+    public Object exitChat(@RequestParam(value = "userId") String userId, @RequestParam(value = "roomId") String roomId, HttpServletResponse response) throws IOException {
+        int parsedRoomId = Integer.parseInt(roomId.replaceAll("\\D+", ""));
         Long parsedUserId = Long.parseLong(userId);
         getRoomEntityRepository().deleteRoomMember(parsedUserId, parsedRoomId);
-        if (getRoomEntityRepository().findRoomById(parsedRoomId.intValue()).getRoomMembers().size() == 0)
-            getRoomEntityRepository().deleteRoomEntityById(parsedRoomId.intValue());
+        if (getRoomEntityRepository().findRoomById(parsedRoomId).getRoomMembers().size() == 0)
+            getRoomEntityRepository().deleteRoomEntityById(parsedRoomId);
         return null;
     }
 
@@ -259,6 +259,7 @@ public class ChatController implements RoomSanitizer {
             modelAndView.addObject("offlineUsers", getOfflineUsers());
             modelAndView.addObject("roomType", room.getRoomType());
             modelAndView.addObject("title", room.getTitle());
+            modelAndView.addObject("members", room.getRoomMembers());
             return modelAndView;
         } else
             return new ModelAndView("redirect:/home");

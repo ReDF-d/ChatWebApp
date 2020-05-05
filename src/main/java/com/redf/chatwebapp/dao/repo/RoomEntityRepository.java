@@ -26,7 +26,7 @@ public interface RoomEntityRepository extends JpaRepository<RoomEntity, Long> {
 
     @Modifying
     @Query(value = "DELETE from room_members where user_id = :id and room_id = :roomId", nativeQuery = true)
-    void deleteRoomMember(@Param("id") Long id, @Param("roomId") Long roomId);
+    void deleteRoomMember(@Param("id") Long id, @Param("roomId") int roomId);
 
 
     void deleteRoomEntityById(int id);

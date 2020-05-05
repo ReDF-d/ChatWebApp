@@ -2,14 +2,12 @@
 <!--suppress ALL -->
 <html th:lang="ru" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <title>Сообщения</title>
     <div th:replace="header::links"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
-
 <body>
 <header th:replace="header::head"></header>
 <div class="container-fluid img">
@@ -38,8 +36,10 @@
                             </i>
                         </button>
                     </div>
-                    <div class="row d-flex justify-content-center">
-                        <a style="text-underline: none; color: #28a745; font-size: 14px;">участники чата</a>
+                    <div class="row d-flex justify-content-center"
+                         th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                        <a id="removeMembers" style="text-underline: none; color: #28a745; font-size: 14px;">Управление
+                            чатом</a>
                     </div>
                 </div>
             </div>
@@ -73,7 +73,7 @@
                                                                 onclick="openExitConfirm(event, this.id)"
                                                                 style="padding: 0;" th:id="${'exitChat' + chat.getId()}"
                                                                 type="button">
-                                                        <i class="fas fa-times"></i>
+                                                            <i class="fas fa-times"></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -446,12 +446,73 @@
             <div class="row justify-content-center align-items-center">
                 <div class="col-12 d-flex justify-content-center align-items-center" style="margin-top: 10px;">
                     <span
-                          style="font-size: 25px;">Вы действительно хотите выйти из чата?
+                            style="font-size: 25px;">Вы действительно хотите выйти из чата?
                     </span>
                 </div>
                 <div class="row d-flex justify-content-center align-items-center" style="margin-top: 40px;">
-                        <button class="btn btn-danger" id="chatExitConfirmButton" style="margin-right: 20px; width: 80px; font-size: 20px;" th:text="Да"></button>
-                        <button class="btn btn-success" id="chatExitRefuseButton" style="margin-left: 20px; width: 80px; font-size: 20px;" th:text="Нет"></button>
+                    <button class="btn btn-danger" id="chatExitConfirmButton"
+                            style="margin-right: 20px; width: 80px; font-size: 20px;" th:text="Да"></button>
+                    <button class="btn btn-success" id="chatExitRefuseButton"
+                            style="margin-left: 20px; width: 80px; font-size: 20px;" th:text="Нет"></button>
+                </div>
+            </div>
+        </div>
+        <!--RemoveMembersForm-->
+        <div class="col-sm-7 col-md-5 col-lg-4 col-xl-3 search_result_form" id="removeMembersForm"
+             style="padding: 0 0 0 0; display: none">
+            <div class="row" style="margin: 0;">
+                <div class="col-md-12 col-xl-12 offset-md-6" style="padding: 0;margin-left: 0;height: 70vh;">
+                    <div class="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 d-flex d-sm-flex
+                    d-md-flex d-lg-flex d-xl-flex justify-content-end align-items-center
+                    justify-content-sm-end align-items-sm-center justify-content-md-end align-items-md-center
+                    justify-content-lg-end align-items-lg-center justify-content-xl-end align-items-xl-center"
+                         style="padding: 0  ;">
+                        <button class="btn d-xl-flex justify-content-xl-center align-items-xl-center"
+                                id="closeRemoveMembers"
+                                style="padding: 0;"
+                                type="button">
+                            <i class="fa fa-close" style="font-size: 20px;"></i>
+                        </button>
+                    </div>
+                    <div class="row" style="margin: 0;">
+                        <div class="col text-center" style="padding: 0;margin-top: 10px;margin-bottom: 10px;">
+                            <span class="online_status" style="font-size: 20px;">Управление участниками&nbsp;</span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin: 0;">
+                        <div class="col your_chats_column" id="membersList">
+                            <th:block th:each="member : ${members}">
+                                <div class="row search_element" style="margin: 0;padding: 10px;"
+                                     th:id="'removeMember' + ${member.getId()}"
+                                     th:if="${member.getId() != #authentication.getPrincipal().getId()}">
+                                    <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 offset-0 offset-sm-0 offset-md-0 offset-lg-0 offset-xl-0 d-flex d-sm-flex d-md-flex d-lg-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
+                                         style="padding: 0;">
+                                        <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                             style="width: 50px;height: 50px;"
+                                             th:src="@{${'~/media/avatars/avatar' + member.getId() + '.png'}}">
+                                    </div>
+                                    <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 offset-sm-0 offset-xl-0 d-flex d-sm-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
+                                        <a th:href="@{/user/{id}(id=${member.getId()})}">
+                                            <div class="row">
+                                                <div class="col-sm-12 col-xl-12 offset-xl-0 your_chats_online_users"
+                                                     style="padding-left: 0;padding-right: 0;">
+                                                    <span style="font-size: 18px;"
+                                                          th:text="${member.getUsername()}"></span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                                         style="padding: 0;">
+                                        <button class="btn text-danger removeMemberButton"
+                                                th:id="'removeMemberButton' + ${member.getId()}">
+                                            <i class="fa fa-remove"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th:block>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -462,5 +523,6 @@
 <script th:src="@{~/js/createChat.js}"></script>
 <script th:src="@{~/js/addChatMember.js}"></script>
 <script th:src="@{~/js/exitChat.js}"></script>
+<script th:src="@{~/js/removeChatMember.js}"></script>
 </body>
 </html>

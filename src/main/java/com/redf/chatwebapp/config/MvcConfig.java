@@ -38,7 +38,7 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/registrationConfirm").setViewName("registrationConfirmSuccess");
         registry.addViewController("/forgotPasswordEmailSent").setViewName("forgotPasswordEmailSent");
         registry.addViewController("/forgotPassword").setViewName("forgotPassword");
-        registry.addViewController("/forgotPassword").setViewName("changeForgotPassword");
+        registry.addViewController("/changeForgotPassword/{token}").setViewName("changeForgotPassword");
 
     }
 
