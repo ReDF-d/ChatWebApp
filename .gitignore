@@ -8,3 +8,5 @@
 /.gradle/
 /.gradle/
 /.gradle/
+*.lock
+*.bin
