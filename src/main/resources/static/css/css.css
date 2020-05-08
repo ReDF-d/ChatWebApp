@@ -813,3 +813,11 @@ body {
     opacity: 1;
     transition: 150ms;
 }
+
+.chatOptionsDropdown{
+    color: #6f7a85;
+}
+
+.chatOptionsDropdown:hover{
+    color: #2c3136;
+}
