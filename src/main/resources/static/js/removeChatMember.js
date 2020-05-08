@@ -33,14 +33,5 @@ $(document).on("click", '.removeMemberButton', function (event) {
         processData: false,
         contentType: false,
         cache: false,
-        success: function () {
-            document.getElementById('membersList').removeChild(document.getElementById('removeMember' + memberId));
-            let onlineElem = document.getElementById('online' + memberId);
-            let offlineElem = document.getElementById('offline' + memberId);
-            if (onlineElem !== null)
-                document.getElementById('onlineUsers').removeChild(onlineElem);
-            if (offlineElem !== null)
-                document.getElementById('offlineUsers').removeChild(offlineElem);
-        }
     });
 });

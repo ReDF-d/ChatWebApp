@@ -19,9 +19,9 @@ import com.redf.chatwebapp.messaging.ChatMessage;
 import com.redf.chatwebapp.messaging.EditChatTitleMessage;
 import com.redf.chatwebapp.messaging.UserOnlineStatusChangeMessage;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -77,7 +77,7 @@ public class ChatController implements RoomSanitizer {
     public ChatController(MessageDAOImpl messageDAO, RoomEntity room, RoomEntityRepository roomEntityRepository, MessageEntityRepository messageEntityRepository,
                           FriendshipDAOImpl friendshipDAO, UserService userService, FriendshipEntityRepository friendshipEntityRepository,
                           SimpMessagingTemplate messagingTemplate, OnlineUserEntityRepository onlineUserEntityRepository) {
-        this.messageDAO = messageDAO;
+        setMessageDAO(messageDAO);
         setRoom(room);
         setRoomEntityRepository(roomEntityRepository);
         setMessageEntityRepository(messageEntityRepository);
@@ -109,7 +109,7 @@ public class ChatController implements RoomSanitizer {
     @ModelAttribute("messages")
     public ArrayList<MessageEntity> getChatHistory(@PathVariable int id) {
         ArrayList<MessageEntity> messages;
-        messages = (ArrayList<MessageEntity>) messageDAO.getAllMessagesFromRoom(id);
+        messages = (ArrayList<MessageEntity>) getMessageDAO().getAllMessagesFromRoom(id);
         return messages;
     }
 
@@ -146,7 +146,7 @@ public class ChatController implements RoomSanitizer {
             Timestamp timestamp = chatMessage.getTimestamp();
             RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
             String messageType = "text";
-            MessageEntity message = messageDAO.createAndSave(author, login, messageText, timestamp, roomEntity, messageType);
+            MessageEntity message = getMessageDAO().createAndSave(author, login, messageText, timestamp, roomEntity, messageType);
             savePermitted = true;
             chatMessage.setMessageId(String.valueOf(message.getMessageId()));
             return chatMessage;
@@ -164,7 +164,13 @@ public class ChatController implements RoomSanitizer {
         }
         if (chatMessage.getType().equals(ChatMessage.MessageType.DELETE)) {
             MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
-            getMessageEntityRepository().delete(message);
+            if (message.getMessageType().equals("text"))
+                getMessageEntityRepository().delete(message);
+            else if (message.getMessageType().equals("image") || (message.getMessageType().equals("audio"))) {
+                File file = new File(message.getMessageText());
+                boolean del = file.delete();
+                getMessageEntityRepository().delete(message);
+            }
             return chatMessage;
         }
         return null;
@@ -188,9 +194,7 @@ public class ChatController implements RoomSanitizer {
         try {
             final String senderId = request.getParameter("id");
             final String timestamp = request.getParameter("timestamp");
-            final String PATH = "./media/img/" + roomId;
-            //Files.createDirectories(path.getParent());
-//            Files.createFile(path);
+            final String PATH = "./media/file/" + roomId;
             File directory = new File(PATH);
             if (!directory.exists()) {
                 boolean created = directory.mkdir();
@@ -200,24 +204,40 @@ public class ChatController implements RoomSanitizer {
             while (iterator.hasNext()) {
                 file = request.getFile(iterator.next());
                 assert file != null;
-                String random = UUID.randomUUID().toString();
-                String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-                Path pathToImg = Paths.get(PATH, random + "." + extension);
-                Files.write(pathToImg, file.getBytes());
+                Path pathToFile = Paths.get(PATH, file.getOriginalFilename());
+                Files.write(pathToFile, file.getBytes());
                 while (!savePermitted)
                     Thread.sleep(1);
                 savePermitted = false;
                 UserEntity user = getUserService().findById(Long.parseLong(senderId));
                 RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
-                MessageEntity message = messageDAO.createAndSave(user.getUsername(), user.getLogin(), pathToImg.toString(), parseTimestampFromMilliseconds(timestamp), roomEntity, "image");
-                savePermitted = true;
-                ChatMessage chatMessage = new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.IMAGE,
-                        senderId, pathToImg.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
+                ChatMessage chatMessage = new ChatMessage();
+                String contentType = Files.probeContentType(pathToFile);
+                if (contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/gif"))
+                    chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "image");
+                else if (contentType.equals("audio/mpeg"))
+                    chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "audio");
                 getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return null;
+    }
+
+
+    @Nullable
+    @Contract("_, _, _, _, _, _, _ -> new")
+    private ChatMessage createAndSaveMessageFromType(@NotNull UserEntity user, @NotNull Path pathToFile, String timestamp, RoomEntity roomEntity, String senderId, String roomId, String type) {
+        MessageEntity message = getMessageDAO().createAndSave(user.getUsername(), user.getLogin(), pathToFile.toString(),
+                parseTimestampFromMilliseconds(timestamp), roomEntity, type);
+        savePermitted = true;
+        if (type.equals("image"))
+            return new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.IMAGE,
+                    senderId, pathToFile.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
+        else if (type.equals("audio"))
+            return new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.AUDIO,
+                    senderId, pathToFile.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
         return null;
     }
 
@@ -418,11 +438,22 @@ public class ChatController implements RoomSanitizer {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public OnlineUserEntityRepository getOnlineUserEntityRepository() {
+
+    @Contract(pure = true)
+    private OnlineUserEntityRepository getOnlineUserEntityRepository() {
         return onlineUserEntityRepository;
     }
 
-    public void setOnlineUserEntityRepository(OnlineUserEntityRepository onlineUserEntityRepository) {
+    private void setOnlineUserEntityRepository(OnlineUserEntityRepository onlineUserEntityRepository) {
         this.onlineUserEntityRepository = onlineUserEntityRepository;
+    }
+
+    @Contract(pure = true)
+    private MessageDAOImpl getMessageDAO() {
+        return messageDAO;
+    }
+
+    private void setMessageDAO(MessageDAOImpl messageDAO) {
+        this.messageDAO = messageDAO;
     }
 }

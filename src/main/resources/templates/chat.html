@@ -36,11 +36,6 @@
                             </i>
                         </button>
                     </div>
-                    <div class="row d-flex justify-content-center"
-                         th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}">
-                        <a id="removeMembers" style="text-underline: none; color: #28a745; font-size: 14px;">Управление
-                            чатом</a>
-                    </div>
                 </div>
                 <div class="col-2 col-lg-1 d-flex justify-content-center align-items-center">
                         <div class="dropleft">
@@ -50,10 +45,13 @@
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <button class="dropdown-item" id="addMember" style="font-size: 15px;"
                                         type="button">
-                                    <i class="fas fa-plus-circle"></i>&nbsp;Добавить пользователя
+                                    Добавить пользователя
                                 </button>
-                                <a class="dropdown-item" href="#">Управление пользователями</a>
-                                <a class="dropdown-item" href="#">Something else here</a>
+                                <button class="dropdown-item" id="removeMembers" style="font-size: 15px;"
+                                        th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}"
+                                        type="button">
+                                    Управление пользователями
+                                </button>
                             </div>
                         </div>
                 </div>
@@ -95,11 +93,14 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-12 your_chats_message_preview">
+                                                <div class="col-12 your_chats_message_preview"
+                                                     th:id="${'messagePreview' + chat.getId()}">
                                                     <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('text')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + chat.getLastMessage().getMessageText()}"></span>
                                                     <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('image')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + 'Фотография'}"></span>
+                                                    <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('audio')}"
+                                                          th:text="${chat.getLastMessage().getUsername() + ': ' + 'Аудиозапись'}"></span>
                                                     <span th:if="${chat.getLastMessage() == null}" th:text="''"></span>
                                                 </div>
                                             </div>
@@ -161,6 +162,11 @@
                                                          style="max-width: 300px; max-height: 300px;"
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
+                                                    <audio class="message"
+                                                           controls preload="none"
+                                                           th:if="${message.getMessageType().equals('audio')}">
+                                                        <source th:src="@{${message.getMessageText().substring(1)}}">
+                                                    </audio>
                                                 </div>
                                             </div>
                                         </div>
@@ -189,7 +195,7 @@
                                                         <button class="editButton"
                                                                 style="border: none; background: none; padding-left: 10px;"
                                                                 th:id="${'editMessage' + message.getMessageId()}"
-                                                                th:if="${!message.getMessageType().equals('image')}">
+                                                                th:if="${!message.getMessageType().equals('image') && !message.getMessageType().equals('audio')}">
                                                             <i class="fas fa-pencil-alt"></i>
                                                         </button>
                                                     </div>
@@ -205,6 +211,12 @@
                                                              th:id="${'messageContent' + message.getMessageId()}"
                                                              th:if="${message.getMessageType().equals('image')}"
                                                              th:src="@{${message.getMessageText().substring(1)}}">
+                                                        <audio class="message"
+                                                               controls preload="none"
+                                                               th:id="${'messageContent' + message.getMessageId()}"
+                                                               th:if="${message.getMessageType().equals('audio')}">
+                                                            <source th:src="@{${message.getMessageText().substring(1)}}">
+                                                        </audio>
                                                     </div>
                                                 </div>
                                             </div>
@@ -235,7 +247,7 @@
                                        style="width: 100%;margin: 10px 0;" type="text">
                             </div>
                             <div class="col-3 col-lg-2" style="padding: 0;">
-                                <input multiple type="file" accept="image/*" name="file" id="file">
+                                <input accept="image/*, audio/*, video/*" id="file" multiple name="file" type="file">
                                 <label class="btn-1 btn btn-light" for="file" id="fileLabel"
                                        style="width: 36px; margin: 0 0 8px; height: 32px"><i
                                         class="fas fa-paperclip"></i></label>
@@ -462,7 +474,7 @@
         </div>
         <!--RemoveMembersForm-->
                 <div class="col-10 col-sm-7 col-md-6 col-lg-4 col-xl-4 search_result_form" id="removeMembersForm"
-                     style="height: 50vh; margin-top: 7vh;">
+                     style="height: 50vh; margin-top: 7vh; display: none">
                     <div class="row">
                         <div class="col-11 d-flex justify-content-center align-items-center" style="margin: 0; padding: 0;">
                             <span class="d-flex justify-center align-items-center"

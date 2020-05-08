@@ -4,8 +4,10 @@ import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
 import com.redf.chatwebapp.dao.services.UserService;
+import com.redf.chatwebapp.messaging.RemoveRoomMemberMessage;
 import org.jetbrains.annotations.Contract;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,15 +22,17 @@ public class RemoveChatMemberController {
 
     private RoomEntityRepository roomEntityRepository;
     private UserService userService;
+    private SimpMessagingTemplate messagingTemplate;
 
     RemoveChatMemberController() {
     }
 
 
     @Autowired
-    RemoveChatMemberController(RoomEntityRepository roomEntityRepository, UserService userService) {
+    RemoveChatMemberController(RoomEntityRepository roomEntityRepository, UserService userService, SimpMessagingTemplate messagingTemplate) {
         setRoomEntityRepository(roomEntityRepository);
         setUserService(userService);
+        setMessagingTemplate(messagingTemplate);
     }
 
 
@@ -39,6 +43,7 @@ public class RemoveChatMemberController {
         UserEntity member = getUserService().findById(Long.parseLong(memberId));
         if (member != null && room != null)
             getRoomEntityRepository().deleteRoomMember(member.getId(), room.getId());
+        getMessagingTemplate().convertAndSend("/topic/removeRoomMember", new RemoveRoomMemberMessage(memberId, roomId));
         return null;
     }
 
@@ -62,5 +67,16 @@ public class RemoveChatMemberController {
 
     private void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+
+    @Contract(pure = true)
+    private SimpMessagingTemplate getMessagingTemplate() {
+        return messagingTemplate;
+    }
+
+
+    private void setMessagingTemplate(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
     }
 }
