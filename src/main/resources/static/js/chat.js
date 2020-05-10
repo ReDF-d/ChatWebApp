@@ -100,8 +100,8 @@ $(window).on("load", function () {
                 div2.classList.add('col-4', 'col-sm-7', 'col-md-5', 'col-lg-3', 'col-xl-3', 'offset-xl-0', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'justify-content-sm-center', 'align-items-sm-center', 'justify-content-md-center', 'align-items-md-center', 'justify-content-lg-center', 'align-items-lg-center');
                 img.classList.add('rounded-circle', 'd-lg-flex', 'justify-content-lg-center', 'align-items-lg-center');
                 img.src = '/media/avatars/avatar' + statusChangeMessage.id + '.png';
-                img.style.width = '35px';
-                img.style.height = '35px';
+                img.style.width = '25px';
+                img.style.height = '25px';
                 div2.appendChild(img);
                 div1.appendChild(div2);
                 div3.classList.add('col-8', 'col-sm-12', 'col-md-7', 'col-xl-7', 'offset-xl-0', 'd-xl-flex', 'justify-content-xl-start', 'align-items-xl-center');
@@ -145,8 +145,8 @@ $(window).on("load", function () {
                 div2.classList.add('col-4', 'col-sm-7', 'col-md-5', 'col-lg-3', 'col-xl-3', 'offset-xl-0', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'justify-content-sm-center', 'align-items-sm-center', 'justify-content-md-center', 'align-items-md-center', 'justify-content-lg-center', 'align-items-lg-center');
                 img.classList.add('rounded-circle', 'd-lg-flex', 'justify-content-lg-center', 'align-items-lg-center');
                 img.src = '/media/avatars/avatar' + statusChangeMessage.id + '.png';
-                img.style.width = '35px';
-                img.style.height = '35px';
+                img.style.width = '25px';
+                img.style.height = '25px';
                 div2.appendChild(img);
                 div1.appendChild(div2);
                 div3.classList.add('col-8', 'col-sm-12', 'col-md-7', 'col-xl-7', 'offset-xl-0', 'd-xl-flex', 'justify-content-xl-start', 'align-items-xl-center');
@@ -742,4 +742,23 @@ $(window).on("load", function () {
                 document.getElementById('offlineUsers').removeChild(offlineElem);
         }
     }
+
+    function textarea_resize(event, line_height, min_line_count)
+    {
+        let min_line_height = min_line_count * line_height;
+        let obj = event.target;
+        let div = document.getElementById(obj.id + '_div');
+        div.innerHTML = obj.value;
+        let obj_height = div.offsetHeight;
+        if (event.keyCode === 13)
+            obj_height += line_height;
+        else if (obj_height < min_line_height)
+            obj_height = min_line_height;
+        obj.style.height = obj_height + 'px';
+    }
+
+    $('#message').bind("keypress", function (e) {
+            textarea_resize(e,15,2);
+    });
+
 });
