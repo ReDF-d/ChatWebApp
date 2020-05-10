@@ -36,10 +36,12 @@ public class AddChatMemberController implements ListUsersParser, TitleCreator {
         setRoomEntityRepository(roomEntityRepository);
     }
 
+
     @ModelAttribute("chatMemberDto")
     public ChatMemberDto getChatMemberDto() {
         return new ChatMemberDto();
     }
+
 
     @Contract(pure = true)
     private UserService getUserService() {
@@ -50,6 +52,7 @@ public class AddChatMemberController implements ListUsersParser, TitleCreator {
         this.userService = userService;
     }
 
+
     @PostMapping
     public String createChat(@NotNull @ModelAttribute("chatMemberDto") ChatMemberDto chatDto, @PathVariable String id) {
         RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
@@ -57,9 +60,10 @@ public class AddChatMemberController implements ListUsersParser, TitleCreator {
         String titleBefore = createTitle(room.getRoomMembers());
         if (titleBefore.equals(room.getTitle()))
             room.setTitle(titleBefore + ", " + createTitle(users));
-        getRoomDAO().update(room.addRoomMembers(users));
+        getRoomEntityRepository().save(room.addRoomMembers(users));
         return "redirect:/chat/" + id;
     }
+
 
     @Contract(pure = true)
     private RoomDAOImpl getRoomDAO() {

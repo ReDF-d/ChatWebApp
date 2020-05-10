@@ -25,10 +25,11 @@ public class FriendshipEntity extends AbstractEntity {
     }
 
 
-    public FriendshipEntity(UserEntity firstUser, UserEntity secondUser, String status) {
+    public FriendshipEntity(UserEntity firstUser, UserEntity secondUser, String status, int lastAction) {
         setFirstUser(firstUser);
         setSecondUser(secondUser);
         setStatus(status);
+        setLastAction(lastAction);
     }
 
 

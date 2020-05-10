@@ -78,6 +78,8 @@ $(window).on("load", function () {
 
     function onStatusChange(payload) {
         let statusChangeMessage = JSON.parse(payload.body);
+        let checkOffline = document.getElementById('offline' + statusChangeMessage.id);
+        let checkOnline = document.getElementById('online' + statusChangeMessage.id);
         if (statusChangeMessage.status === 'ONLINE' && id !== statusChangeMessage.id) {
             let parent = document.getElementById('onlineUsers');
             let a = document.createElement('a');
@@ -90,8 +92,7 @@ $(window).on("load", function () {
             let span = document.createElement('span');
             let offlineElement = document.getElementById('offline' + statusChangeMessage.id);
             let offlineParent = document.getElementById('offlineUsers');
-            let checkOnline = document.getElementById('online' + statusChangeMessage.id);
-            if (!checkOnline) {
+            if (!checkOnline && checkOffline) {
                 a.setAttribute('href', "/user/" + statusChangeMessage.id);
                 div1.classList.add('row', 'userStatus');
                 div1.style.padding = '10px';
@@ -135,8 +136,7 @@ $(window).on("load", function () {
             let span = document.createElement('span');
             let onlineElement = document.getElementById('online' + statusChangeMessage.id);
             let onlineParent = document.getElementById('onlineUsers');
-            let checkOffline = document.getElementById('offline' + statusChangeMessage.id);
-            if (!checkOffline) {
+            if (!checkOffline && checkOnline) {
                 a.setAttribute('href', "/user/" + statusChangeMessage.id);
                 div1.classList.add('row', 'userStatus');
                 div1.style.padding = '10px';
@@ -246,7 +246,7 @@ $(window).on("load", function () {
             div1.classList.add('row');
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
-                div1.classList.add('opponents_message');
+                div1.classList.add('message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
@@ -261,7 +261,7 @@ $(window).on("load", function () {
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
                 div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                messageContent.classList.add('message');
+                messageContent.classList.add('message user_message');
                 messageContent.style.marginLeft = '5px';
                 messageContent.style.wordBreak = 'break-all';
                 messageContent.style.fontSize = '14px';
@@ -290,7 +290,6 @@ $(window).on("load", function () {
                 let deleteIcon = document.createElement('i');
                 let editButton = document.createElement('button');
                 let editIcon = document.createElement('i');
-                div1.classList.add('my_message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
                 div3.classList.add('row');
@@ -379,7 +378,7 @@ $(window).on("load", function () {
             div1.classList.add('row');
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
-                div1.classList.add('opponents_message');
+                div1.classList.add('message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
@@ -419,7 +418,6 @@ $(window).on("load", function () {
                 messageArea.appendChild(div1);
                 chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
             } else {
-                div1.classList.add('my_message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
                 div3.classList.add('row');
@@ -484,6 +482,8 @@ $(window).on("load", function () {
             let month = date.getMonth();
             let currentHours = date.getHours();
             let currentMinutes = date.getMinutes();
+            let parentDiv = document.createElement('div');
+            let fileName = document.createElement('span');
             let div1 = document.createElement('div');
             let div2 = document.createElement('div');
             let div3 = document.createElement('div');
@@ -497,13 +497,16 @@ $(window).on("load", function () {
             let authorImg = document.createElement('img');
             let messageContent = document.createElement('audio');
             let source = document.createElement('source');
+            parentDiv.style.textAlign = 'center';
+            parentDiv.style.background = 'none';
+            parentDiv.classList.add('message');
             month += 1;
             currentHours = ("0" + currentHours).slice(-2);
             currentMinutes = ("0" + currentMinutes).slice(-2);
             div1.classList.add('row');
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
-                div1.classList.add('opponents_message');
+                div1.classList.add('message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
@@ -518,12 +521,16 @@ $(window).on("load", function () {
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
                 div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                messageContent.controls = 'controls';
                 messageContent.classList.add('message');
+                messageContent.setAttribute('controls', 'controls');
+                messageContent.setAttribute('preload', 'metadata');
                 source.src = receivedMessage.content.substr(1);
                 messageContent.id = 'messageContent' + receivedMessage.messageId;
                 messageContent.appendChild(source);
-                div6.appendChild(messageContent);
+                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("\\") + 1, receivedMessage.content.length);
+                parentDiv.appendChild(fileName);
+                parentDiv.appendChild(messageContent);
+                div6.appendChild(parentDiv);
                 div5.appendChild(div6);
                 div4.appendChild(div5);
                 div3.appendChild(div4);
@@ -540,14 +547,14 @@ $(window).on("load", function () {
                 messageArea.appendChild(div1);
                 chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
             } else {
-                div1.classList.add('my_message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
                 div4.style.padding = '5px';
                 div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
-                messageContent.controls = 'controls';
+                messageContent.setAttribute('controls', 'controls');
+                messageContent.setAttribute('preload', 'metadata');
                 messageContent.classList.add('message');
                 messageContent.id = 'messageContent' + receivedMessage.messageId;
                 source.src = receivedMessage.content.substr(1);
@@ -563,7 +570,10 @@ $(window).on("load", function () {
                 deleteButton.appendChild(deleteIcon);
                 anotherEditAndDeleteDiv.appendChild(deleteButton);
                 editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
-                div5.appendChild(messageContent);
+                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("\\") + 1, receivedMessage.content.length);
+                parentDiv.appendChild(fileName);
+                parentDiv.appendChild(messageContent);
+                div5.appendChild(parentDiv);
                 editAndDeleteButtonsDiv.appendChild(div5);
                 div4.appendChild(editAndDeleteButtonsDiv);
                 div3.appendChild(div4);
@@ -733,13 +743,19 @@ $(window).on("load", function () {
     function onRemoveRoomMember(payload) {
         let removeRoomMemberMessage = JSON.parse(payload.body);
         if (roomId.textContent === removeRoomMemberMessage.roomId) {
-            document.getElementById('membersList').removeChild(document.getElementById('removeMember' + removeRoomMemberMessage.memberId));
-            let onlineElem = document.getElementById('online' + removeRoomMemberMessage.memberId);
-            let offlineElem = document.getElementById('offline' + removeRoomMemberMessage.memberId);
-            if (onlineElem !== null)
-                document.getElementById('onlineUsers').removeChild(onlineElem);
-            if (offlineElem !== null)
-                document.getElementById('offlineUsers').removeChild(offlineElem);
+            if (removeRoomMemberMessage.memberId === id)
+                window.location.replace('/chats');
+            else {
+                document.getElementById('membersList').removeChild(document.getElementById('removeMember' + removeRoomMemberMessage.memberId));
+                let onlineElem = document.getElementById('online' + removeRoomMemberMessage.memberId);
+                let offlineElem = document.getElementById('offline' + removeRoomMemberMessage.memberId);
+                if (onlineElem !== null)
+                    document.getElementById('onlineUsers').removeChild(onlineElem);
+                if (offlineElem !== null)
+                    document.getElementById('offlineUsers').removeChild(offlineElem);
+                let addMemberForm = document.getElementById('addMemberForm');
+                addMemberForm.removeChild(document.getElementById('addMember' + removeRoomMemberMessage.memberId));
+            }
         }
     }
 

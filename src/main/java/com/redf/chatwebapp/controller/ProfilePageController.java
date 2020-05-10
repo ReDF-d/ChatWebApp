@@ -144,7 +144,7 @@ public class ProfilePageController {
                 setFriends(true);
             }
         } else
-            getFriendshipDAO().createAndSave(getUserService().findById(getPrincipal().getId()), getUserService().findById(getId()), "pending", getPrincipal().getId().intValue());
+            getFriendshipEntityRepository().save(new FriendshipEntity(getUserService().findById(getPrincipal().getId()), getUserService().findById(getId()), "pending", getPrincipal().getId().intValue()));
         return "redirect:/user/" + getId();
     }
 

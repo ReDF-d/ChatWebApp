@@ -163,8 +163,8 @@
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
                                                     <div class="message"  style="text-align: center; background: none;" th:if="${message.getMessageType().equals('audio')}">
-                                                        <span>Название трека</span>
-                                                        <audio controls preload="none"
+                                                        <span th:text="${#strings.arraySplit(message.getMessageText(), '\\')[#arrays.length(#strings.arraySplit(message.getMessageText(), '\\')) - 1]}"></span>
+                                                        <audio controls preload="metadata"
                                                                th:id="${'messageContent' + message.getMessageId()}">
                                                             <source th:src="@{${message.getMessageText().substring(1)}}">
                                                         </audio>
@@ -213,9 +213,11 @@
                                                              th:id="${'messageContent' + message.getMessageId()}"
                                                              th:if="${message.getMessageType().equals('image')}"
                                                              th:src="@{${message.getMessageText().substring(1)}}">
-                                                        <div class="message"  style="text-align: center; background: none; !important;" th:if="${message.getMessageType().equals('audio')}">
-                                                            <span>Название трека</span>
-                                                            <audio controls preload="none"
+                                                        <div class="message"
+                                                             style="text-align: center; background: none; !important;"
+                                                             th:if="${message.getMessageType().equals('audio')}">
+                                                            <span th:text="${#strings.arraySplit(message.getMessageText(), '\\')[#arrays.length(#strings.arraySplit(message.getMessageText(), '\\')) - 1]}"></span>
+                                                            <audio controls preload="metadata"
                                                                    th:id="${'messageContent' + message.getMessageId()}">
                                                                 <source th:src="@{${message.getMessageText().substring(1)}}">
                                                             </audio>
