@@ -57,8 +57,6 @@ $(window).on("load", function () {
     });
 
 
-    $('#send').click(sendMessage(event));
-
 
     function onConnected() {
         stompClient.subscribe('/topic/chat/' + roomId.textContent, onMessageReceived);
@@ -189,10 +187,10 @@ $(window).on("load", function () {
             stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
             messageInput.value = '';
         }
-        let file = $('#file');
-        if (file.val() && stompClient) {
+        let file = document.getElementById('file');
+        if (file.files.length !== 0 && stompClient) {
             let form_data = new FormData();
-            let file_data = file.prop('files');
+            let file_data = file.files;
             for (let i = 0; i < file_data.length; i++) {
                 form_data.append('file' + i, file_data[i]);
             }
@@ -200,7 +198,7 @@ $(window).on("load", function () {
             form_data.append('timestamp', new Date().getTime().toString());
             form_data.append('roomId', roomId.textContent);
             let token = $("meta[name='_csrf']").attr("content");
-            $.ajax({
+            let ajaxReq = $.ajax({
                 url: "/chat/" + roomId.textContent,
                 type: "POST",
                 headers: {"X-CSRF-TOKEN": token},
@@ -209,9 +207,125 @@ $(window).on("load", function () {
                 processData: false,
                 contentType: false,
                 cache: false,
+                success: function () {
+                    let o = document.getElementById("progress");
+                    let fileButton = document.getElementById('fileLabel');
+                    let cancelEditButton = document.getElementById('cancelEdit');
+                    let fileDrag = document.getElementById('filedragDIV');
+                    fileDrag.style.display = 'none';
+                    o.innerHTML = '';
+                    fileButton.style.display = 'inline-block';
+                    cancelEditButton.style.display = 'none';
+                }
             });
-            file.val(null);
+            file.value = '';
         }
+    }
+
+
+    function FileSelectHandler(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        let fileButton = document.getElementById('fileLabel');
+        let cancelEditButton = document.getElementById('cancelEdit');
+        let fileInput = document.getElementById('file');
+        cancelEditButton.style.display = 'inline-block';
+        fileButton.style.display = 'none';
+        let files = e.target.files || e.dataTransfer.files;
+        fileInput.files = fileInput.files;
+        Array.from(files).forEach(f =>
+            UploadFile(f)
+        );
+    }
+
+
+    function UploadFile(file) {
+        let xhr = new XMLHttpRequest();
+        let fileDrag = document.getElementById('filedragDIV');
+        fileDrag.style.display = 'block';
+        if (xhr.upload) {
+            let o = document.getElementById("progress");
+            let progress = o.appendChild(document.createElement("p"));
+            progress.appendChild(document.createTextNode(file.name));
+            xhr.upload.addEventListener("progress", function (e) {
+                let pc = parseInt(100 - (e.loaded / e.total * 100));
+                progress.style.backgroundPosition = pc + "% 0";
+            }, false);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    progress.className = (xhr.status === 200 ? "success" : "failure");
+                }
+            };
+            let token = $("meta[name='_csrf']").attr("content");
+            let boundary = String(Math.random()).slice(2);
+            xhr.open("POST", "/chat/" + roomId.textContent, true);
+            xhr.setRequestHeader("X-CSRF-TOKEN", token);
+            xhr.setRequestHeader('Content-Type', 'multipart/form-data;boundary=' + boundary);
+            xhr.send(file);
+        }
+
+    }
+
+    let dragging = 0;
+
+    $(document).on('dragover', function (e) {
+        let fileDragDIV = document.getElementById("filedragDIV");
+        fileDragDIV.style.display = 'block';
+        e.stopPropagation();
+        e.preventDefault();
+    });
+
+
+    $('#filedrag').on('dragover', function (e) {
+        let fileDrag = document.getElementById('filedrag');
+        fileDrag.classList.add('hover');
+        e.stopPropagation();
+        e.preventDefault();
+    });
+
+
+    $('#filedrag').on('dragleave', function (e) {
+        let fileDrag = document.getElementById('filedrag');
+        fileDrag.classList.remove('hover');
+        fileDrag.classList.add('col-9', 'col-lg-10');
+        e.stopPropagation();
+        e.preventDefault();
+    });
+
+
+    $(document).on('dragenter', function (e) {
+        let fileDragDIV = document.getElementById("filedragDIV");
+        dragging++;
+        fileDragDIV.style.display = 'block';
+        e.stopPropagation();
+        e.preventDefault();
+    });
+
+
+    $(document).on('dragleave', function (e) {
+        dragging--;
+        let fileDrag = document.getElementById("filedragDIV");
+        if (dragging === 0)
+            fileDrag.style.display = 'none';
+        e.stopPropagation();
+        e.preventDefault();
+    });
+
+
+    function Init() {
+        let fileSelect = document.getElementById("file"),
+            fileDrag = document.getElementById("filedrag");
+        fileSelect.addEventListener("change", FileSelectHandler, false);
+        let xhr = new XMLHttpRequest();
+        if (xhr.upload) {
+            fileDrag.addEventListener("drop", FileSelectHandler, false);
+            fileDrag.style.display = "block";
+        }
+    }
+
+
+    if (window.File && window.FileList && window.FileReader) {
+        Init();
     }
 
 
@@ -679,9 +793,15 @@ $(window).on("load", function () {
     cancelEdit.addEventListener('click', function (event) {
         event.preventDefault();
         let fileButton = document.getElementById('fileLabel');
+        let o = document.getElementById("progress");
+        let file = document.getElementById('file');
         let sendButton = document.getElementById('send');
         let editButton = document.getElementById('edit');
         let cancelEditButton = document.getElementById('cancelEdit');
+        let fileDrag = document.getElementById('filedragDIV');
+        fileDrag.style.display = 'none';
+        file.value = '';
+        o.innerHTML = '';
         fileButton.style.display = 'inline-block';
         sendButton.style.display = 'inline-block';
         editButton.style.display = 'none';
@@ -759,8 +879,8 @@ $(window).on("load", function () {
         }
     }
 
-    function textarea_resize(event, line_height, min_line_count)
-    {
+
+    function textarea_resize(event, line_height, min_line_count) {
         let min_line_height = min_line_count * line_height;
         let obj = event.target;
         let div = document.getElementById(obj.id + '_div');
@@ -773,8 +893,8 @@ $(window).on("load", function () {
         obj.style.height = obj_height + 'px';
     }
 
-    $('#message').bind("keypress", function (e) {
-            textarea_resize(e,15,2);
-    });
 
+    $('#message').bind("keypress", function (e) {
+        textarea_resize(e, 15, 2);
+    });
 });

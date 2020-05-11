@@ -19,12 +19,8 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,12 +33,11 @@ import java.util.stream.Collectors;
 @Controller
 @ControllerAdvice
 @RequestMapping("/adminpanel/edituser/{id}")
-public class AdminEditUserController implements HandlerExceptionResolver {
+public class AdminEditUserController {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
     private UserDAOImpl userDAO;
     private SessionRegistry sessionRegistry;
-    private UserEntity user;
     private UserUpdateValidatorImpl userUpdateValidator;
     private UserService userService;
     private RoleEntityRepository roleEntityRepository;
@@ -59,7 +54,6 @@ public class AdminEditUserController implements HandlerExceptionResolver {
         setRoleEntityRepository(roleEntityRepository);
         setUserUpdateDto(userUpdateDto);
         setUserEntityRepository(userEntityRepository);
-        setUser(new UserEntity());
     }
 
 
@@ -81,11 +75,11 @@ public class AdminEditUserController implements HandlerExceptionResolver {
 
     @GetMapping
     public ModelAndView getUserPage(@PathVariable String id) {
-        setUser(getUserDAO().findById(Long.parseLong(id)));
+        UserEntity user = getUserDAO().findById(Long.parseLong(id));
         ModelAndView modelAndView = new ModelAndView("adminedituser");
-        modelAndView.addObject("userUpdating", getUser());
+        modelAndView.addObject("userUpdating", user);
         modelAndView.addObject("userDto", getUserUpdateDto());
-        modelAndView.addObject("roles", getRolesAsList());
+        modelAndView.addObject("roles", getRolesAsList(user));
         modelAndView.addObject("tooLarge", avatarTooLargeException(""));
         return modelAndView;
     }
@@ -106,64 +100,42 @@ public class AdminEditUserController implements HandlerExceptionResolver {
     }
 
 
-    private ArrayList<String> getRolesAsList() {
-        return getUser().getRoles().stream().map(RoleEntity::getRole).collect(Collectors.toCollection(ArrayList::new));
+    private ArrayList<String> getRolesAsList(@NotNull UserEntity user) {
+        return user.getRoles().stream().map(RoleEntity::getRole).collect(Collectors.toCollection(ArrayList::new));
     }
 
 
     @PostMapping
     public String updateUserProfile(@NotNull @ModelAttribute("userDto") UserUpdateDto userUpdateDto, BindingResult result, @PathVariable String id) {
-        setUser(getUserDAO().findById(Long.parseLong(id)));
-        UserEntity user = getUserEntityRepository().findByLogin(getUser().getLogin());
-        UserDetails userDetails = new UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword(), user.getRoles(), !user.getIsLocked(), user.isEnabled());
-        getUserUpdateValidator().validateAllFields(result, userUpdateDto, userDetails, "ADMIN");
-        if (result.hasErrors()) {
-            return "redirect:/adminedituser";
-        }
-        userUpdateDto.setId(userDetails.getId());
-        userUpdateDto.setRoles(getRoleList(userDetails.getAuthorities(), userUpdateDto));
-        if (userUpdateDto.isMarkBanned()) {
-            try {
-                long millis = System.currentTimeMillis();
-                Date date = new Date(millis);
-                userUpdateDto.setStarted(new Timestamp(getSdf().parse(getSdf().format(date)).getTime()));
-                if(userUpdateDto.getDateTimeLocal() != null && !userUpdateDto.getDateTimeLocal().equals("")) {
-                    Date parsedDate = getSdf().parse(userUpdateDto.getDateTimeLocal());
-                    userUpdateDto.setEnds(new Timestamp(parsedDate.getTime()));
-                }
-                else userUpdateDto.setEnds(null);
-            } catch (ParseException e) {
-                System.out.println(e.getMessage());
+        UserEntity user;
+        if (getUserEntityRepository().findById(Long.parseLong(id)).isPresent()) {
+            user = getUserEntityRepository().findById(Long.parseLong(id)).get();
+            UserDetails userDetails = new UserDetails(user.getId(), user.getLogin(), user.getUsername(), user.getPassword(), user.getRoles(), !user.getIsLocked(), user.isEnabled());
+            getUserUpdateValidator().validateAllFields(result, userUpdateDto, userDetails, "ADMIN");
+            if (result.hasErrors()) {
+                return "redirect:/adminedituser";
             }
-        }
-        update(userUpdateDto);
-        if (!userUpdateDto.getAvatar().isEmpty())
-            getUserUpdateValidator().saveAvatar(userUpdateDto);
-        return "redirect:/adminpanel";
-    }
-
-
-    @Override
-    public ModelAndView resolveException(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, Object object, @NotNull Exception exc) {
-        ModelAndView modelAndView = new ModelAndView("adminedituser");
-        if (exc instanceof MaxUploadSizeExceededException) {
-            modelAndView.addObject("userUpdating", getUser());
-            modelAndView.addObject("userDto", getUserUpdateDto());
-            modelAndView.addObject("roles", getRolesAsList());
-            modelAndView.addObject("tooLarge", avatarTooLargeException("Файл слишком большой!"));
-        }
-        return modelAndView;
-    }
-
-
-    @NotNull
-    public UserEntity getUser() {
-        return user;
-    }
-
-
-    public void setUser(UserEntity user) {
-        this.user = user;
+            userUpdateDto.setId(userDetails.getId());
+            userUpdateDto.setRoles(getRoleList(userDetails.getAuthorities(), userUpdateDto));
+            if (userUpdateDto.isMarkBanned()) {
+                try {
+                    long millis = System.currentTimeMillis();
+                    Date date = new Date(millis);
+                    userUpdateDto.setStarted(new Timestamp(getSdf().parse(getSdf().format(date)).getTime()));
+                    if (userUpdateDto.getDateTimeLocal() != null && !userUpdateDto.getDateTimeLocal().equals("")) {
+                        Date parsedDate = getSdf().parse(userUpdateDto.getDateTimeLocal());
+                        userUpdateDto.setEnds(new Timestamp(parsedDate.getTime()));
+                    } else userUpdateDto.setEnds(null);
+                } catch (ParseException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            update(userUpdateDto);
+            if (!userUpdateDto.getAvatar().isEmpty())
+                getUserUpdateValidator().saveAvatar(userUpdateDto);
+            return "redirect:/adminpanel";
+        } else
+            return "redirect:/adminpanel";
     }
 
 
