@@ -152,9 +152,6 @@
                                         </a>
                                     </div>
                                     <div class="col-sm-7 col-xl-4">
-                                        <div class="row d-flex justify-content-start" style="padding-left: 10px; font-weight: 550;">
-                                            <span>Dima_loh</span>
-                                        </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-0" style="padding: 5px;">
                                                 <div class="d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-start justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
@@ -167,7 +164,7 @@
                                                          style="max-width: 300px; max-height: 300px;"
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
-                                                    <div class="message"  style="text-align: center; background: none; padding-left: 0px;" th:if="${message.getMessageType().equals('audio')}">
+                                                    <div class="message"  style="text-align: center; background: none;" th:if="${message.getMessageType().equals('audio')}">
                                                         <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                         <audio controls preload="metadata"
                                                                th:id="${'messageContent' + message.getMessageId()}">
@@ -190,9 +187,6 @@
                                      th:id="${'message' + message.getMessageId()}"
                                      th:if="${message.getUser().getId() == #authentication.getPrincipal().getId()}">
                                     <div class="col-sm-7 col-xl-6 offset-sm-3 offset-md-3 offset-lg-3 offset-xl-5 ">
-                                        <div class="row d-flex justify-content-end" style="padding-right: 10px; font-weight: 550;">
-                                        <span>Dima_loh</span>
-                                    </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-1 " style="padding: 5px;">
                                                 <div class="row edit_message_main">
@@ -222,7 +216,7 @@
                                                              th:if="${message.getMessageType().equals('image')}"
                                                              th:src="@{${message.getMessageText().substring(1)}}">
                                                         <div class="message"
-                                                             style="text-align: center; background: none; !important; padding-right: 0px;"
+                                                             style="text-align: center; background: none; !important;"
                                                              th:if="${message.getMessageType().equals('audio')}">
                                                             <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                             <audio controls preload="metadata"

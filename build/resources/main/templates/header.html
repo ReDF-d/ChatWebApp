@@ -45,7 +45,7 @@
                                             type="button"><i class="fa fa-search"></i></button>
                                 </form>
                             </li>
-                            <li class="nav-item" role="presentation"
+                            <li class="nav-item" role="presentation" sec:authorize="isAnonymous()"
                                 th:classappend="${#httpServletRequest.getRequestURI() == '/home' || #httpServletRequest.getRequestURI() == '/' ? 'active':''}">
                                 <a class="nav-link" th:href="@{/home}">Главная</a>
                             </li>
