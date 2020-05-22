@@ -756,16 +756,18 @@ body {
     overflow-x: hidden
 }
 
+
 .chat_welcome_h1 {
     Color: #fff
 }
 
 
-[type="file"] {
+.chatFile {
     height: 0;
     overflow: hidden;
     width: 0;
 }
+
 
 [type="file"] + label {
     cursor: pointer;

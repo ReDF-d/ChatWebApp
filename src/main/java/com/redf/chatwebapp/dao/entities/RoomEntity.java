@@ -5,6 +5,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.Contract;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ public class RoomEntity extends AbstractEntity {
     private String roomType;
     private List<UserEntity> roomMembers = new ArrayList<>();
     private String title;
+    private UserEntity owner;
 
 
     public RoomEntity() {
@@ -97,5 +99,18 @@ public class RoomEntity extends AbstractEntity {
     public RoomEntity addRoomMembers(List<UserEntity> users) {
         users.forEach(this::addRoomMember);
         return this;
+    }
+
+
+    @OneToOne(targetEntity = UserEntity.class, fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false, name = "owner")
+    @Contract(pure = true)
+    public UserEntity getOwner() {
+        return owner;
+    }
+
+
+    public void setOwner(UserEntity owner) {
+        this.owner = owner;
     }
 }

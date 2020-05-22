@@ -143,13 +143,16 @@ public class ChatController implements RoomSanitizer {
             String author = chatMessage.getSender().trim();
             String login = chatMessage.getLogin().trim();
             String messageText = chatMessage.getContent().trim();
-            Timestamp timestamp = chatMessage.getTimestamp();
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis() + 7200000);
             RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
             String messageType = "text";
-            MessageEntity message = getMessageDAO().createAndSave(author, login, messageText, timestamp, roomEntity, messageType);
+            MessageEntity message = getMessageEntityRepository().save(getMessageDAO().create(author, login, messageText, timestamp, roomEntity, messageType));
+            getMessageEntityRepository().flush();
             savePermitted = true;
             chatMessage.setMessageId(String.valueOf(message.getMessageId()));
-            return chatMessage;
+            message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
+            if (message != null)
+                return chatMessage;
         }
         if (chatMessage.getType().equals(ChatMessage.MessageType.UPDATE)) {
             MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
@@ -158,20 +161,22 @@ public class ChatController implements RoomSanitizer {
                 getMessageEntityRepository().save(message);
                 chatMessage.setMessageId(String.valueOf(message.getMessageId()));
                 chatMessage.setContent(message.getMessageText());
-                chatMessage.setTimestamp(message.getTime());
+                chatMessage.setTimestamp(new Timestamp(System.currentTimeMillis() + 7200000));
                 return chatMessage;
             }
         }
         if (chatMessage.getType().equals(ChatMessage.MessageType.DELETE)) {
             MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
-            if (message.getMessageType().equals("text"))
-                getMessageEntityRepository().delete(message);
-            else if (message.getMessageType().equals("image") || (message.getMessageType().equals("audio"))) {
-                File file = new File(message.getMessageText());
-                boolean del = file.delete();
-                getMessageEntityRepository().delete(message);
+            if (message != null) {
+                if (message.getMessageType().equals("text"))
+                    getMessageEntityRepository().delete(message);
+                else if (message.getMessageType().equals("image") || (message.getMessageType().equals("audio"))) {
+                    File file = new File(message.getMessageText());
+                    boolean del = file.delete();
+                    getMessageEntityRepository().delete(message);
+                }
+                return chatMessage;
             }
-            return chatMessage;
         }
         return null;
     }
@@ -195,6 +200,7 @@ public class ChatController implements RoomSanitizer {
             final String senderId = request.getParameter("id");
             final String timestamp = request.getParameter("timestamp");
             final String PATH = "./media/file/" + roomId;
+            Timestamp s;
             File directory = new File(PATH);
             if (!directory.exists()) {
                 boolean created = directory.mkdir();
@@ -247,7 +253,9 @@ public class ChatController implements RoomSanitizer {
         Date date = new Date(Long.parseLong(timestampInString));
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         String formatted = format.format(date);
-        return Timestamp.valueOf(formatted);
+        Timestamp ret = Timestamp.valueOf(formatted);
+        ret.setTime(ret.getTime() + 7200000);
+        return ret;
     }
 
 
@@ -280,6 +288,7 @@ public class ChatController implements RoomSanitizer {
             modelAndView.addObject("roomType", room.getRoomType());
             modelAndView.addObject("title", room.getTitle());
             modelAndView.addObject("members", room.getRoomMembers());
+            modelAndView.addObject("owner", room.getOwner());
             return modelAndView;
         } else
             return new ModelAndView("redirect:/home");

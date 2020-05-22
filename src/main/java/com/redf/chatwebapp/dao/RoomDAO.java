@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface RoomDAO {
 
-    RoomEntity create(String room);
+    RoomEntity create(String room, UserEntity owner);
 
-    RoomEntity create(String room, List<UserEntity> roomMembers, String title);
+    RoomEntity create(String room, List<UserEntity> roomMembers, String title, UserEntity owner);
 
     RoomEntity save(RoomEntity room);
 
@@ -17,7 +17,7 @@ public interface RoomDAO {
 
     void delete(RoomEntity room);
 
-    RoomEntity createAndSave(String room);
+    RoomEntity createAndSave(String room, UserEntity owner);
 
-    RoomEntity createAndSave(String room, List<UserEntity> roomMembers, String title);
+    RoomEntity createAndSave(String room, List<UserEntity> roomMembers, String title, UserEntity owner);
 }

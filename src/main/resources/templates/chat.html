@@ -10,7 +10,7 @@
 </head>
 <body>
 <header th:replace="header::head"></header>
-<div class="container-fluid img">
+<div class="container-fluid img" draggable="false">
     <span hidden id="roomId" th:text="${roomId}"></span>
     <div class="row d-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
          style="margin: 0px;">
@@ -44,11 +44,12 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <button class="dropdown-item" id="addMember" style="font-size: 15px;"
+                                        th:if="${roomType.equals('group')}"
                                         type="button">
                                     Добавить пользователя
                                 </button>
                                 <button class="dropdown-item" id="removeMembers" style="font-size: 15px;"
-                                        th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}"
+                                        th:if="${((#authorization.expression('hasAuthority(''ADMIN'')')) && roomType.equals('group')) || ((owner.getId() == #authentication.getPrincipal().getId()) && roomType.equals('group'))}"
                                         type="button">
                                     Управление пользователями
                                 </button>
@@ -164,7 +165,7 @@
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
                                                     <div class="message"  style="text-align: center; background: none;" th:if="${message.getMessageType().equals('audio')}">
-                                                        <span th:text="${#strings.arraySplit(message.getMessageText(), '\\')[#arrays.length(#strings.arraySplit(message.getMessageText(), '\\')) - 1]}"></span>
+                                                        <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                         <audio controls preload="metadata"
                                                                th:id="${'messageContent' + message.getMessageId()}">
                                                             <source th:src="@{${message.getMessageText().substring(1)}}">
@@ -217,7 +218,7 @@
                                                         <div class="message"
                                                              style="text-align: center; background: none; !important;"
                                                              th:if="${message.getMessageType().equals('audio')}">
-                                                            <span th:text="${#strings.arraySplit(message.getMessageText(), '\\')[#arrays.length(#strings.arraySplit(message.getMessageText(), '\\')) - 1]}"></span>
+                                                            <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                             <audio controls preload="metadata"
                                                                    th:id="${'messageContent' + message.getMessageId()}">
                                                                 <source th:src="@{${message.getMessageText().substring(1)}}">
@@ -254,7 +255,8 @@
                                         <div id="message_div"></div>
                             </div>
                             <div class="col-3 col-lg-2" style="padding: 0; padding-bottom: 5px;">
-                                <input accept="image/*, audio/*, video/*" id="file" multiple name="file" type="file">
+                                <input accept="image/*, audio/*, video/*" class="chatFile" id="file" multiple
+                                       name="file" type="file">
                                 <label class="btn-1 btn btn-light" for="file" id="fileLabel"
                                        style="width: 36px; margin:0; height: 36px">
                                     <i class="fas fa-paperclip"></i>

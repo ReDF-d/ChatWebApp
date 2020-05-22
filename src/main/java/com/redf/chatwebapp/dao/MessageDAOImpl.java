@@ -24,15 +24,13 @@ import java.util.Set;
 public class MessageDAOImpl implements MessageDAO, TransactionHandler {
 
     private UserService userService;
-    private MessageEntity message;
     private MessageEntityRepository messageEntityRepository;
 
 
     @Contract(pure = true)
     @Autowired
-    MessageDAOImpl(UserService userService, MessageEntity message, MessageEntityRepository messageEntityRepository) {
+    MessageDAOImpl(UserService userService, MessageEntityRepository messageEntityRepository) {
         setUserService(userService);
-        setMessage(message);
         setMessageEntityRepository(messageEntityRepository);
     }
 
@@ -55,13 +53,14 @@ public class MessageDAOImpl implements MessageDAO, TransactionHandler {
     @Override
     public MessageEntity create(@NotNull String author, @NotNull String login, @NotNull String messageText, @NotNull Timestamp time, @NotNull RoomEntity room, @NotNull String messageType) {
         UserEntity authorEntity = userService.findByLogin(login);
-        getMessage().setUsername(author);
-        getMessage().setMessageText(messageText);
-        getMessage().setTime(time);
-        getMessage().setUser(authorEntity);
-        getMessage().setRoomEntity(room);
-        getMessage().setMessageType(messageType);
-        return getMessage();
+        MessageEntity message = new MessageEntity();
+        message.setUsername(author);
+        message.setMessageText(messageText);
+        message.setTime(time);
+        message.setUser(authorEntity);
+        message.setRoomEntity(room);
+        message.setMessageType(messageType);
+        return message;
     }
 
 
@@ -105,14 +104,6 @@ public class MessageDAOImpl implements MessageDAO, TransactionHandler {
         this.messageEntityRepository = messageEntityRepository;
     }
 
-    @Contract(pure = true)
-    private MessageEntity getMessage() {
-        return message;
-    }
-
-    private void setMessage(MessageEntity message) {
-        this.message = message;
-    }
 
     @Contract(pure = true)
     private UserService getUserService() {

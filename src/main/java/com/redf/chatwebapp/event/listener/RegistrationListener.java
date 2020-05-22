@@ -39,11 +39,11 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         getUserService().createVerificationToken(user, token);
         String recipientAddress = user.getLogin();
         String subject = "Подтверждение регистрации";
-        String confirmationUrl = event.getAppUrl() + "registrationConfirm?token=" + token;
+        String confirmationUrl = event.getAppUrl() + "/registrationConfirm?token=" + token;
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(recipientAddress);
         email.setSubject(subject);
-        email.setText("Ссылка для завершения процесса регистрации в BlinkTalk " + "\r\n" + event.getAppUrl() + confirmationUrl);
+        email.setText("Ссылка для завершения процесса регистрации в BlinkTalk " + "\r\n" + confirmationUrl);
         getMailSender().send(email);
     }
 

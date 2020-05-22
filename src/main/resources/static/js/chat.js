@@ -28,6 +28,7 @@ $(window).on("load", function () {
     connectingError = document.createElement('div');
     chatWindow = $("#chatWindow");
     currentEditMessageId = null;
+    let disabled = false;
 
     connectingError.classList.add('hidden', 'text-danger', 'text-center');
     connectingError.id = 'connectionError';
@@ -42,19 +43,36 @@ $(window).on("load", function () {
         username = document.querySelector('#username').innerText.trim();
         login = document.querySelector('#login').textContent.trim();
         if (username) {
-            let socket = new SockJS('http://localhost:8080/ws'); // window.location.host
+            let socket = new SockJS('http://' + window.location.host + '/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, onConnected, onError);
             stompClient.debug = true;
         }
     }
 
+
     $('#messageSendForm').bind("keypress", function (e) {
-        if (e.keyCode === 13 && currentEditMessageId === null)
+        if (e.keyCode === 13 && currentEditMessageId === null && disabled === false) {
             sendMessage(e);
-        else if (e.keyCode === 13 && currentEditMessageId !== null)
+            disableSendButton();
+            setTimeout(enableSendButton, 3000);
+        } else if (e.keyCode === 13 && currentEditMessageId !== null && disabled === false) {
             sendEditedMessage(e);
+            disableSendButton();
+            setTimeout(enableSendButton, 3000);
+        } else if (e.keyCode === 13)
+            e.preventDefault();
     });
+
+
+    function enableSendButton() {
+        disabled = false;
+    }
+
+
+    function disableSendButton() {
+        disabled = true;
+    }
 
 
 
@@ -232,7 +250,7 @@ $(window).on("load", function () {
         cancelEditButton.style.display = 'inline-block';
         fileButton.style.display = 'none';
         let files = e.target.files || e.dataTransfer.files;
-        fileInput.files = fileInput.files;
+        fileInput.files = files;
         Array.from(files).forEach(f =>
             UploadFile(f)
         );
@@ -266,7 +284,9 @@ $(window).on("load", function () {
 
     }
 
+
     let dragging = 0;
+
 
     $(document).on('dragover', function (e) {
         let fileDragDIV = document.getElementById("filedragDIV");
@@ -329,6 +349,22 @@ $(window).on("load", function () {
     }
 
 
+    $("audio").each(function () {
+        $(this).bind("play", stopAll);
+    });
+
+    function stopAll(e) {
+        let currentElementId = $(e.currentTarget).attr("id");
+        $("audio").each(function () {
+            let $this = $(this);
+            let elementId = $this.attr("id");
+            if (elementId !== currentElementId) {
+                $this[0].pause();
+            }
+        });
+    }
+
+
     function onMessageReceived(payload) {
         let receivedMessage = JSON.parse(payload.body);
         let messagePreview = document.getElementById('messagePreview' + roomId.textContent);
@@ -339,9 +375,6 @@ $(window).on("load", function () {
                 messagePreview.firstChild.remove();
             messagePreview.appendChild(messagePreviewSpan);
             let date = new Date(receivedMessage.timestamp);
-            let month = date.getMonth();
-            let currentHours = date.getHours();
-            let currentMinutes = date.getMinutes();
             let div1 = document.createElement('div');
             let div2 = document.createElement('div');
             let div3 = document.createElement('div');
@@ -354,13 +387,10 @@ $(window).on("load", function () {
             let messageLink = document.createElement('a');
             let authorImg = document.createElement('img');
             let messageContent = document.createElement('p');
-            month += 1;
-            currentHours = ("0" + currentHours).slice(-2);
-            currentMinutes = ("0" + currentMinutes).slice(-2);
             div1.classList.add('row');
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
-                div1.classList.add('message');
+                div1.classList.add('row', 'opponents_message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
@@ -375,7 +405,7 @@ $(window).on("load", function () {
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
                 div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                messageContent.classList.add('message user_message');
+                messageContent.classList.add('message');
                 messageContent.style.marginLeft = '5px';
                 messageContent.style.wordBreak = 'break-all';
                 messageContent.style.fontSize = '14px';
@@ -389,7 +419,7 @@ $(window).on("load", function () {
                 div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
                 dateElement.classList.add('.date');
                 dateElement.style.fontSize = '11px';
-                dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
                 div8.appendChild(dateElement);
                 div7.appendChild(div8);
                 div3.appendChild(div7);
@@ -443,7 +473,7 @@ $(window).on("load", function () {
                 div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
                 dateElement.classList.add('.date');
                 dateElement.style.fontSize = '11px';
-                dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2);
                 div7.appendChild(dateElement);
                 div6.appendChild(div7);
                 div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
@@ -471,9 +501,6 @@ $(window).on("load", function () {
             let deleteButton = document.createElement('button');
             let deleteIcon = document.createElement('i');
             let date = new Date(receivedMessage.timestamp);
-            let month = date.getMonth();
-            let currentHours = date.getHours();
-            let currentMinutes = date.getMinutes();
             let div1 = document.createElement('div');
             let div2 = document.createElement('div');
             let div3 = document.createElement('div');
@@ -486,13 +513,10 @@ $(window).on("load", function () {
             let messageLink = document.createElement('a');
             let authorImg = document.createElement('img');
             let messageContent = document.createElement('img');
-            month += 1;
-            currentHours = ("0" + currentHours).slice(-2);
-            currentMinutes = ("0" + currentMinutes).slice(-2);
             div1.classList.add('row');
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
-                div1.classList.add('message');
+                div1.classList.add('row', 'opponents_message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
@@ -523,7 +547,7 @@ $(window).on("load", function () {
                 div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
                 dateElement.classList.add('.date');
                 dateElement.style.fontSize = '11px';
-                dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() - 2 + ':' + date.getMinutes());
                 div8.appendChild(dateElement);
                 div7.appendChild(div8);
                 div3.appendChild(div7);
@@ -564,7 +588,7 @@ $(window).on("load", function () {
                 div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
                 dateElement.classList.add('.date');
                 dateElement.style.fontSize = '11px';
-                dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() - 2 + ':' + date.getMinutes());
                 div7.appendChild(dateElement);
                 div6.appendChild(div7);
                 div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
@@ -593,9 +617,6 @@ $(window).on("load", function () {
             let deleteButton = document.createElement('button');
             let deleteIcon = document.createElement('i');
             let date = new Date(receivedMessage.timestamp);
-            let month = date.getMonth();
-            let currentHours = date.getHours();
-            let currentMinutes = date.getMinutes();
             let parentDiv = document.createElement('div');
             let fileName = document.createElement('span');
             let div1 = document.createElement('div');
@@ -614,13 +635,10 @@ $(window).on("load", function () {
             parentDiv.style.textAlign = 'center';
             parentDiv.style.background = 'none';
             parentDiv.classList.add('message');
-            month += 1;
-            currentHours = ("0" + currentHours).slice(-2);
-            currentMinutes = ("0" + currentMinutes).slice(-2);
             div1.classList.add('row');
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
-                div1.classList.add('message');
+                div1.classList.add('opponents_message');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
@@ -630,7 +648,7 @@ $(window).on("load", function () {
                 authorImg.style.height = '50px';
                 messageLink.appendChild(authorImg);
                 div2.appendChild(messageLink);
-                div3.classList.add('col-sm-7', 'col-xl-6');
+                div3.classList.add('col-sm-7', 'col-xl-4');
                 div4.classList.add('row');
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
@@ -641,7 +659,8 @@ $(window).on("load", function () {
                 source.src = receivedMessage.content.substr(1);
                 messageContent.id = 'messageContent' + receivedMessage.messageId;
                 messageContent.appendChild(source);
-                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("\\") + 1, receivedMessage.content.length);
+                messageContent.addEventListener("play", stopAll, null);
+                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
                 parentDiv.appendChild(fileName);
                 parentDiv.appendChild(messageContent);
                 div6.appendChild(parentDiv);
@@ -652,7 +671,7 @@ $(window).on("load", function () {
                 div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
                 dateElement.classList.add('.date');
                 dateElement.style.fontSize = '11px';
-                dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
                 div8.appendChild(dateElement);
                 div7.appendChild(div8);
                 div3.appendChild(div7);
@@ -669,10 +688,10 @@ $(window).on("load", function () {
                 div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
                 messageContent.setAttribute('controls', 'controls');
                 messageContent.setAttribute('preload', 'metadata');
-                messageContent.classList.add('message');
                 messageContent.id = 'messageContent' + receivedMessage.messageId;
                 source.src = receivedMessage.content.substr(1);
                 messageContent.appendChild(source);
+                messageContent.addEventListener("play", stopAll, null);
                 editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
                 anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
                 deleteButton.style.border = 'none';
@@ -684,7 +703,7 @@ $(window).on("load", function () {
                 deleteButton.appendChild(deleteIcon);
                 anotherEditAndDeleteDiv.appendChild(deleteButton);
                 editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
-                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("\\") + 1, receivedMessage.content.length);
+                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
                 parentDiv.appendChild(fileName);
                 parentDiv.appendChild(messageContent);
                 div5.appendChild(parentDiv);
@@ -695,7 +714,7 @@ $(window).on("load", function () {
                 div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
                 dateElement.classList.add('.date');
                 dateElement.style.fontSize = '11px';
-                dateElement.innerText = date.getDate() + '-' + month + ' ' + currentHours + ':' + currentMinutes;
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
                 div7.appendChild(dateElement);
                 div6.appendChild(div7);
                 div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
@@ -812,7 +831,11 @@ $(window).on("load", function () {
 
 
     sendButton.addEventListener('click', function (event) {
-        sendMessage(event);
+        if (disabled === false) {
+            sendMessage(event);
+            disableSendButton();
+            setTimeout(enableSendButton, 3000);
+        }
     });
 
 

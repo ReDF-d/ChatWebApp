@@ -23,12 +23,5 @@ public class WebSocketEventListener {
 
     @EventListener
     public void handleWebSocketDisconnectListener(@NotNull SessionDisconnectEvent event) {
-    /*    StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        Long id = (Long) Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("id");
-        String roomId = (String) Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("roomId");
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setType(ChatMessage.MessageType.LEAVE);
-        chatMessage.setSender(username);
-        messagingTemplate.convertAndSend("/topic/chat/" + roomId, chatMessage);*/
     }
 }

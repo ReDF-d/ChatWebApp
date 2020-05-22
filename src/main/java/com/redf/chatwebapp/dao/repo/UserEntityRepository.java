@@ -18,6 +18,6 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u from UserEntity u order by id")
     List<UserEntity> findAllOrderById();
 
-    @Query("SELECT u from UserEntity u where u.username like %:username%")
-    List<UserEntity> findByUsername(@Param("username") String username);
+
+    List<UserEntity> findByUsernameContainingIgnoreCase(@Param("username") String username);
 }

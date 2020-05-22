@@ -63,6 +63,8 @@ public class ChatsController implements RoomSanitizer {
     public ModelAndView getChatsPage() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity principal = getUserService().findById(userDetails.getId());
+        if (getRoomEntityRepository().findRoomsByMemberId(principal.getId()).contains(getRoomEntityRepository().findRoomById(1)) && getRoomEntityRepository().findRoomsByMemberId(principal.getId()).size() == 1)
+            return new ModelAndView("redirect:/chat/1");
         List<RoomBeautify> roomsBeautify = new ArrayList<>();
         setRooms((ArrayList<RoomEntity>) getRoomEntityRepository().findRoomsByMemberId(principal.getId()));
         addRooms(getRooms(), roomsBeautify, principal.getId(), getMessageEntityRepository());

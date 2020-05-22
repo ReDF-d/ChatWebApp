@@ -31,7 +31,7 @@ public class SearchController {
     @PostMapping
     public ModelAndView searchUsers(@RequestParam(value = "searchUsers", required = false) String searchString) {
         ModelAndView modelAndView = new ModelAndView("searchUsers");
-        setSearchResult((ArrayList<UserEntity>) getUserEntityRepository().findByUsername(searchString));
+        setSearchResult((ArrayList<UserEntity>) getUserEntityRepository().findByUsernameContainingIgnoreCase(searchString));
         if (getSearchResult().size() == 1)
             return new ModelAndView("redirect:/user/" + getSearchResult().get(0).getId());
         modelAndView.addObject("searchResult", getSearchResult());
