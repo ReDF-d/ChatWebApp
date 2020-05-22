@@ -33,8 +33,6 @@ public class ProfilePageController {
     private UserService userService;
     private FriendshipDAOImpl friendshipDAO;
     private FriendshipEntityRepository friendshipEntityRepository;
-    private boolean friends = false;
-    private boolean pending = false;
     private RoomEntityRepository roomEntityRepository;
     private RoomDAOImpl roomDAO;
 
@@ -61,13 +59,12 @@ public class ProfilePageController {
         if (isAuthenticated())
             userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userDetails != null) {
-            initFriendsFields(userDetails.getId(), user.getId());
-            modelAndView.addObject("isFriend", isFriends());
-            FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(userDetails.getId(), user.getId());
+            FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(user.getId(), userDetails.getId());
+            modelAndView.addObject("isFriend", isFriends(userDetails.getId(), user.getId()));
             if (friendshipEntity != null) {
-                if (isFriends())
+                if (isFriends(userDetails.getId(), user.getId()))
                     modelAndView.addObject("friends", "Удалить " + user.getUsername() + " из друзей");
-                if (isPending()) {
+                if (isPending(userDetails.getId(), user.getId())) {
                     if (friendshipEntity.getLastAction() == userDetails.getId().intValue())
                         modelAndView.addObject("friends", "Вы отправили заявку в друзья");
                     else
@@ -117,32 +114,25 @@ public class ProfilePageController {
 
     @PostMapping
     public String addFriend(@PathVariable String id) {
-        Long uId = (Long.parseLong(id));
-        UserEntity user = getUserService().findById(uId);
+        UserEntity user = getUserService().findById(Long.parseLong(id));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity principal = getUserService().findById(userDetails.getId());
-        initFriendsFields(uId, principal.getId());
-        if (isPending() || isFriends()) {
-            FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(user.getId(), userDetails.getId());
-            if (isFriends()) {
+        FriendshipEntity friendshipEntity;
+        if (isPending(principal.getId(), user.getId()) || isFriends(principal.getId(), user.getId())) {
+            friendshipEntity = getFriendshipEntityRepository().findById(user.getId(), userDetails.getId());
+            if (isFriends(principal.getId(), user.getId())) {
                 getFriendshipEntityRepository().delete(friendshipEntity);
-                setFriends(false);
-                setPending(false);
             }
-            if (isPending() && friendshipEntity.getLastAction() == userDetails.getId().intValue()) {
+            if (isPending(principal.getId(), user.getId()) && friendshipEntity.getLastAction() == userDetails.getId().intValue()) {
                 getFriendshipEntityRepository().delete(friendshipEntity);
-                setFriends(false);
-                setPending(false);
             }
-            if (isPending() && friendshipEntity.getLastAction() != userDetails.getId().intValue()) {
+            if (isPending(principal.getId(), user.getId()) && friendshipEntity.getLastAction() != userDetails.getId().intValue()) {
                 friendshipEntity.setStatus("friends");
                 getFriendshipDAO().update(friendshipEntity);
-                setPending(false);
-                setFriends(true);
             }
         } else
-            getFriendshipEntityRepository().save(new FriendshipEntity(getUserService().findById(userDetails.getId()), getUserService().findById(userDetails.getId()), "pending", userDetails.getId().intValue()));
-        return "redirect:/user/" + uId;
+            getFriendshipEntityRepository().save(new FriendshipEntity(getUserService().findById(user.getId()), getUserService().findById(userDetails.getId()), "pending", userDetails.getId().intValue()));
+        return "redirect:/user/" + Long.parseLong(id);
     }
 
 
@@ -167,14 +157,15 @@ public class ProfilePageController {
     }
 
 
-    private void initFriendsFields(Long id1, Long id2) {
+    private boolean isFriends(Long id1, Long id2) {
         FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(id1, id2);
-        if (friendshipEntity != null) {
-            if (!friendshipEntity.getStatus().equals("friends"))
-                setPending(true);
-            else if (friendshipEntity.getStatus().equals("friends"))
-                setFriends(true);
-        }
+        return (friendshipEntity != null) && (friendshipEntity.getStatus().equals("friends"));
+    }
+
+
+    private boolean isPending(Long id1, Long id2) {
+        FriendshipEntity friendshipEntity = getFriendshipEntityRepository().findById(id1, id2);
+        return (friendshipEntity != null) && (friendshipEntity.getStatus().equals("pending"));
     }
 
 
@@ -237,26 +228,6 @@ public class ProfilePageController {
     }
 
 
-    @Contract(pure = true)
-    private boolean isPending() {
-        return pending;
-    }
-
-
-    private void setPending(boolean pending) {
-        this.pending = pending;
-    }
-
-
-    @Contract(pure = true)
-    private boolean isFriends() {
-        return friends;
-    }
-
-
-    private void setFriends(boolean friends) {
-        this.friends = friends;
-    }
 
 
     @Contract(pure = true)
