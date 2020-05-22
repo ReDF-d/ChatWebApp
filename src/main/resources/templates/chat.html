@@ -167,7 +167,7 @@
                                                          style="max-width: 300px; max-height: 300px;"
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
-                                                    <div class="message"  style="text-align: center; background: none; padding-left: 0px;" th:if="${message.getMessageType().equals('audio')}">
+                                                    <div class="message"  style="text-align: center; background: none; padding-left: 0px; " th:if="${message.getMessageType().equals('audio')}">
                                                         <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                         <audio controls preload="metadata"
                                                                th:id="${'messageContent' + message.getMessageId()}">
