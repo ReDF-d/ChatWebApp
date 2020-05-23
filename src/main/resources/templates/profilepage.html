@@ -30,6 +30,11 @@
                 <div class="col-xl-12 text-center User_profile_name" style="margin-top: 10px;">
                     <span th:text="${user.getUsername()}"></span>
                 </div>
+                <div class="col-xl-12 text-center d-flex justify-content-center" style="margin-top: 10px;">
+                    <span class="text-success">В сети</span>
+                    <span class="text-danger">Не в сети</span>
+                </div>
+
                 <div class="col-xl-12 text-center User_profile_name text-danger" style="margin-top: 10px;">
                     <span th:if="${user.getIsLocked() == true}">Пользователь заблокирован</span>
                 </div>
