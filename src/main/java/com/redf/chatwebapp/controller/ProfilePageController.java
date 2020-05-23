@@ -4,9 +4,11 @@ package com.redf.chatwebapp.controller;
 import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.RoomDAOImpl;
 import com.redf.chatwebapp.dao.entities.FriendshipEntity;
+import com.redf.chatwebapp.dao.entities.OnlineUserEntity;
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.FriendshipEntityRepository;
+import com.redf.chatwebapp.dao.repo.OnlineUserEntityRepository;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
 import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dao.utils.UserDetails;
@@ -35,6 +37,7 @@ public class ProfilePageController {
     private FriendshipEntityRepository friendshipEntityRepository;
     private RoomEntityRepository roomEntityRepository;
     private RoomDAOImpl roomDAO;
+    private OnlineUserEntityRepository onlineUserEntityRepository;
 
 
     private ArrayList<FriendshipEntity> userFriends;
@@ -42,12 +45,13 @@ public class ProfilePageController {
 
     @Contract(pure = true)
     @Autowired
-    ProfilePageController(UserService userService, FriendshipDAOImpl friendshipDAO, FriendshipEntityRepository friendshipEntityRepository, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO) {
+    ProfilePageController(UserService userService, FriendshipDAOImpl friendshipDAO, FriendshipEntityRepository friendshipEntityRepository, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO, OnlineUserEntityRepository onlineUserEntityRepository) {
         setFriendshipEntityRepository(friendshipEntityRepository);
         setFriendshipDAO(friendshipDAO);
         setUserService(userService);
         setRoomEntityRepository(roomEntityRepository);
         setRoomDAO(roomDAO);
+        setOnlineUserEntityRepository(onlineUserEntityRepository);
     }
 
 
@@ -74,6 +78,10 @@ public class ProfilePageController {
                 modelAndView.addObject("friends", "Добавить " + user.getUsername() + " в друзья");
         }
         modelAndView.addObject("user", user);
+        if (userDetails == null)
+            modelAndView.addObject("isOnline", isOnline(user, -1L));
+        else
+            modelAndView.addObject("isOnline", isOnline(user, userDetails.getId()));
         String url = getPrincipalPageUrl();
         modelAndView.addObject("url", url);
         setUserFriends((ArrayList<FriendshipEntity>) getFriendshipEntityRepository().getUserFriends(user.getId()));
@@ -81,6 +89,18 @@ public class ProfilePageController {
         return modelAndView;
     }
 
+
+    private boolean isOnline(@NotNull UserEntity user, Long id) {
+        if (user.getId().equals(id))
+            return true;
+        OnlineUserEntity onlineUserEntity = getOnlineUserEntityRepository().findByUserId(user.getId());
+        String status;
+        if (onlineUserEntity != null)
+            status = onlineUserEntity.isOnline();
+        else
+            return false;
+        return !status.equals("OFFLINE");
+    }
 
     @PutMapping
     public String getEditPage() {
@@ -247,5 +267,14 @@ public class ProfilePageController {
 
     private void setRoomDAO(RoomDAOImpl roomDAO) {
         this.roomDAO = roomDAO;
+    }
+
+    @Contract(pure = true)
+    private OnlineUserEntityRepository getOnlineUserEntityRepository() {
+        return onlineUserEntityRepository;
+    }
+
+    private void setOnlineUserEntityRepository(OnlineUserEntityRepository onlineUserEntityRepository) {
+        this.onlineUserEntityRepository = onlineUserEntityRepository;
     }
 }

@@ -14,7 +14,8 @@ import java.util.List;
 @Repository
 public interface OnlineUserEntityRepository extends JpaRepository<OnlineUserEntity, Long> {
 
-    OnlineUserEntity findOnlineUserEntityById(@Param("id") Long id);
+    @Query(value = "select o from OnlineUserEntity o where o.id = :id")
+    OnlineUserEntity findByUserId(@Param("id") Long id);
 
 
     @Query(value = "select id, is_online, last_seen from online_users join room_members on (room_members.user_id = online_users.id) where room_id = :id", nativeQuery = true)

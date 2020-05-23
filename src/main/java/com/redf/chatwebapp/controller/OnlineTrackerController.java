@@ -53,7 +53,7 @@ public class OnlineTrackerController {
     public UserOnlineStatusChangeMessage setUserOffline(@NotNull @Payload UserOnlineStatusChangeMessage message) throws InterruptedException {
         Long parsedId = Long.parseLong(message.getId());
         Thread.sleep(5500);
-        OnlineUserEntity currentUser = getOnlineUserEntityRepository().findOnlineUserEntityById(parsedId);
+        OnlineUserEntity currentUser = getOnlineUserEntityRepository().findByUserId(parsedId);
         if (!currentUser.isOnline().equals("ONLINE")) {
             Thread.sleep(500);
             if (!currentUser.isOnline().equals("ONLINE")) {
@@ -68,8 +68,8 @@ public class OnlineTrackerController {
     public void saveUserStatus(@NotNull @Payload UserOnlineStatusChangeMessage message) throws InterruptedException {
         Long parsedId = Long.parseLong(message.getId());
         OnlineUserEntity currentUser;
-        if (getOnlineUserEntityRepository().findOnlineUserEntityById(parsedId) != null) {
-            currentUser = getOnlineUserEntityRepository().findOnlineUserEntityById(parsedId);
+        if (getOnlineUserEntityRepository().findByUserId(parsedId) != null) {
+            currentUser = getOnlineUserEntityRepository().findByUserId(parsedId);
             currentUser.setLastSeen(Calendar.getInstance().getTimeInMillis());
             currentUser.setOnline(message.getStatus().toString());
             while (!savePermitted)

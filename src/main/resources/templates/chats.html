@@ -58,6 +58,8 @@
                                                   th:text="${chat.getLastMessage().getUsername() + ': ' + 'Фотография'}"></span>
                                             <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('audio')}"
                                                   th:text="${chat.getLastMessage().getUsername() + ': ' + 'Аудиозапись'}"></span>
+                                            <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('video')}"
+                                                  th:text="${chat.getLastMessage().getUsername() + ': ' + 'Видеозапись'}"></span>
                                             <span th:if="${chat.getLastMessage() == null}"
                                                   th:text="''"></span>
                                         </div>

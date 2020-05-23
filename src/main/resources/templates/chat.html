@@ -17,8 +17,11 @@
         <div class="col-11 col-md-11 col-lg-11 col-xl-11 chats_body" id="chats_body"
              style="background-color: rgba(255,255,255,0.81);">
             <div class="row">
-                <div class="col-3 column_bottom_border" style="padding: 10px 15px;"><span
-                        style="font-size: 24px;"><strong>Ваши чаты</strong></span></div>
+                <div class="col-3 column_bottom_border" style="padding: 10px 15px;">
+                    <span style="font-size: 24px;">
+                        <strong>Ваши чаты</strong>
+                    </span>
+                </div>
                 <div class="col-4 col-lg-5 col-xl-6 column_bottom_border" style="padding: 10px 15px;">
                     <div class="row d-flex justify-content-center">
                         <span class="edit_chatname_main" id="chatTitle" style="font-size: 24px;"
@@ -37,38 +40,43 @@
                         </button>
                     </div>
                 </div>
-                <div class="col-4 col-lg-3 col-xl-2 column_bottom_border d-flex justify-content-center" style="padding: 0;">
+                <div class="col-4 col-lg-3 col-xl-2 column_bottom_border d-flex justify-content-center"
+                     style="padding: 0;" th:if="${searchResult == null}">
                     <form class="form-inline d-flex justify-content-center align-items-center"
                           id="searchMessage" th:action="@{/chat/{id} (id=${roomId})}" th:method="patch">
                         <input class="form-control" id="searchMessageInput" placeholder="Найти сообщение"
-                               style="padding: 1px 0 2px;" th:name="searchMessage"
+                               style=" width: 0;opacity: 0;transition: width 2s, opacity 0s;" th:name="searchMessage"
                                type="text"/>
                         <input readonly style="display: none;" th:name="roomId" th:value="${roomId.trim()}">
-                        <button class="btn btn-light border rounded-0 border-secondary"
+                        <button class="btn rounded-0"
                                 id="searchMessageSubmit" style="padding: 6px 10px;"
                                 type="submit">
                             <i class="fa fa-search"></i>
                         </button>
                     </form>
                 </div>
-                <div class="col-2 col-lg-1 d-flex justify-content-center align-items-center column_bottom_border    ">
-                        <div class="dropleft">
-                            <button class="btn chatOptionsDropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>
+                <div class="col-2 col-lg-1 d-flex justify-content-center align-items-center column_bottom_border">
+                    <div class="dropleft">
+                        <button aria-expanded="false" aria-haspopup="true" class="btn chatOptionsDropdown"
+                                data-toggle="dropdown" id="dropdownMenuButton" type="button">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div aria-labelledby="dropdownMenuButton" class="dropdown-menu">
+                            <button class="dropdown-item" id="addMember" style="font-size: 15px;"
+                                    th:if="${roomType.equals('group')}"
+                                    type="button">
+                                Добавить пользователя
                             </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <button class="dropdown-item" id="addMember" style="font-size: 15px;"
-                                        th:if="${roomType.equals('group')}"
-                                        type="button">
-                                    Добавить пользователя
-                                </button>
-                                <button class="dropdown-item" id="removeMembers" style="font-size: 15px;"
-                                        th:if="${((#authorization.expression('hasAuthority(''ADMIN'')')) && roomType.equals('group')) || ((owner.getId() == #authentication.getPrincipal().getId()) && roomType.equals('group'))}"
-                                        type="button">
-                                    Управление пользователями
-                                </button>
-                            </div>
+                            <button class="dropdown-item" id="removeMembers" style="font-size: 15px;"
+                                    th:if="${((#authorization.expression('hasAuthority(''ADMIN'')')) && roomType.equals('group')) || ((owner.getId() == #authentication.getPrincipal().getId()) && roomType.equals('group'))}"
+                                    type="button">
+                                Управление пользователями
+                            </button>
+                            <button class="dropdown-item" id="viewAttachments" style="font-size: 15px;" type="button">
+                                Показать вложения
+                            </button>
                         </div>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -115,6 +123,8 @@
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + 'Фотография'}"></span>
                                                     <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('audio')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + 'Аудиозапись'}"></span>
+                                                    <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('video')}"
+                                                          th:text="${chat.getLastMessage().getUsername() + ': ' + 'Видеозапись'}"></span>
                                                     <span th:if="${chat.getLastMessage() == null}" th:text="''"></span>
                                                 </div>
                                             </div>
@@ -165,22 +175,27 @@
                                         </a>
                                     </div>
                                     <div class="col-sm-7 col-xl-4">
-                                        <div class="row d-flex justify-content-start" style="padding-left: 10px; font-weight: 550;">
+                                        <div class="row d-flex justify-content-start"
+                                             style="padding-left: 10px; font-weight: 550;">
                                             <span th:text="${message.getUser().getUsername()}"></span>
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-0" style="padding: 5px;">
                                                 <div class="d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-start justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
-                                                    <p class="message"
+                                                    <p class="message text"
                                                        th:if="${message.getMessageType().equals('text')}"
                                                        style="margin-left: 5px;font-size: 14px;word-break: break-all;"
+                                                       th:id="${'messageContent' + message.getMessageId()}">
                                                        th:text="${message.getMessageText()}">
                                                     </p>
                                                     <img class="message" draggable="false"
                                                          style="max-width: 300px; max-height: 300px;"
+                                                         th:id="${'messageContent' + message.getMessageId()}">
                                                          th:if="${message.getMessageType().equals('image')}"
                                                          th:src="@{${message.getMessageText().substring(1)}}">
-                                                    <div class="message"  style="text-align: center; background: none; padding-left: 0px; " th:if="${message.getMessageType().equals('audio')}">
+                                                    <div class="message"
+                                                         style="text-align: center; background: none; padding-left: 0px; "
+                                                         th:if="${message.getMessageType().equals('audio')}">
                                                         <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                         <audio controls preload="metadata"
                                                                th:id="${'messageContent' + message.getMessageId()}">
@@ -212,9 +227,10 @@
                                      th:id="${'message' + message.getMessageId()}"
                                      th:if="${message.getUser().getId() == #authentication.getPrincipal().getId()}">
                                     <div class="col-sm-7 col-xl-6 offset-sm-3 offset-md-3 offset-lg-3 offset-xl-5 ">
-                                        <div class="row d-flex justify-content-end" style="padding-right: 10px; font-weight: 550;">
+                                        <div class="row d-flex justify-content-end"
+                                             style="padding-right: 10px; font-weight: 550;">
                                             <span th:text="${message.getUser().getUsername()}"></span>
-                                    </div>
+                                        </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-1 " style="padding: 5px;">
                                                 <div class="row edit_message_main">
@@ -227,12 +243,12 @@
                                                         <button class="editButton"
                                                                 style="border: none; background: none; padding-left: 10px;"
                                                                 th:id="${'editMessage' + message.getMessageId()}"
-                                                                th:if="${!message.getMessageType().equals('image') && !message.getMessageType().equals('audio')}">
+                                                                th:if="${!message.getMessageType().equals('image') && !message.getMessageType().equals('audio') && !message.getMessageType().equals('video')}">
                                                             <i class="fas fa-pencil-alt"></i>
                                                         </button>
                                                     </div>
                                                     <div class="col d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-end justify-content-md-end justify-content-lg-end justify-content-xl-end align-items-xl-center">
-                                                        <p class="message user_message"
+                                                        <p class="message user_message text"
                                                            th:id="${'messageContent' + message.getMessageId()}"
                                                            th:if="${message.getMessageType().equals('text')}"
                                                            style="margin-right: 0;font-size: 14px;margin-left: 0;"
@@ -302,7 +318,7 @@
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-0" style="padding: 5px;">
                                                 <div class="d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-start justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
-                                                    <p class="message"
+                                                    <p class="message text"
                                                        style="margin-left: 5px;font-size: 14px;word-break: break-all;"
                                                        th:if="${message.getMessageType().equals('text')}"
                                                        th:text="${message.getMessageText()}">
@@ -353,7 +369,7 @@
                                             <div class="col-sm-12 col-xl-11 offset-xl-1 " style="padding: 5px;">
                                                 <div class="row edit_message_main">
                                                     <div class="col d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-end justify-content-md-end justify-content-lg-end justify-content-xl-end align-items-xl-center">
-                                                        <p class="message user_message"
+                                                        <p class="message user_message text"
                                                            style="margin-right: 0;font-size: 14px;margin-left: 0;"
                                                            th:id="${'messageContent' + message.getMessageId()}"
                                                            th:if="${message.getMessageType().equals('text')}"
@@ -409,8 +425,11 @@
                           th:if="${searchResult == null}">
                         <div class="row d-flex align-items-center">
                             <div class=" col-9 col-lg-10" style="padding: 0 0 0 15px;">
-                                        <textarea value="" class="text_area" id="message" placeholder="Введите сообщение" style=" margin: 0; overflow: auto; resize: none; min-height: 30px; max-height: 70px; width: 100%;" type="text"></textarea>
-                                        <div id="message_div"></div>
+                                <textarea class="text_area" id="message" placeholder="Введите сообщение"
+                                          style=" margin: 0; overflow: auto; resize: none; min-height: 30px; max-height: 70px; width: 100%;"
+                                          type="text"
+                                          value=""></textarea>
+                                <div id="message_div"></div>
                             </div>
                             <div class="col-3 col-lg-2" style="padding: 0; padding-bottom: 5px;">
                                 <input accept="image/*, audio/*, video/*" class="chatFile" id="file" multiple
@@ -442,7 +461,8 @@
                 </div>
                 <div class="col-2 col-xl-1 phonehider" style="padding: 0px 0px 0px 0px;">
                     <div class="row" style="margin: 0px;">
-                        <div class="col-md-12 col-xl-12 offset-md-6" style="padding: 0px;margin-left: 0;height: 70vh; border-bottom: 1px solid #858686;">
+                        <div class="col-md-12 col-xl-12 offset-md-6"
+                             style="padding: 0px;margin-left: 0;height: 70vh; border-bottom: 1px solid #858686;">
                             <div class="row" style="margin: 0px;">
                                 <div class="col text-center border_class" style="padding: 0px;"><span
                                         class="online_status" style="font-size: 13px;">В сети:&nbsp;</span>
@@ -648,61 +668,62 @@
             </div>
         </div>
         <!--RemoveMembersForm-->
-                <div class="col-10 col-sm-7 col-md-6 col-lg-4 col-xl-4 search_result_form" id="removeMembersForm"
-                     style="height: 50vh; margin-top: 7vh; display: none">
-                    <div class="row">
-                        <div class="col-11 d-flex justify-content-center align-items-center" style="margin: 0; padding: 0;">
+        <div class="col-10 col-sm-7 col-md-6 col-lg-4 col-xl-4 search_result_form" id="removeMembersForm"
+             style="height: 50vh; margin-top: 7vh; display: none">
+            <div class="row">
+                <div class="col-11 d-flex justify-content-center align-items-center" style="margin: 0; padding: 0;">
                             <span class="d-flex justify-center align-items-center"
                                   style="font-size: 18px;">Управление пользователями
                             </span>
-                        </div>
-                        <div class="col-1 d-flex justify-content-center align-items-center"
-                             style="padding: 0  ;">
-                            <button class="btn d-xl-flex justify-content-xl-center align-items-xl-center" id="closeRemoveMembers"
-                                    style="padding: 0;"
-                                    type="button">
-                                <i class="fa fa-close" style="font-size: 20px;"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row" style="margin: 0;">
-                            <div class="col your_chats_column" id="membersList">
-                                    <th:block th:each="member : ${members}">
-                                        <div class="row search_element" style="margin: 0;padding: 10px;"
-                                             th:id="'removeMember' + ${member.getId()}"
-                                             th:if="${member.getId() != #authentication.getPrincipal().getId()}">
-                                            <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 offset-0 offset-sm-0 offset-md-0 offset-lg-0 offset-xl-0 d-flex d-sm-flex d-md-flex d-lg-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
-                                                 style="padding: 0;">
-                                                <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
-                                                     draggable="false"
-                                                     style="width: 50px;height: 50px;"
-                                                     th:src="@{${'~/media/avatars/avatar' + member.getId() + '.png'}}">
-                                            </div>
-                                            <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 offset-sm-0 offset-xl-0 d-flex d-sm-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
-                                                <a th:href="@{/user/{id}(id=${member.getId()})}">
-                                                    <div class="row">
-                                                        <div class="col-sm-12 col-xl-12 offset-xl-0 your_chats_online_users"
-                                                             style="padding-left: 0;padding-right: 0;">
+                </div>
+                <div class="col-1 d-flex justify-content-center align-items-center"
+                     style="padding: 0  ;">
+                    <button class="btn d-xl-flex justify-content-xl-center align-items-xl-center"
+                            id="closeRemoveMembers"
+                            style="padding: 0;"
+                            type="button">
+                        <i class="fa fa-close" style="font-size: 20px;"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row" style="margin: 0;">
+                <div class="col your_chats_column" id="membersList">
+                    <th:block th:each="member : ${members}">
+                        <div class="row search_element" style="margin: 0;padding: 10px;"
+                             th:id="'removeMember' + ${member.getId()}"
+                             th:if="${member.getId() != #authentication.getPrincipal().getId()}">
+                            <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 offset-0 offset-sm-0 offset-md-0 offset-lg-0 offset-xl-0 d-flex d-sm-flex d-md-flex d-lg-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
+                                 style="padding: 0;">
+                                <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                     draggable="false"
+                                     style="width: 50px;height: 50px;"
+                                     th:src="@{${'~/media/avatars/avatar' + member.getId() + '.png'}}">
+                            </div>
+                            <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 offset-sm-0 offset-xl-0 d-flex d-sm-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
+                                <a th:href="@{/user/{id}(id=${member.getId()})}">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-xl-12 offset-xl-0 your_chats_online_users"
+                                             style="padding-left: 0;padding-right: 0;">
                                                             <span style="font-size: 18px;"
                                                                   th:text="${member.getUsername()}"></span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
-                                                 style="padding: 0;">
-                                                <button class="btn text-danger removeMemberButton"
-                                                        th:id="'removeMemberButton' + ${member.getId()}">
-                                                    <i class="fa fa-remove"></i>
-                                                </button>
-                                            </div>
                                         </div>
-                                    </th:block>
+                                    </div>
+                                </a>
                             </div>
-                    </div>
+                            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center"
+                                 style="padding: 0;">
+                                <button class="btn text-danger removeMemberButton"
+                                        th:id="'removeMemberButton' + ${member.getId()}">
+                                    <i class="fa fa-remove"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </th:block>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 <footer th:replace="footer::foot"></footer>
 <script th:src="@{~/js/chat.js}"></script>
 <script th:src="@{~/js/createChat.js}"></script>

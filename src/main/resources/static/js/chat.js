@@ -76,7 +76,6 @@ $(window).on("load", function () {
     }
 
 
-
     function onConnected() {
         stompClient.subscribe('/topic/chat/' + roomId.textContent, onMessageReceived);
         stompClient.subscribe('/topic/onlineTracker', onStatusChange);
@@ -400,7 +399,7 @@ $(window).on("load", function () {
             div1.classList.add('row');
             div1.style.padding = '10px';
             if (id !== receivedMessage.id) {
-                div1.classList.add('row', 'opponents_message');
+                div1.classList.add('row', 'opponents_message', 'text');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                 messageLink.setAttribute('href', "/user/" + receivedMessage.id);
@@ -446,6 +445,7 @@ $(window).on("load", function () {
                 let editButton = document.createElement('button');
                 let editIcon = document.createElement('i');
                 div1.id = 'message' + receivedMessage.messageId;
+                div1.classList.add('my_message', 'text');
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
                 usernameDiv.style.paddingRight = '10px';
                 usernameDiv.classList.add('justify-content-end');
@@ -968,7 +968,6 @@ $(window).on("load", function () {
 
     /*
         $(document).on('click', '.foundMessage', function (event) {
-            event.preventDefault();
             window.location.href = "/chat/" + roomId.innerText + "#" + $(event.currentTarget).attr("id");
             window.location.reload(true);
         });*/
@@ -996,18 +995,18 @@ $(window).on("load", function () {
         });
 
     if (sendButton != null)
-    sendButton.addEventListener('click', function (event) {
-        if (disabled === false) {
-            sendMessage(event);
-            disableSendButton();
-            setTimeout(enableSendButton, 3000);
-        }
-    });
+        sendButton.addEventListener('click', function (event) {
+            if (disabled === false) {
+                sendMessage(event);
+                disableSendButton();
+                setTimeout(enableSendButton, 3000);
+            }
+        });
 
     if (editButton != null)
-    editButton.addEventListener('click', function (event) {
-        sendEditedMessage(event);
-    });
+        editButton.addEventListener('click', function (event) {
+            sendEditedMessage(event);
+        });
 
 
     if (typeof editChatTitleButton !== "undefined" && editChatTitleButton !== null)
@@ -1085,5 +1084,34 @@ $(window).on("load", function () {
 
     $('#message').bind("keypress", function (e) {
         textarea_resize(e, 15, 2);
+    });
+
+
+    let searchMessageSubmit = document.getElementById('searchMessageSubmit');
+    let searchMessageInput = document.getElementById('searchMessageInput');
+
+    if (searchMessageSubmit != null)
+        searchMessageSubmit.addEventListener('click', function (event) {
+            if (searchMessageInput.value.trim() === "") {
+                event.preventDefault();
+                if (searchMessageInput.style.width === '0px') {
+                    searchMessageInput.style.width = '10vw';
+                    searchMessageInput.style.opacity = '1';
+                } else {
+                    searchMessageInput.style.width = '0';
+                    searchMessageInput.style.opacity = '0';
+                }
+            }
+        });
+    searchMessageInput.value = "";
+
+    let savedMessages;
+
+    $('#viewAttachments').on('click', function () {
+        let textMessages = document.getElementsByClassName('text');
+        savedMessages = textMessages;
+        Array.from(textMessages).forEach(element => {
+            document.getElementById('message' + element.id.match(/\d+/g)).style.display = 'none';
+        })
     });
 });
