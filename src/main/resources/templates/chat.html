@@ -40,7 +40,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="col-4 col-lg-3 col-xl-2 column_bottom_border d-flex justify-content-center"
+                <div class="col-3 col-lg-3 col-xl-2 column_bottom_border d-flex justify-content-center"
                      style="padding: 0;" th:if="${searchResult == null}">
                     <form class="form-inline d-flex justify-content-center align-items-center"
                           id="searchMessage" th:action="@{/chat/{id} (id=${roomId})}" th:method="patch">
@@ -56,6 +56,9 @@
                     </form>
                 </div>
                 <div class="col-2 col-lg-1 d-flex justify-content-center align-items-center column_bottom_border">
+                    <button class="btn" style="padding: 0; padding-right: 30px;">
+                        <i class="fas fa-times"></i>
+                    </button>
                     <div class="dropleft">
                         <button aria-expanded="false" aria-haspopup="true" class="btn chatOptionsDropdown"
                                 data-toggle="dropdown" id="dropdownMenuButton" type="button">
