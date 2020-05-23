@@ -105,6 +105,7 @@ public class ChatMessage {
         IMAGE,
         UPDATE,
         DELETE,
-        AUDIO
+        AUDIO,
+        VIDEO
     }
 }

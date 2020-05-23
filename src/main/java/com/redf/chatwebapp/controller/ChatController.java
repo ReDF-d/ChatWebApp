@@ -38,9 +38,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.inject.Singleton;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -183,7 +181,7 @@ public class ChatController implements RoomSanitizer {
 
 
     @PostMapping(params = {"userId", "roomId"})
-    public Object exitChat(@RequestParam(value = "userId") String userId, @RequestParam(value = "roomId") String roomId, HttpServletResponse response) throws IOException {
+    public Object exitChat(@RequestParam(value = "userId") String userId, @RequestParam(value = "roomId") String roomId) {
         int parsedRoomId = Integer.parseInt(roomId.replaceAll("\\D+", ""));
         Long parsedUserId = Long.parseLong(userId);
         getRoomEntityRepository().deleteRoomMember(parsedUserId, parsedRoomId);
@@ -219,10 +217,20 @@ public class ChatController implements RoomSanitizer {
                 RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
                 ChatMessage chatMessage = new ChatMessage();
                 String contentType = Files.probeContentType(pathToFile);
-                if (contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/gif"))
-                    chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "image");
-                else if (contentType.equals("audio/mpeg"))
-                    chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "audio");
+                switch (contentType) {
+                    case "image/jpeg":
+                    case "image/png":
+                    case "image/gif":
+                        chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "image");
+                        break;
+                    case "audio/mpeg":
+                        chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "audio");
+                        break;
+                    case "video/mp4":
+                    case "video/webm":
+                        chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "video");
+                        break;
+                }
                 getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
             }
         } catch (Exception ex) {
@@ -238,12 +246,17 @@ public class ChatController implements RoomSanitizer {
         MessageEntity message = getMessageDAO().createAndSave(user.getUsername(), user.getLogin(), pathToFile.toString(),
                 parseTimestampFromMilliseconds(timestamp), roomEntity, type);
         savePermitted = true;
-        if (type.equals("image"))
-            return new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.IMAGE,
-                    senderId, pathToFile.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
-        else if (type.equals("audio"))
-            return new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.AUDIO,
-                    senderId, pathToFile.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
+        switch (type) {
+            case "image":
+                return new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.IMAGE,
+                        senderId, pathToFile.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
+            case "audio":
+                return new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.AUDIO,
+                        senderId, pathToFile.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
+            case "video":
+                return new ChatMessage(roomId, String.valueOf(message.getMessageId()), ChatMessage.MessageType.VIDEO,
+                        senderId, pathToFile.toString(), user.getUsername(), user.getLogin(), parseTimestampFromMilliseconds(timestamp));
+        }
         return null;
     }
 
@@ -268,8 +281,25 @@ public class ChatController implements RoomSanitizer {
     }
 
 
+    @PatchMapping
+    public ModelAndView searchMessage(@RequestParam("searchMessage") String searchString, @PathVariable String id, @ModelAttribute("currentDate") Calendar currentDate) {
+        if (searchString.equals(""))
+            return new ModelAndView("redirect:/chat/" + Integer.parseInt(id));
+        ModelAndView modelAndView;
+        ArrayList<MessageEntity> searchResult = (ArrayList<MessageEntity>) getMessageEntityRepository().findByMessageTextFromRoom(searchString, Integer.parseInt(id));
+        modelAndView = buildModelAndView(id);
+        modelAndView.addObject("searchResult", searchResult);
+        return modelAndView;
+    }
+
+
     @GetMapping
     public ModelAndView getChatPage(@PathVariable String id, @ModelAttribute("messages") ArrayList<MessageEntity> messages, @ModelAttribute("currentDate") Calendar currentDate) {
+        return buildModelAndView(id);
+    }
+
+
+    public ModelAndView buildModelAndView(String id) {
         RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (room != null && checkMembership(room, userDetails.getId())) {
@@ -293,7 +323,6 @@ public class ChatController implements RoomSanitizer {
         } else
             return new ModelAndView("redirect:/home");
     }
-
 
     public RoomEntity getRoom() {
         return room;

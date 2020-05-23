@@ -35,7 +35,8 @@ $(window).on("load", function () {
     if (!stompClient)
         connect();
     chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
-    messageInput.focus();
+    if (messageInput != null)
+        messageInput.focus();
 
 
     function connect() {
@@ -215,6 +216,7 @@ $(window).on("load", function () {
             form_data.append('id', $('#id').text());
             form_data.append('timestamp', new Date().getTime().toString());
             form_data.append('roomId', roomId.textContent);
+            form_data.append('sender', username);
             let token = $("meta[name='_csrf']").attr("content");
             let ajaxReq = $.ajax({
                 url: "/chat/" + roomId.textContent,
@@ -335,11 +337,13 @@ $(window).on("load", function () {
     function Init() {
         let fileSelect = document.getElementById("file"),
             fileDrag = document.getElementById("filedrag");
-        fileSelect.addEventListener("change", FileSelectHandler, false);
-        let xhr = new XMLHttpRequest();
-        if (xhr.upload) {
-            fileDrag.addEventListener("drop", FileSelectHandler, false);
-            fileDrag.style.display = "block";
+        if (fileSelect != null) {
+            fileSelect.addEventListener("change", FileSelectHandler, false);
+            let xhr = new XMLHttpRequest();
+            if (xhr.upload) {
+                fileDrag.addEventListener("drop", FileSelectHandler, false);
+                fileDrag.style.display = "block";
+            }
         }
     }
 
@@ -369,6 +373,12 @@ $(window).on("load", function () {
         let receivedMessage = JSON.parse(payload.body);
         let messagePreview = document.getElementById('messagePreview' + roomId.textContent);
         let messagePreviewSpan = document.createElement('span');
+        let usernameDiv = document.createElement('div');
+        let usernameSpan = document.createElement('span');
+        usernameDiv.classList.add('row', 'd-flex');
+        usernameDiv.style.fontWeight = '550';
+        usernameSpan.innerText = receivedMessage.sender;
+        usernameDiv.appendChild(usernameSpan);
         if (receivedMessage.type === 'CHAT') {
             messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
             while (messagePreview.firstChild)
@@ -400,7 +410,8 @@ $(window).on("load", function () {
                 authorImg.style.height = '50px';
                 messageLink.appendChild(authorImg);
                 div2.appendChild(messageLink);
-                div3.classList.add('col-sm-7', 'col-xl-6');
+                div3.classList.add('col-sm-7', 'col-xl-4');
+                div3.appendChild(usernameDiv);
                 div4.classList.add('row');
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
@@ -436,6 +447,9 @@ $(window).on("load", function () {
                 let editIcon = document.createElement('i');
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                usernameDiv.style.paddingRight = '10px';
+                usernameDiv.classList.add('justify-content-end');
+                div2.appendChild(usernameDiv);
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
                 editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
@@ -526,7 +540,10 @@ $(window).on("load", function () {
                 authorImg.style.height = '50px';
                 messageLink.appendChild(authorImg);
                 div2.appendChild(messageLink);
-                div3.classList.add('col-sm-7', 'col-xl-6');
+                div3.classList.add('col-sm-7', 'col-xl-4');
+                usernameDiv.style.paddingLeft = '10px';
+                usernameDiv.classList.add('justify-content-start');
+                div3.appendChild(usernameDiv);
                 div4.classList.add('row');
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
@@ -558,6 +575,9 @@ $(window).on("load", function () {
             } else {
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                usernameDiv.style.paddingRight = '10px';
+                usernameDiv.classList.add('justify-content-end');
+                div2.appendChild(usernameDiv);
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
                 div4.style.padding = '5px';
@@ -649,6 +669,9 @@ $(window).on("load", function () {
                 messageLink.appendChild(authorImg);
                 div2.appendChild(messageLink);
                 div3.classList.add('col-sm-7', 'col-xl-4');
+                usernameDiv.style.paddingLeft = '10px';
+                usernameDiv.classList.add('justify-content-start');
+                div3.appendChild(usernameDiv);
                 div4.classList.add('row');
                 div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                 div5.style.padding = '5px';
@@ -682,6 +705,141 @@ $(window).on("load", function () {
             } else {
                 div1.id = 'message' + receivedMessage.messageId;
                 div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                usernameDiv.style.paddingRight = '10px';
+                usernameDiv.classList.add('justify-content-end');
+                div2.appendChild(usernameDiv);
+                div3.classList.add('row');
+                div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
+                div4.style.padding = '5px';
+                div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+                messageContent.setAttribute('controls', 'controls');
+                messageContent.setAttribute('preload', 'metadata');
+                messageContent.id = 'messageContent' + receivedMessage.messageId;
+                source.src = receivedMessage.content.substr(1);
+                messageContent.appendChild(source);
+                messageContent.addEventListener("play", stopAll, null);
+                editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
+                anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
+                deleteButton.style.border = 'none';
+                deleteButton.style.background = 'none';
+                deleteButton.style.paddingRight = '10px';
+                deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
+                deleteButton.classList.add('deleteButton');
+                deleteIcon.classList.add('fas', 'fa-times');
+                deleteButton.appendChild(deleteIcon);
+                anotherEditAndDeleteDiv.appendChild(deleteButton);
+                editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
+                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
+                parentDiv.appendChild(fileName);
+                parentDiv.appendChild(messageContent);
+                div5.appendChild(parentDiv);
+                editAndDeleteButtonsDiv.appendChild(div5);
+                div4.appendChild(editAndDeleteButtonsDiv);
+                div3.appendChild(div4);
+                div6.classList.add('row');
+                div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
+                dateElement.classList.add('.date');
+                dateElement.style.fontSize = '11px';
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
+                div7.appendChild(dateElement);
+                div6.appendChild(div7);
+                div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                messageLink.id = 'messageContent' + receivedMessage.messageId;
+                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                authorImg.style.width = '50px';
+                authorImg.style.height = '50px';
+                messageLink.appendChild(authorImg);
+                div8.appendChild(messageLink);
+                div2.appendChild(div3);
+                div2.appendChild(div6);
+                div1.appendChild(div2);
+                div1.appendChild(div8);
+                messageArea.appendChild(div1);
+                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+            }
+        } else if (receivedMessage.type === 'VIDEO') {
+            messagePreviewSpan.innerText = receivedMessage.sender + ': Аудиозапись';
+            while (messagePreview.firstChild)
+                messagePreview.firstChild.remove();
+            messagePreview.appendChild(messagePreviewSpan);
+            let editAndDeleteButtonsDiv = document.createElement('div');
+            let anotherEditAndDeleteDiv = document.createElement('div');
+            let deleteButton = document.createElement('button');
+            let deleteIcon = document.createElement('i');
+            let date = new Date(receivedMessage.timestamp);
+            let parentDiv = document.createElement('div');
+            let fileName = document.createElement('span');
+            let div1 = document.createElement('div');
+            let div2 = document.createElement('div');
+            let div3 = document.createElement('div');
+            let div4 = document.createElement('div');
+            let div5 = document.createElement('div');
+            let div6 = document.createElement('div');
+            let div7 = document.createElement('div');
+            let div8 = document.createElement('div');
+            let dateElement = document.createElement('span');
+            let messageLink = document.createElement('a');
+            let authorImg = document.createElement('img');
+            let messageContent = document.createElement('video');
+            let source = document.createElement('source');
+            parentDiv.style.textAlign = 'center';
+            parentDiv.style.background = 'none';
+            parentDiv.classList.add('message');
+            div1.classList.add('row');
+            div1.style.padding = '10px';
+            if (id !== receivedMessage.id) {
+                div1.classList.add('opponents_message');
+                div1.id = 'message' + receivedMessage.messageId;
+                div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                authorImg.style.width = '50px';
+                authorImg.style.height = '50px';
+                messageLink.appendChild(authorImg);
+                div2.appendChild(messageLink);
+                div3.classList.add('col-sm-7', 'col-xl-4');
+                usernameDiv.style.paddingLeft = '10px';
+                usernameDiv.classList.add('justify-content-start');
+                div3.appendChild(usernameDiv);
+                div4.classList.add('row');
+                div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
+                div5.style.padding = '5px';
+                div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
+                messageContent.classList.add('message');
+                messageContent.setAttribute('controls', 'controls');
+                messageContent.setAttribute('preload', 'metadata');
+                source.src = receivedMessage.content.substr(1);
+                messageContent.id = 'messageContent' + receivedMessage.messageId;
+                messageContent.appendChild(source);
+                messageContent.addEventListener("play", stopAll, null);
+                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
+                parentDiv.appendChild(fileName);
+                parentDiv.appendChild(messageContent);
+                div6.appendChild(parentDiv);
+                div5.appendChild(div6);
+                div4.appendChild(div5);
+                div3.appendChild(div4);
+                div7.classList.add('row');
+                div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
+                dateElement.classList.add('.date');
+                dateElement.style.fontSize = '11px';
+                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
+                div8.appendChild(dateElement);
+                div7.appendChild(div8);
+                div3.appendChild(div7);
+                div1.appendChild(div2);
+                div1.appendChild(div3);
+                messageArea.appendChild(div1);
+                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+            } else {
+                div1.id = 'message' + receivedMessage.messageId;
+                div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                usernameDiv.style.paddingRight = '10px';
+                usernameDiv.classList.add('justify-content-end');
+                div2.appendChild(usernameDiv);
                 div3.classList.add('row');
                 div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
                 div4.style.padding = '5px';
@@ -792,7 +950,7 @@ $(window).on("load", function () {
     });
 
 
-    $(document).on("click", '.deleteButton', function (event) {
+    $(document).on('click', '.deleteButton', function (event) {
         event.preventDefault();
         let messageId = event.currentTarget.id.match(/\d+/g);
         let chatMessage = {
@@ -808,28 +966,36 @@ $(window).on("load", function () {
         stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
     });
 
-
-    cancelEdit.addEventListener('click', function (event) {
-        event.preventDefault();
-        let fileButton = document.getElementById('fileLabel');
-        let o = document.getElementById("progress");
-        let file = document.getElementById('file');
-        let sendButton = document.getElementById('send');
-        let editButton = document.getElementById('edit');
-        let cancelEditButton = document.getElementById('cancelEdit');
-        let fileDrag = document.getElementById('filedragDIV');
-        fileDrag.style.display = 'none';
-        file.value = '';
-        o.innerHTML = '';
-        fileButton.style.display = 'inline-block';
-        sendButton.style.display = 'inline-block';
-        editButton.style.display = 'none';
-        cancelEditButton.style.display = 'none';
-        messageInput.value = '';
-        currentEditMessageId = null;
-    });
+    /*
+        $(document).on('click', '.foundMessage', function (event) {
+            event.preventDefault();
+            window.location.href = "/chat/" + roomId.innerText + "#" + $(event.currentTarget).attr("id");
+            window.location.reload(true);
+        });*/
 
 
+    if (cancelEdit != null)
+        cancelEdit.addEventListener('click', function (event) {
+            event.preventDefault();
+            let fileButton = document.getElementById('fileLabel');
+            let o = document.getElementById("progress");
+            let file = document.getElementById('file');
+            let sendButton = document.getElementById('send');
+            let editButton = document.getElementById('edit');
+            let cancelEditButton = document.getElementById('cancelEdit');
+            let fileDrag = document.getElementById('filedragDIV');
+            fileDrag.style.display = 'none';
+            file.value = '';
+            o.innerHTML = '';
+            fileButton.style.display = 'inline-block';
+            sendButton.style.display = 'inline-block';
+            editButton.style.display = 'none';
+            cancelEditButton.style.display = 'none';
+            messageInput.value = '';
+            currentEditMessageId = null;
+        });
+
+    if (sendButton != null)
     sendButton.addEventListener('click', function (event) {
         if (disabled === false) {
             sendMessage(event);
@@ -838,7 +1004,7 @@ $(window).on("load", function () {
         }
     });
 
-
+    if (editButton != null)
     editButton.addEventListener('click', function (event) {
         sendEditedMessage(event);
     });

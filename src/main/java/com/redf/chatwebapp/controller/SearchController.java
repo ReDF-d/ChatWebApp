@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @RequestMapping("/search")
 public class SearchController {
     private UserEntityRepository userEntityRepository;
-    private ArrayList<UserEntity> searchResult;
+
 
 
     @Autowired
@@ -31,10 +31,10 @@ public class SearchController {
     @PostMapping
     public ModelAndView searchUsers(@RequestParam(value = "searchUsers", required = false) String searchString) {
         ModelAndView modelAndView = new ModelAndView("searchUsers");
-        setSearchResult((ArrayList<UserEntity>) getUserEntityRepository().findByUsernameContainingIgnoreCase(searchString));
-        if (getSearchResult().size() == 1)
-            return new ModelAndView("redirect:/user/" + getSearchResult().get(0).getId());
-        modelAndView.addObject("searchResult", getSearchResult());
+        ArrayList<UserEntity> searchResult = ((ArrayList<UserEntity>) getUserEntityRepository().findByUsernameContainingIgnoreCase(searchString));
+        if (searchResult.size() == 1)
+            return new ModelAndView("redirect:/user/" + searchResult.get(0).getId());
+        modelAndView.addObject("searchResult", searchResult);
         modelAndView.addObject("searchString", searchString);
         return modelAndView;
     }
@@ -50,12 +50,4 @@ public class SearchController {
         this.userEntityRepository = userEntityRepository;
     }
 
-    @Contract(pure = true)
-    private ArrayList<UserEntity> getSearchResult() {
-        return searchResult;
-    }
-
-    private void setSearchResult(ArrayList<UserEntity> searchResult) {
-        this.searchResult = searchResult;
-    }
 }

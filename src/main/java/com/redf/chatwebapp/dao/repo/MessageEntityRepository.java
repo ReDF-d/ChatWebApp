@@ -17,4 +17,7 @@ public interface MessageEntityRepository extends JpaRepository<MessageEntity, Lo
 
 
     MessageEntity findByMessageId(int id);
+
+    @Query(value = "SELECT * from messages where lower(message_text) like lower(concat('%',:messageText,'%')) AND room_id = :roomId", nativeQuery = true)
+    List<MessageEntity> findByMessageTextFromRoom(@Param("messageText") String messageText, @Param("roomId") int roomId);
 }

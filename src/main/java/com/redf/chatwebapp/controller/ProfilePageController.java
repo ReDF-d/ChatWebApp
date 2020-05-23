@@ -228,8 +228,6 @@ public class ProfilePageController {
     }
 
 
-
-
     @Contract(pure = true)
     private RoomEntityRepository getRoomEntityRepository() {
         return roomEntityRepository;
@@ -239,6 +237,7 @@ public class ProfilePageController {
     private void setRoomEntityRepository(RoomEntityRepository roomEntityRepository) {
         this.roomEntityRepository = roomEntityRepository;
     }
+
 
     @Contract(pure = true)
     private RoomDAOImpl getRoomDAO() {
