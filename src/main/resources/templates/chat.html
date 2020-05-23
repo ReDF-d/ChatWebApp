@@ -19,7 +19,7 @@
             <div class="row">
                 <div class="col-3 column_bottom_border" style="padding: 10px 15px;"><span
                         style="font-size: 24px;"><strong>Ваши чаты</strong></span></div>
-                <div class="col-7 col-lg-8 column_bottom_border" style="padding: 10px 15px;">
+                <div class="col-4 col-lg-5 col-xl-6  column_bottom_border" style="padding: 10px 15px;">
                     <div class="row d-flex justify-content-center">
                         <span class="edit_chatname_main" id="chatTitle" style="font-size: 24px;"
                               th:text="${title}"><strong></strong></span>
@@ -37,8 +37,8 @@
                         </button>
                     </div>
                 </div>
-                <div>
-                    <form class="form-inline d-xl-flex justify-content-xl-center align-items-xl-center"
+                <div class="col-4 col-lg-3 col-xl-2 column_bottom_border d-flex justify-content-center" style="padding: 0;">
+                    <form class="form-inline d-flex justify-content-center align-items-center"
                           id="searchMessage" th:action="@{/chat/{id} (id=${roomId})}" th:method="patch">
                         <input class="form-control" id="searchMessageInput" placeholder="Найти сообщение"
                                style="padding: 1px 0 2px;" th:name="searchMessage"
@@ -51,7 +51,7 @@
                         </button>
                     </form>
                 </div>
-                <div class="col-2 col-lg-1 d-flex justify-content-center align-items-center">
+                <div class="col-2 col-lg-1 d-flex justify-content-center align-items-center column_bottom_border    ">
                         <div class="dropleft">
                             <button class="btn chatOptionsDropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-ellipsis-v"></i>
