@@ -19,6 +19,7 @@ import com.redf.chatwebapp.messaging.ChatMessage;
 import com.redf.chatwebapp.messaging.EditChatTitleMessage;
 import com.redf.chatwebapp.messaging.UserOnlineStatusChangeMessage;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +28,6 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -106,7 +106,7 @@ public class ChatController implements RoomSanitizer {
 
     @ModelAttribute("messages")
     public ArrayList<MessageEntity> getChatHistory(@PathVariable int id) {
-        ArrayList<MessageEntity> messages;
+        final ArrayList<MessageEntity> messages;
         messages = (ArrayList<MessageEntity>) getMessageDAO().getAllMessagesFromRoom(id);
         return messages;
     }
@@ -121,7 +121,7 @@ public class ChatController implements RoomSanitizer {
     @MessageMapping("/chat.editChatTitle.{id}")
     @SendTo("/topic/editChatTitle")
     public EditChatTitleMessage editChatTitle(@NotNull @Payload EditChatTitleMessage message, @DestinationVariable("id") String id) {
-        RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(message.getRoomId()));
+        final RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(message.getRoomId()));
         if (room.getId() != 1) {
             room.setTitle(message.getTitle());
             getRoomEntityRepository().save(room);
@@ -134,23 +134,31 @@ public class ChatController implements RoomSanitizer {
     @MessageMapping("/chat.saveAndSendMessage.{id}")
     @SendTo("/topic/chat/{id}")
     public ChatMessage saveAndSendMessage(@NotNull @Payload ChatMessage chatMessage, @DestinationVariable("id") String id) throws InterruptedException {
+        final ArrayList<RoomEntity> allRooms = (ArrayList<RoomEntity>) getRoomEntityRepository().findAll();
+        allRooms.remove(getRoomEntityRepository().findRoomById(Integer.parseInt(id)));
         if (chatMessage.getType().equals(ChatMessage.MessageType.CHAT)) {
             while (!savePermitted)
                 Thread.sleep(1);
             savePermitted = false;
-            String author = chatMessage.getSender().trim();
-            String login = chatMessage.getLogin().trim();
-            String messageText = chatMessage.getContent().trim();
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis() + 7200000);
-            RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
-            String messageType = "text";
+            final String author = chatMessage.getSender().trim();
+            final String login = chatMessage.getLogin().trim();
+            final String messageText = chatMessage.getContent().trim();
+            if (messageText.length() > 1024) {
+                savePermitted = true;
+                return new ChatMessage(null, null, null, null, null, null, null, null);
+            }
+            final Timestamp timestamp = new Timestamp(System.currentTimeMillis() + 7200000);
+            final RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
+            final String messageType = "text";
             MessageEntity message = getMessageEntityRepository().save(getMessageDAO().create(author, login, messageText, timestamp, roomEntity, messageType));
             getMessageEntityRepository().flush();
             savePermitted = true;
             chatMessage.setMessageId(String.valueOf(message.getMessageId()));
             message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
-            if (message != null)
+            if (message != null) {
+                sendToAllRooms(allRooms, chatMessage);
                 return chatMessage;
+            }
         }
         if (chatMessage.getType().equals(ChatMessage.MessageType.UPDATE)) {
             MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
@@ -160,19 +168,21 @@ public class ChatController implements RoomSanitizer {
                 chatMessage.setMessageId(String.valueOf(message.getMessageId()));
                 chatMessage.setContent(message.getMessageText());
                 chatMessage.setTimestamp(new Timestamp(System.currentTimeMillis() + 7200000));
+                sendToAllRooms(allRooms, chatMessage);
                 return chatMessage;
             }
         }
         if (chatMessage.getType().equals(ChatMessage.MessageType.DELETE)) {
-            MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
+            final MessageEntity message = getMessageEntityRepository().findByMessageId(Integer.parseInt(chatMessage.getMessageId()));
             if (message != null) {
                 if (message.getMessageType().equals("text"))
                     getMessageEntityRepository().delete(message);
-                else if (message.getMessageType().equals("image") || (message.getMessageType().equals("audio"))) {
+                else if (message.getMessageType().equals("image") || (message.getMessageType().equals("audio") || (message.getMessageType().equals("video")))) {
                     File file = new File(message.getMessageText());
                     boolean del = file.delete();
                     getMessageEntityRepository().delete(message);
                 }
+                sendToAllRooms(allRooms, chatMessage);
                 return chatMessage;
             }
         }
@@ -182,8 +192,8 @@ public class ChatController implements RoomSanitizer {
 
     @PostMapping(params = {"userId", "roomId"})
     public Object exitChat(@RequestParam(value = "userId") String userId, @RequestParam(value = "roomId") String roomId) {
-        int parsedRoomId = Integer.parseInt(roomId.replaceAll("\\D+", ""));
-        Long parsedUserId = Long.parseLong(userId);
+        final int parsedRoomId = Integer.parseInt(roomId.replaceAll("\\D+", ""));
+        final Long parsedUserId = Long.parseLong(userId);
         getRoomEntityRepository().deleteRoomMember(parsedUserId, parsedRoomId);
         if (getRoomEntityRepository().findRoomById(parsedRoomId).getRoomMembers().size() == 0)
             getRoomEntityRepository().deleteRoomEntityById(parsedRoomId);
@@ -191,30 +201,51 @@ public class ChatController implements RoomSanitizer {
     }
 
 
+    private void sendToAllRooms(@NotNull List<RoomEntity> rooms, ChatMessage message) {
+        rooms.forEach(r ->
+                getMessagingTemplate().convertAndSend("/topic/chat/" + r.getId(), message));
+    }
+
+
     @PostMapping
     @ResponseBody
     public Object saveAndSendFile(MultipartHttpServletRequest request, @DestinationVariable("id") String roomId) {
         try {
+            ArrayList<RoomEntity> allRooms = (ArrayList<RoomEntity>) getRoomEntityRepository().findAll();
+            allRooms.remove(getRoomEntityRepository().findRoomById(Integer.parseInt(roomId)));
             final String senderId = request.getParameter("id");
             final String timestamp = request.getParameter("timestamp");
             final String PATH = "./media/file/" + roomId;
-            Timestamp s;
-            File directory = new File(PATH);
+            final File directory = new File(PATH);
             if (!directory.exists()) {
                 boolean created = directory.mkdir();
             }
-            Iterator<String> iterator = request.getFileNames();
+            final Iterator<String> iterator = request.getFileNames();
             MultipartFile file;
             while (iterator.hasNext()) {
                 file = request.getFile(iterator.next());
                 assert file != null;
                 Path pathToFile = Paths.get(PATH, file.getOriginalFilename());
-                Files.write(pathToFile, file.getBytes());
+                File existing = new File(pathToFile.toString());
+                if (!existing.exists())
+                    Files.write(pathToFile, file.getBytes());
+                else {
+                    String extension = FilenameUtils.getExtension(pathToFile.toString());
+                    String pathWithoutExtension = FilenameUtils.removeExtension(pathToFile.toString());
+                    for (int i = 1; existing.exists(); i++) {
+                        existing = new File(pathWithoutExtension + "(" + i + ")" + "." + extension);
+                        if (!existing.exists()) {
+                            Files.write(Paths.get(pathWithoutExtension + "(" + i + ")" + "." + extension), file.getBytes());
+                            pathToFile = Paths.get(pathWithoutExtension + "(" + i + ")" + "." + extension);
+                            break;
+                        }
+                    }
+                }
                 while (!savePermitted)
                     Thread.sleep(1);
                 savePermitted = false;
-                UserEntity user = getUserService().findById(Long.parseLong(senderId));
-                RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
+                final UserEntity user = getUserService().findById(Long.parseLong(senderId));
+                final RoomEntity roomEntity = getRoomEntityRepository().findRoomById(Integer.parseInt(roomId));
                 ChatMessage chatMessage = new ChatMessage();
                 String contentType = Files.probeContentType(pathToFile);
                 switch (contentType) {
@@ -231,6 +262,7 @@ public class ChatController implements RoomSanitizer {
                         chatMessage = createAndSaveMessageFromType(user, pathToFile, timestamp, roomEntity, senderId, roomId, "video");
                         break;
                 }
+                sendToAllRooms(allRooms, chatMessage);
                 getMessagingTemplate().convertAndSend("/topic/chat/" + roomId, chatMessage);
             }
         } catch (Exception ex) {
@@ -272,23 +304,19 @@ public class ChatController implements RoomSanitizer {
     }
 
 
-    @MessageMapping("/chat.addUser.{id}")
-    @SendTo("/topic/chat/{id}")
-    public ChatMessage addUser(@NotNull @Payload ChatMessage chatMessage,
-                               @NotNull SimpMessageHeaderAccessor headerAccessor, @DestinationVariable("id") String id) {
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        return chatMessage;
-    }
-
-
     @PatchMapping
     public ModelAndView searchMessage(@RequestParam("searchMessage") String searchString, @PathVariable String id, @ModelAttribute("currentDate") Calendar currentDate) {
         if (searchString.equals(""))
             return new ModelAndView("redirect:/chat/" + Integer.parseInt(id));
-        ModelAndView modelAndView;
-        ArrayList<MessageEntity> searchResult = (ArrayList<MessageEntity>) getMessageEntityRepository().findByMessageTextFromRoom(searchString, Integer.parseInt(id));
+        final ModelAndView modelAndView;
+        final ArrayList<MessageEntity> searchResult = (ArrayList<MessageEntity>) getMessageEntityRepository().findByMessageTextFromRoom(searchString, Integer.parseInt(id));
+        final ArrayList<MessageEntity> filteredResult = new ArrayList<>();
+        searchResult.forEach(s -> {
+            if (s.getMessageType().equals("text"))
+                filteredResult.add(s);
+        });
         modelAndView = buildModelAndView(id);
-        modelAndView.addObject("searchResult", searchResult);
+        modelAndView.addObject("searchResult", filteredResult);
         return modelAndView;
     }
 
@@ -300,8 +328,8 @@ public class ChatController implements RoomSanitizer {
 
 
     public ModelAndView buildModelAndView(String id) {
-        RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        final RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(id));
+        final UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (room != null && checkMembership(room, userDetails.getId())) {
             setRoom(room);
             ArrayList<RoomBeautify> roomsBeautify = new ArrayList<>();
@@ -357,7 +385,7 @@ public class ChatController implements RoomSanitizer {
 
 
     public boolean checkMembership(@NotNull RoomEntity room, Long id) {
-        List<UserEntity> users = room.getRoomMembers();
+        final List<UserEntity> users = room.getRoomMembers();
         for (UserEntity user : users) {
             if (user.getId().equals(id)) {
                 return true;
@@ -406,8 +434,8 @@ public class ChatController implements RoomSanitizer {
 
 
     private void initOnlineAndOfflineLists(int id) {
-        List<UserEntity> loggedUsers = new ArrayList<>();
-        List<UserEntity> offlineUsers = new ArrayList<>();
+        final List<UserEntity> loggedUsers = new ArrayList<>();
+        final List<UserEntity> offlineUsers = new ArrayList<>();
         getOnlineUserEntityRepository().findAllUsersFromRoom((long) id).forEach(o -> {
             if (o.isOnline().equals("ONLINE"))
                 loggedUsers.add(o.getUser());
@@ -415,8 +443,8 @@ public class ChatController implements RoomSanitizer {
                 offlineUsers.add(o.getUser());
 
         });
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserEntity principal = getUserService().findById(userDetails.getId());
+        final UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        final UserEntity principal = getUserService().findById(userDetails.getId());
         if (!loggedUsers.contains(principal)) {
             loggedUsers.add(principal);
             UserOnlineStatusChangeMessage message = new UserOnlineStatusChangeMessage();

@@ -12,10 +12,12 @@ import com.redf.chatwebapp.dao.repo.OnlineUserEntityRepository;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
 import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dao.utils.UserDetails;
+import com.redf.chatwebapp.messaging.FriendNotification;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +40,7 @@ public class ProfilePageController {
     private RoomEntityRepository roomEntityRepository;
     private RoomDAOImpl roomDAO;
     private OnlineUserEntityRepository onlineUserEntityRepository;
+    private SimpMessagingTemplate simpMessagingTemplate;
 
 
     private ArrayList<FriendshipEntity> userFriends;
@@ -45,13 +48,14 @@ public class ProfilePageController {
 
     @Contract(pure = true)
     @Autowired
-    ProfilePageController(UserService userService, FriendshipDAOImpl friendshipDAO, FriendshipEntityRepository friendshipEntityRepository, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO, OnlineUserEntityRepository onlineUserEntityRepository) {
+    ProfilePageController(UserService userService, FriendshipDAOImpl friendshipDAO, FriendshipEntityRepository friendshipEntityRepository, RoomEntityRepository roomEntityRepository, RoomDAOImpl roomDAO, OnlineUserEntityRepository onlineUserEntityRepository, SimpMessagingTemplate simpMessagingTemplate) {
         setFriendshipEntityRepository(friendshipEntityRepository);
         setFriendshipDAO(friendshipDAO);
         setUserService(userService);
         setRoomEntityRepository(roomEntityRepository);
         setRoomDAO(roomDAO);
         setOnlineUserEntityRepository(onlineUserEntityRepository);
+        setSimpMessagingTemplate(simpMessagingTemplate);
     }
 
 
@@ -142,16 +146,17 @@ public class ProfilePageController {
             friendshipEntity = getFriendshipEntityRepository().findById(user.getId(), userDetails.getId());
             if (isFriends(principal.getId(), user.getId())) {
                 getFriendshipEntityRepository().delete(friendshipEntity);
-            }
-            if (isPending(principal.getId(), user.getId()) && friendshipEntity.getLastAction() == userDetails.getId().intValue()) {
+            } else if (isPending(principal.getId(), user.getId()) && friendshipEntity.getLastAction() == userDetails.getId().intValue()) {
                 getFriendshipEntityRepository().delete(friendshipEntity);
-            }
-            if (isPending(principal.getId(), user.getId()) && friendshipEntity.getLastAction() != userDetails.getId().intValue()) {
+            } else if (isPending(principal.getId(), user.getId()) && friendshipEntity.getLastAction() != userDetails.getId().intValue()) {
                 friendshipEntity.setStatus("friends");
                 getFriendshipDAO().update(friendshipEntity);
+                getSimpMessagingTemplate().convertAndSend("/topic/friendNotification", new FriendNotification(principal.getId().toString(), user.getId().toString(), "friends", principal.getUsername()));
             }
-        } else
+        } else {
             getFriendshipEntityRepository().save(new FriendshipEntity(getUserService().findById(user.getId()), getUserService().findById(userDetails.getId()), "pending", userDetails.getId().intValue()));
+            getSimpMessagingTemplate().convertAndSend("/topic/friendNotification", new FriendNotification(principal.getId().toString(), user.getId().toString(), "pending", principal.getUsername()));
+        }
         return "redirect:/user/" + Long.parseLong(id);
     }
 
@@ -269,12 +274,24 @@ public class ProfilePageController {
         this.roomDAO = roomDAO;
     }
 
+
     @Contract(pure = true)
     private OnlineUserEntityRepository getOnlineUserEntityRepository() {
         return onlineUserEntityRepository;
     }
 
+
     private void setOnlineUserEntityRepository(OnlineUserEntityRepository onlineUserEntityRepository) {
         this.onlineUserEntityRepository = onlineUserEntityRepository;
+    }
+
+
+    @Contract(pure = true)
+    private SimpMessagingTemplate getSimpMessagingTemplate() {
+        return simpMessagingTemplate;
+    }
+
+    private void setSimpMessagingTemplate(SimpMessagingTemplate simpMessagingTemplate) {
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 }

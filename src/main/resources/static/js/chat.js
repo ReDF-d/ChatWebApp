@@ -29,6 +29,8 @@ $(window).on("load", function () {
     chatWindow = $("#chatWindow");
     currentEditMessageId = null;
     let disabled = false;
+    let disableMessaging = false;
+    let isSearching = document.getElementById('isSearching').innerText;
 
     connectingError.classList.add('hidden', 'text-danger', 'text-center');
     connectingError.id = 'connectionError';
@@ -76,7 +78,7 @@ $(window).on("load", function () {
     }
 
 
-    function onConnected() {
+    async function onConnected() {
         stompClient.subscribe('/topic/chat/' + roomId.textContent, onMessageReceived);
         stompClient.subscribe('/topic/onlineTracker', onStatusChange);
         stompClient.subscribe('/topic/editChatTitle', onTitleChange);
@@ -111,7 +113,8 @@ $(window).on("load", function () {
             if (!checkOnline && checkOffline) {
                 a.setAttribute('href', "/user/" + statusChangeMessage.id);
                 div1.classList.add('row', 'userStatus');
-                div1.style.padding = '10px';
+                div1.style.padding = '5px';
+                div1.style.paddingLeft = '10px';
                 div1.id = 'online' + statusChangeMessage.id;
                 div2.style.padding = '0px';
                 div2.classList.add('col-4', 'col-sm-7', 'col-md-5', 'col-lg-3', 'col-xl-3', 'offset-xl-0', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'justify-content-sm-center', 'align-items-sm-center', 'justify-content-md-center', 'align-items-md-center', 'justify-content-lg-center', 'align-items-lg-center');
@@ -122,7 +125,7 @@ $(window).on("load", function () {
                 div2.appendChild(img);
                 div1.appendChild(div2);
                 div3.classList.add('col-8', 'col-sm-12', 'col-md-7', 'col-xl-7', 'offset-xl-0', 'd-xl-flex', 'justify-content-xl-start', 'align-items-xl-center');
-                div3.style.padding = '0px';
+                div3.style.paddingLeft = '5px';
                 div4.classList.add('row');
                 div4.style.margin = '0px';
                 div5.classList.add('col-xl-12', 'offset-xl-0', 'your_chats_online_users');
@@ -155,7 +158,8 @@ $(window).on("load", function () {
             if (!checkOffline && checkOnline) {
                 a.setAttribute('href', "/user/" + statusChangeMessage.id);
                 div1.classList.add('row', 'userStatus');
-                div1.style.padding = '10px';
+                div1.style.padding = '5px';
+                div1.style.paddingLeft = '10px';
                 div1.id = 'offline' + statusChangeMessage.id;
                 div2.style.padding = '0px';
                 div2.classList.add('col-4', 'col-sm-7', 'col-md-5', 'col-lg-3', 'col-xl-3', 'offset-xl-0', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'justify-content-sm-center', 'align-items-sm-center', 'justify-content-md-center', 'align-items-md-center', 'justify-content-lg-center', 'align-items-lg-center');
@@ -166,7 +170,7 @@ $(window).on("load", function () {
                 div2.appendChild(img);
                 div1.appendChild(div2);
                 div3.classList.add('col-8', 'col-sm-12', 'col-md-7', 'col-xl-7', 'offset-xl-0', 'd-xl-flex', 'justify-content-xl-start', 'align-items-xl-center');
-                div3.style.padding = '0px';
+                div3.style.paddingLeft = '5px';
                 div4.classList.add('row');
                 div4.style.margin = '0px';
                 div5.classList.add('col-xl-12', 'offset-xl-0', 'your_chats_online_users');
@@ -356,6 +360,7 @@ $(window).on("load", function () {
         $(this).bind("play", stopAll);
     });
 
+
     function stopAll(e) {
         let currentElementId = $(e.currentTarget).attr("id");
         $("audio").each(function () {
@@ -369,536 +374,606 @@ $(window).on("load", function () {
 
 
     function onMessageReceived(payload) {
-        let receivedMessage = JSON.parse(payload.body);
-        let messagePreview = document.getElementById('messagePreview' + roomId.textContent);
-        let messagePreviewSpan = document.createElement('span');
-        let usernameDiv = document.createElement('div');
-        let usernameSpan = document.createElement('span');
-        usernameDiv.classList.add('row', 'd-flex');
-        usernameDiv.style.fontWeight = '550';
-        usernameSpan.innerText = receivedMessage.sender;
-        usernameDiv.appendChild(usernameSpan);
-        if (receivedMessage.type === 'CHAT') {
-            messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
-            while (messagePreview.firstChild)
-                messagePreview.firstChild.remove();
-            messagePreview.appendChild(messagePreviewSpan);
-            let date = new Date(receivedMessage.timestamp);
-            let div1 = document.createElement('div');
-            let div2 = document.createElement('div');
-            let div3 = document.createElement('div');
-            let div4 = document.createElement('div');
-            let div5 = document.createElement('div');
-            let div6 = document.createElement('div');
-            let div7 = document.createElement('div');
-            let div8 = document.createElement('div');
-            let dateElement = document.createElement('span');
-            let messageLink = document.createElement('a');
-            let authorImg = document.createElement('img');
-            let messageContent = document.createElement('p');
-            div1.classList.add('row');
-            div1.style.padding = '10px';
-            if (id !== receivedMessage.id) {
-                div1.classList.add('row', 'opponents_message', 'text');
-                div1.id = 'message' + receivedMessage.messageId;
-                div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div2.appendChild(messageLink);
-                div3.classList.add('col-sm-7', 'col-xl-4');
-                div3.appendChild(usernameDiv);
-                div4.classList.add('row');
-                div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
-                div5.style.padding = '5px';
-                div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                messageContent.classList.add('message');
-                messageContent.style.marginLeft = '5px';
-                messageContent.style.wordBreak = 'break-all';
-                messageContent.style.fontSize = '14px';
-                messageContent.innerText = receivedMessage.content;
-                messageContent.id = 'messageContent' + receivedMessage.messageId;
-                div6.appendChild(messageContent);
-                div5.appendChild(div6);
-                div4.appendChild(div5);
-                div3.appendChild(div4);
-                div7.classList.add('row');
-                div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
-                div8.appendChild(dateElement);
-                div7.appendChild(div8);
-                div3.appendChild(div7);
-                div1.appendChild(div2);
-                div1.appendChild(div3);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
-            } else {
-                let editAndDeleteButtonsDiv = document.createElement('div');
-                let anotherEditAndDeleteDiv = document.createElement('div');
-                let deleteButton = document.createElement('button');
-                let deleteIcon = document.createElement('i');
-                let editButton = document.createElement('button');
-                let editIcon = document.createElement('i');
-                div1.id = 'message' + receivedMessage.messageId;
-                div1.classList.add('my_message', 'text');
-                div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
-                usernameDiv.style.paddingRight = '10px';
-                usernameDiv.classList.add('justify-content-end');
-                div2.appendChild(usernameDiv);
-                div3.classList.add('row');
-                div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
-                editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
-                anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
-                deleteButton.style.border = 'none';
-                deleteButton.style.background = 'none';
-                deleteButton.style.paddingRight = '10px';
-                deleteButton.classList.add('deleteButton');
-                deleteIcon.classList.add('fas', 'fa-times');
-                editButton.style.border = 'none';
-                editButton.style.background = 'none';
-                editButton.style.paddingRight = '10px';
-                editButton.classList.add('editButton');
-                deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
-                editButton.id = 'editMessage' + receivedMessage.messageId;
-                editIcon.classList.add('fas', 'fa-pencil-alt');
-                div4.style.padding = '5px';
-                div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
-                messageContent.classList.add('message', 'user_message');
-                messageContent.style.marginRight = '0';
-                messageContent.style.marginLeft = '0';
-                messageContent.style.fontSize = '14px';
-                messageContent.innerText = receivedMessage.content;
-                messageContent.id = 'messageContent' + receivedMessage.messageId;
-                div5.appendChild(messageContent);
-                deleteButton.appendChild(deleteIcon);
-                editButton.appendChild(editIcon);
-                anotherEditAndDeleteDiv.appendChild(deleteButton);
-                anotherEditAndDeleteDiv.appendChild(editButton);
-                editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
-                editAndDeleteButtonsDiv.appendChild(div5);
-                div4.appendChild(editAndDeleteButtonsDiv);
-                div3.appendChild(div4);
-                div6.classList.add('row');
-                div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2);
-                div7.appendChild(dateElement);
-                div6.appendChild(div7);
-                div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div8.appendChild(messageLink);
-                div2.appendChild(div3);
-                div2.appendChild(div6);
-                div1.appendChild(div2);
-                div1.appendChild(div8);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+        if (!disableMessaging && isSearching === 'false') {
+            let receivedMessage = JSON.parse(payload.body);
+            if ((receivedMessage.type === 'CHAT' || receivedMessage.type === 'IMAGE' || receivedMessage.type === 'AUDIO' || receivedMessage.type === 'VIDEO') && receivedMessage.id !== id) {
+                let audio = new Audio('/media/notification.mp3');
+                audio.play();
             }
-        } else if (receivedMessage.type === 'IMAGE') {
-            messagePreviewSpan.innerText = receivedMessage.sender + ': Фотография';
-            while (messagePreview.firstChild)
-                messagePreview.firstChild.remove();
-            messagePreview.appendChild(messagePreviewSpan);
-            let editAndDeleteButtonsDiv = document.createElement('div');
-            let anotherEditAndDeleteDiv = document.createElement('div');
-            let deleteButton = document.createElement('button');
-            let deleteIcon = document.createElement('i');
-            let date = new Date(receivedMessage.timestamp);
-            let div1 = document.createElement('div');
-            let div2 = document.createElement('div');
-            let div3 = document.createElement('div');
-            let div4 = document.createElement('div');
-            let div5 = document.createElement('div');
-            let div6 = document.createElement('div');
-            let div7 = document.createElement('div');
-            let div8 = document.createElement('div');
-            let dateElement = document.createElement('span');
-            let messageLink = document.createElement('a');
-            let authorImg = document.createElement('img');
-            let messageContent = document.createElement('img');
-            div1.classList.add('row');
-            div1.style.padding = '10px';
-            if (id !== receivedMessage.id) {
-                div1.classList.add('row', 'opponents_message');
-                div1.id = 'message' + receivedMessage.messageId;
-                div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div2.appendChild(messageLink);
-                div3.classList.add('col-sm-7', 'col-xl-4');
-                usernameDiv.style.paddingLeft = '10px';
-                usernameDiv.classList.add('justify-content-start');
-                div3.appendChild(usernameDiv);
-                div4.classList.add('row');
-                div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
-                div5.style.padding = '5px';
-                div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                messageContent.classList.add('message');
-                messageContent.style.marginLeft = '5px';
-                messageContent.style.width = '100%';
-                messageContent.style.fontSize = '14px';
-                messageContent.src = receivedMessage.content.substr(1);
-                messageContent.style.maxWidth = '300px';
-                messageContent.style.maxHeight = '300px';
-                messageContent.id = 'messageContent' + receivedMessage.messageId;
-                div6.appendChild(messageContent);
-                div5.appendChild(div6);
-                div4.appendChild(div5);
-                div3.appendChild(div4);
-                div7.classList.add('row');
-                div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() - 2 + ':' + date.getMinutes());
-                div8.appendChild(dateElement);
-                div7.appendChild(div8);
-                div3.appendChild(div7);
-                div1.appendChild(div2);
-                div1.appendChild(div3);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+            if (receivedMessage.roomId === roomId.textContent) {
+                if (receivedMessage.content == null)
+                    return;
+                let messagePreview = document.getElementById('messagePreview' + roomId.textContent);
+                let messagePreviewSpan = document.createElement('span');
+                let messagePreviewImg = document.getElementById('imgPreview' + roomId.textContent);
+                messagePreviewImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                let usernameDiv = document.createElement('div');
+                let usernameSpan = document.createElement('span');
+                let usernameHref = document.createElement('a');
+                usernameDiv.classList.add('row', 'd-flex');
+                usernameDiv.style.fontWeight = '550';
+                usernameSpan.innerText = receivedMessage.sender;
+                usernameHref.href = '/user/' + receivedMessage.id;
+                usernameHref.appendChild(usernameSpan);
+                usernameDiv.appendChild(usernameHref);
+                if (receivedMessage.type === 'CHAT') {
+                    messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
+                    while (messagePreview.firstChild)
+                        messagePreview.firstChild.remove();
+                    messagePreview.appendChild(messagePreviewSpan);
+                    let date = new Date(receivedMessage.timestamp);
+                    let div1 = document.createElement('div');
+                    let div2 = document.createElement('div');
+                    let div3 = document.createElement('div');
+                    let div4 = document.createElement('div');
+                    let div5 = document.createElement('div');
+                    let div6 = document.createElement('div');
+                    let div7 = document.createElement('div');
+                    let div8 = document.createElement('div');
+                    let dateElement = document.createElement('span');
+                    let messageLink = document.createElement('a');
+                    let authorImg = document.createElement('img');
+                    let messageContent = document.createElement('p');
+                    div1.classList.add('row');
+                    div1.style.padding = '10px';
+                    if (id !== receivedMessage.id) {
+                        div1.classList.add('row', 'opponents_message', 'text');
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div2.appendChild(messageLink);
+                        div3.classList.add('col-sm-7', 'col-xl-4');
+                        div3.appendChild(usernameDiv);
+                        div4.classList.add('row');
+                        div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
+                        div5.style.padding = '5px';
+                        div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
+                        messageContent.classList.add('message');
+                        messageContent.style.marginLeft = '5px';
+                        messageContent.style.fontSize = '14px';
+                        messageContent.innerText = receivedMessage.content;
+                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        div6.appendChild(messageContent);
+                        div5.appendChild(div6);
+                        div4.appendChild(div5);
+                        div3.appendChild(div4);
+                        div7.classList.add('row');
+                        div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
+                        div8.appendChild(dateElement);
+                        div7.appendChild(div8);
+                        div3.appendChild(div7);
+                        div1.appendChild(div2);
+                        div1.appendChild(div3);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    } else {
+                        let editAndDeleteButtonsDiv = document.createElement('div');
+                        let anotherEditAndDeleteDiv = document.createElement('div');
+                        let deleteButton = document.createElement('button');
+                        let deleteIcon = document.createElement('i');
+                        let editButton = document.createElement('button');
+                        let editIcon = document.createElement('i');
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div1.classList.add('my_message', 'text');
+                        div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                        usernameDiv.style.paddingRight = '10px';
+                        usernameDiv.classList.add('justify-content-end');
+                        div2.appendChild(usernameDiv);
+                        div3.classList.add('row');
+                        div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
+                        editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
+                        anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
+                        deleteButton.style.border = 'none';
+                        deleteButton.style.background = 'none';
+                        deleteButton.style.paddingRight = '10px';
+                        deleteButton.classList.add('deleteButton');
+                        deleteIcon.classList.add('fas', 'fa-times');
+                        editButton.style.border = 'none';
+                        editButton.style.background = 'none';
+                        editButton.style.paddingRight = '10px';
+                        editButton.classList.add('editButton');
+                        deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
+                        editButton.id = 'editMessage' + receivedMessage.messageId;
+                        editIcon.classList.add('fas', 'fa-pencil-alt');
+                        div4.style.padding = '5px';
+                        div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+                        messageContent.classList.add('message', 'user_message');
+                        messageContent.style.marginRight = '0';
+                        messageContent.style.marginLeft = '0';
+                        messageContent.style.fontSize = '14px';
+                        messageContent.innerText = receivedMessage.content;
+                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        div5.appendChild(messageContent);
+                        deleteButton.appendChild(deleteIcon);
+                        editButton.appendChild(editIcon);
+                        anotherEditAndDeleteDiv.appendChild(deleteButton);
+                        anotherEditAndDeleteDiv.appendChild(editButton);
+                        editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
+                        editAndDeleteButtonsDiv.appendChild(div5);
+                        div4.appendChild(editAndDeleteButtonsDiv);
+                        div3.appendChild(div4);
+                        div6.classList.add('row');
+                        div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2);
+                        div7.appendChild(dateElement);
+                        div6.appendChild(div7);
+                        div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div8.appendChild(messageLink);
+                        div2.appendChild(div3);
+                        div2.appendChild(div6);
+                        div1.appendChild(div2);
+                        div1.appendChild(div8);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    }
+                } else if (receivedMessage.type === 'IMAGE') {
+                    messagePreviewSpan.innerText = receivedMessage.sender + ': Фотография';
+                    while (messagePreview.firstChild)
+                        messagePreview.firstChild.remove();
+                    messagePreview.appendChild(messagePreviewSpan);
+                    let editAndDeleteButtonsDiv = document.createElement('div');
+                    let anotherEditAndDeleteDiv = document.createElement('div');
+                    let deleteButton = document.createElement('button');
+                    let deleteIcon = document.createElement('i');
+                    let date = new Date(receivedMessage.timestamp);
+                    let div1 = document.createElement('div');
+                    let div2 = document.createElement('div');
+                    let div3 = document.createElement('div');
+                    let div4 = document.createElement('div');
+                    let div5 = document.createElement('div');
+                    let div6 = document.createElement('div');
+                    let div7 = document.createElement('div');
+                    let div8 = document.createElement('div');
+                    let fancyBox = document.createElement('a');
+                    let dateElement = document.createElement('span');
+                    let messageLink = document.createElement('a');
+                    let authorImg = document.createElement('img');
+                    let messageContent = document.createElement('img');
+                    div1.classList.add('row');
+                    div1.style.padding = '10px';
+                    if (id !== receivedMessage.id) {
+                        div1.classList.add('row', 'opponents_message');
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div2.appendChild(messageLink);
+                        div3.classList.add('col-sm-7', 'col-xl-4');
+                        usernameDiv.style.paddingLeft = '10px';
+                        usernameDiv.classList.add('justify-content-start');
+                        div3.appendChild(usernameDiv);
+                        div4.classList.add('row');
+                        div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
+                        div5.style.padding = '5px';
+                        div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
+                        messageContent.classList.add('message');
+                        messageContent.style.marginLeft = '5px';
+                        messageContent.style.width = '100%';
+                        messageContent.style.fontSize = '14px';
+                        messageContent.src = receivedMessage.content.substr(1);
+                        messageContent.style.maxWidth = '300px';
+                        messageContent.style.maxHeight = '300px';
+                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        fancyBox.appendChild(messageContent);
+                        fancyBox.classList.add('image_message');
+                        fancyBox.href = receivedMessage.content.substr(1);
+                        div6.appendChild(fancyBox);
+                        div5.appendChild(div6);
+                        div4.appendChild(div5);
+                        div3.appendChild(div4);
+                        div7.classList.add('row');
+                        div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() - 2 + ':' + date.getMinutes());
+                        div8.appendChild(dateElement);
+                        div7.appendChild(div8);
+                        div3.appendChild(div7);
+                        div1.appendChild(div2);
+                        div1.appendChild(div3);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    } else {
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                        usernameDiv.style.paddingRight = '10px';
+                        usernameDiv.classList.add('justify-content-end');
+                        div2.appendChild(usernameDiv);
+                        div3.classList.add('row');
+                        div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
+                        div4.style.padding = '5px';
+                        div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+                        messageContent.classList.add('message', 'user_message');
+                        messageContent.style.marginRight = '0';
+                        messageContent.style.marginLeft = '0';
+                        messageContent.style.fontSize = '14px';
+                        messageContent.src = receivedMessage.content.substr(1);
+                        messageContent.style.maxWidth = '300px';
+                        messageContent.style.maxHeight = '300px';
+                        editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
+                        anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
+                        deleteButton.style.border = 'none';
+                        deleteButton.style.background = 'none';
+                        deleteButton.style.paddingRight = '10px';
+                        deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
+                        deleteButton.classList.add('deleteButton');
+                        deleteIcon.classList.add('fas', 'fa-times');
+                        deleteButton.appendChild(deleteIcon);
+                        anotherEditAndDeleteDiv.appendChild(deleteButton);
+                        editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
+                        fancyBox.appendChild(messageContent);
+                        fancyBox.classList.add('image_message');
+                        fancyBox.href = receivedMessage.content.substr(1);
+                        div5.appendChild(fancyBox);
+                        editAndDeleteButtonsDiv.appendChild(div5);
+                        div4.appendChild(editAndDeleteButtonsDiv);
+                        div3.appendChild(div4);
+                        div6.classList.add('row');
+                        div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() - 2 + ':' + date.getMinutes());
+                        div7.appendChild(dateElement);
+                        div6.appendChild(div7);
+                        div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        messageLink.id = 'messageContent' + receivedMessage.messageId;
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div8.appendChild(messageLink);
+                        div2.appendChild(div3);
+                        div2.appendChild(div6);
+                        div1.appendChild(div2);
+                        div1.appendChild(div8);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    }
+                } else if (receivedMessage.type === 'AUDIO') {
+                    messagePreviewSpan.innerText = receivedMessage.sender + ': Аудиозапись';
+                    while (messagePreview.firstChild)
+                        messagePreview.firstChild.remove();
+                    messagePreview.appendChild(messagePreviewSpan);
+                    let editAndDeleteButtonsDiv = document.createElement('div');
+                    let anotherEditAndDeleteDiv = document.createElement('div');
+                    let deleteButton = document.createElement('button');
+                    let deleteIcon = document.createElement('i');
+                    let date = new Date(receivedMessage.timestamp);
+                    let parentDiv = document.createElement('div');
+                    let fileName = document.createElement('span');
+                    let div1 = document.createElement('div');
+                    let div2 = document.createElement('div');
+                    let div3 = document.createElement('div');
+                    let div4 = document.createElement('div');
+                    let div5 = document.createElement('div');
+                    let div6 = document.createElement('div');
+                    let div7 = document.createElement('div');
+                    let div8 = document.createElement('div');
+                    let dateElement = document.createElement('span');
+                    let messageLink = document.createElement('a');
+                    let authorImg = document.createElement('img');
+                    let messageContent = document.createElement('audio');
+                    let source = document.createElement('source');
+                    parentDiv.style.textAlign = 'center';
+                    parentDiv.style.background = 'none';
+                    parentDiv.classList.add('message');
+                    div1.classList.add('row');
+                    div1.style.padding = '10px';
+                    if (id !== receivedMessage.id) {
+                        div1.classList.add('opponents_message');
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div2.appendChild(messageLink);
+                        div3.classList.add('col-sm-7', 'col-xl-4');
+                        usernameDiv.style.paddingLeft = '10px';
+                        usernameDiv.classList.add('justify-content-start');
+                        div3.appendChild(usernameDiv);
+                        div4.classList.add('row');
+                        div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
+                        div5.style.padding = '5px';
+                        div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
+                        messageContent.classList.add('message');
+                        messageContent.setAttribute('controls', 'controls');
+                        messageContent.setAttribute('preload', 'metadata');
+                        source.src = receivedMessage.content.substr(1);
+                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        messageContent.appendChild(source);
+                        messageContent.addEventListener("play", stopAll, null);
+                        fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
+                        parentDiv.appendChild(fileName);
+                        parentDiv.appendChild(messageContent);
+                        div6.appendChild(parentDiv);
+                        div5.appendChild(div6);
+                        div4.appendChild(div5);
+                        div3.appendChild(div4);
+                        div7.classList.add('row');
+                        div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
+                        div8.appendChild(dateElement);
+                        div7.appendChild(div8);
+                        div3.appendChild(div7);
+                        div1.appendChild(div2);
+                        div1.appendChild(div3);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    } else {
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                        usernameDiv.style.paddingRight = '10px';
+                        usernameDiv.classList.add('justify-content-end');
+                        div2.appendChild(usernameDiv);
+                        div3.classList.add('row');
+                        div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
+                        div4.style.padding = '5px';
+                        div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+                        messageContent.setAttribute('controls', 'controls');
+                        messageContent.setAttribute('preload', 'metadata');
+                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        source.src = receivedMessage.content.substr(1);
+                        messageContent.appendChild(source);
+                        messageContent.addEventListener("play", stopAll, null);
+                        editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
+                        anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
+                        deleteButton.style.border = 'none';
+                        deleteButton.style.background = 'none';
+                        deleteButton.style.paddingRight = '10px';
+                        deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
+                        deleteButton.classList.add('deleteButton');
+                        deleteIcon.classList.add('fas', 'fa-times');
+                        deleteButton.appendChild(deleteIcon);
+                        anotherEditAndDeleteDiv.appendChild(deleteButton);
+                        editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
+                        fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
+                        parentDiv.appendChild(fileName);
+                        parentDiv.appendChild(messageContent);
+                        div5.appendChild(parentDiv);
+                        editAndDeleteButtonsDiv.appendChild(div5);
+                        div4.appendChild(editAndDeleteButtonsDiv);
+                        div3.appendChild(div4);
+                        div6.classList.add('row');
+                        div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
+                        div7.appendChild(dateElement);
+                        div6.appendChild(div7);
+                        div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        messageLink.id = 'messageContent' + receivedMessage.messageId;
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div8.appendChild(messageLink);
+                        div2.appendChild(div3);
+                        div2.appendChild(div6);
+                        div1.appendChild(div2);
+                        div1.appendChild(div8);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    }
+                } else if (receivedMessage.type === 'VIDEO') {
+                    messagePreviewSpan.innerText = receivedMessage.sender + ': Видеозапись';
+                    while (messagePreview.firstChild)
+                        messagePreview.firstChild.remove();
+                    messagePreview.appendChild(messagePreviewSpan);
+                    let editAndDeleteButtonsDiv = document.createElement('div');
+                    let anotherEditAndDeleteDiv = document.createElement('div');
+                    let deleteButton = document.createElement('button');
+                    let deleteIcon = document.createElement('i');
+                    let date = new Date(receivedMessage.timestamp);
+                    let parentDiv = document.createElement('div');
+                    let fileName = document.createElement('span');
+                    let div1 = document.createElement('div');
+                    let div2 = document.createElement('div');
+                    let div3 = document.createElement('div');
+                    let div4 = document.createElement('div');
+                    let div5 = document.createElement('div');
+                    let div6 = document.createElement('div');
+                    let div7 = document.createElement('div');
+                    let div8 = document.createElement('div');
+                    let dateElement = document.createElement('span');
+                    let messageLink = document.createElement('a');
+                    let authorImg = document.createElement('img');
+                    let messageContent = document.createElement('video');
+                    let source = document.createElement('source');
+                    parentDiv.style.textAlign = 'center';
+                    parentDiv.style.background = 'none';
+                    parentDiv.classList.add('message');
+                    div1.classList.add('row');
+                    div1.style.padding = '10px';
+                    if (id !== receivedMessage.id) {
+                        div1.classList.add('opponents_message');
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div2.appendChild(messageLink);
+                        div3.classList.add('col-sm-7', 'col-xl-4');
+                        usernameDiv.style.paddingLeft = '10px';
+                        usernameDiv.classList.add('justify-content-start');
+                        div3.appendChild(usernameDiv);
+                        div4.classList.add('row');
+                        div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
+                        div5.style.padding = '5px';
+                        div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
+                        messageContent.classList.add('message');
+                        messageContent.setAttribute('controls', 'controls');
+                        messageContent.setAttribute('preload', 'metadata');
+                        source.src = receivedMessage.content.substr(1);
+                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        messageContent.appendChild(source);
+                        messageContent.style.maxHeight = '500px';
+                        messageContent.style.maxWidth = '500px';
+                        messageContent.addEventListener("play", stopAll, null);
+                        fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
+                        parentDiv.appendChild(fileName);
+                        parentDiv.appendChild(messageContent);
+                        div6.appendChild(parentDiv);
+                        div5.appendChild(div6);
+                        div4.appendChild(div5);
+                        div3.appendChild(div4);
+                        div7.classList.add('row');
+                        div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
+                        div8.appendChild(dateElement);
+                        div7.appendChild(div8);
+                        div3.appendChild(div7);
+                        div1.appendChild(div2);
+                        div1.appendChild(div3);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    } else {
+                        div1.id = 'message' + receivedMessage.messageId;
+                        div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
+                        usernameDiv.style.paddingRight = '10px';
+                        usernameDiv.classList.add('justify-content-end');
+                        div2.appendChild(usernameDiv);
+                        div3.classList.add('row');
+                        div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
+                        div4.style.padding = '5px';
+                        div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
+                        messageContent.setAttribute('controls', 'controls');
+                        messageContent.setAttribute('preload', 'metadata');
+                        messageContent.style.maxHeight = '500px';
+                        messageContent.style.maxWidth = '500px';
+                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        source.src = receivedMessage.content.substr(1);
+                        messageContent.appendChild(source);
+                        messageContent.addEventListener("play", stopAll, null);
+                        editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
+                        anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
+                        deleteButton.style.border = 'none';
+                        deleteButton.style.background = 'none';
+                        deleteButton.style.paddingRight = '10px';
+                        deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
+                        deleteButton.classList.add('deleteButton');
+                        deleteIcon.classList.add('fas', 'fa-times');
+                        deleteButton.appendChild(deleteIcon);
+                        anotherEditAndDeleteDiv.appendChild(deleteButton);
+                        editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
+                        fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
+                        parentDiv.appendChild(fileName);
+                        parentDiv.appendChild(messageContent);
+                        div5.appendChild(parentDiv);
+                        editAndDeleteButtonsDiv.appendChild(div5);
+                        div4.appendChild(editAndDeleteButtonsDiv);
+                        div3.appendChild(div4);
+                        div6.classList.add('row');
+                        div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
+                        dateElement.classList.add('.date');
+                        dateElement.style.fontSize = '11px';
+                        dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
+                        div7.appendChild(dateElement);
+                        div6.appendChild(div7);
+                        div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
+                        messageLink.setAttribute('href', "/user/" + receivedMessage.id);
+                        messageLink.id = 'messageContent' + receivedMessage.messageId;
+                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        authorImg.style.width = '50px';
+                        authorImg.style.height = '50px';
+                        messageLink.appendChild(authorImg);
+                        div8.appendChild(messageLink);
+                        div2.appendChild(div3);
+                        div2.appendChild(div6);
+                        div1.appendChild(div2);
+                        div1.appendChild(div8);
+                        messageArea.appendChild(div1);
+                        chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                    }
+                } else if (receivedMessage.type === 'UPDATE') {
+                    let message = document.getElementById('messageContent' + receivedMessage.messageId);
+                    message.textContent = receivedMessage.content;
+                } else if (receivedMessage.type === 'DELETE') {
+                    let message = document.getElementById('message' + receivedMessage.messageId);
+                    messageArea.removeChild(message);
+                }
             } else {
-                div1.id = 'message' + receivedMessage.messageId;
-                div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
-                usernameDiv.style.paddingRight = '10px';
-                usernameDiv.classList.add('justify-content-end');
-                div2.appendChild(usernameDiv);
-                div3.classList.add('row');
-                div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
-                div4.style.padding = '5px';
-                div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
-                messageContent.classList.add('message', 'user_message');
-                messageContent.style.marginRight = '0';
-                messageContent.style.marginLeft = '0';
-                messageContent.style.fontSize = '14px';
-                messageContent.src = receivedMessage.content.substr(1);
-                messageContent.style.maxWidth = '300px';
-                messageContent.style.maxHeight = '300px';
-                editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
-                anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
-                deleteButton.style.border = 'none';
-                deleteButton.style.background = 'none';
-                deleteButton.style.paddingRight = '10px';
-                deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
-                deleteButton.classList.add('deleteButton');
-                deleteIcon.classList.add('fas', 'fa-times');
-                deleteButton.appendChild(deleteIcon);
-                anotherEditAndDeleteDiv.appendChild(deleteButton);
-                editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
-                div5.appendChild(messageContent);
-                editAndDeleteButtonsDiv.appendChild(div5);
-                div4.appendChild(editAndDeleteButtonsDiv);
-                div3.appendChild(div4);
-                div6.classList.add('row');
-                div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() - 2 + ':' + date.getMinutes());
-                div7.appendChild(dateElement);
-                div6.appendChild(div7);
-                div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                messageLink.id = 'messageContent' + receivedMessage.messageId;
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div8.appendChild(messageLink);
-                div2.appendChild(div3);
-                div2.appendChild(div6);
-                div1.appendChild(div2);
-                div1.appendChild(div8);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
+                let messagePreview = document.getElementById('messagePreview' + receivedMessage.roomId);
+                if (typeof messagePreview !== "undefined") {
+                    let messagePreviewSpan = document.createElement('span');
+                    let messagePreviewImg = document.getElementById('imgPreview' + receivedMessage.roomId);
+                    messagePreviewImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                    if (receivedMessage.type === 'CHAT') {
+                        messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
+                        while (messagePreview.firstChild)
+                            messagePreview.firstChild.remove();
+                        messagePreview.appendChild(messagePreviewSpan);
+                    } else if (receivedMessage.type === 'IMAGE') {
+                        messagePreviewSpan.innerText = receivedMessage.sender + ': Фотография';
+                        while (messagePreview.firstChild)
+                            messagePreview.firstChild.remove();
+                        messagePreview.appendChild(messagePreviewSpan);
+                    } else if (receivedMessage.type === 'AUDIO') {
+                        messagePreviewSpan.innerText = receivedMessage.sender + ': Аудиозапись';
+                        while (messagePreview.firstChild)
+                            messagePreview.firstChild.remove();
+                        messagePreview.appendChild(messagePreviewSpan);
+                    } else if (receivedMessage.type === 'VIDEO') {
+                        messagePreviewSpan.innerText = receivedMessage.sender + ': Видеозапись';
+                        while (messagePreview.firstChild)
+                            messagePreview.firstChild.remove();
+                        messagePreview.appendChild(messagePreviewSpan);
+                    } else if (receivedMessage.type === 'UPDATE') {
+                        let previewMessageExistingSpan = document.getElementById('messagePreviewSpan' + receivedMessage.id);
+                        if (typeof previewMessageExistingSpan !== "undefined") {
+                            messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
+                            while (messagePreview.firstChild)
+                                messagePreview.firstChild.remove();
+                            messagePreview.appendChild(messagePreviewSpan);
+                        }
+                    } else if (receivedMessage.type === 'DELETE') {
+                        let previewMessageExistingSpan = document.getElementById('messagePreviewSpan' + receivedMessage.id);
+                        if (typeof previewMessageExistingSpan !== "undefined") {
+                            messagePreviewSpan.innerText = ""; //todo:AJAX CALL
+                            while (messagePreview.firstChild)
+                                messagePreview.firstChild.remove();
+                            messagePreview.appendChild(messagePreviewSpan);
+                        }
+                    }
+                }
             }
-        } else if (receivedMessage.type === 'AUDIO') {
-            messagePreviewSpan.innerText = receivedMessage.sender + ': Аудиозапись';
-            while (messagePreview.firstChild)
-                messagePreview.firstChild.remove();
-            messagePreview.appendChild(messagePreviewSpan);
-            let editAndDeleteButtonsDiv = document.createElement('div');
-            let anotherEditAndDeleteDiv = document.createElement('div');
-            let deleteButton = document.createElement('button');
-            let deleteIcon = document.createElement('i');
-            let date = new Date(receivedMessage.timestamp);
-            let parentDiv = document.createElement('div');
-            let fileName = document.createElement('span');
-            let div1 = document.createElement('div');
-            let div2 = document.createElement('div');
-            let div3 = document.createElement('div');
-            let div4 = document.createElement('div');
-            let div5 = document.createElement('div');
-            let div6 = document.createElement('div');
-            let div7 = document.createElement('div');
-            let div8 = document.createElement('div');
-            let dateElement = document.createElement('span');
-            let messageLink = document.createElement('a');
-            let authorImg = document.createElement('img');
-            let messageContent = document.createElement('audio');
-            let source = document.createElement('source');
-            parentDiv.style.textAlign = 'center';
-            parentDiv.style.background = 'none';
-            parentDiv.classList.add('message');
-            div1.classList.add('row');
-            div1.style.padding = '10px';
-            if (id !== receivedMessage.id) {
-                div1.classList.add('opponents_message');
-                div1.id = 'message' + receivedMessage.messageId;
-                div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div2.appendChild(messageLink);
-                div3.classList.add('col-sm-7', 'col-xl-4');
-                usernameDiv.style.paddingLeft = '10px';
-                usernameDiv.classList.add('justify-content-start');
-                div3.appendChild(usernameDiv);
-                div4.classList.add('row');
-                div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
-                div5.style.padding = '5px';
-                div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                messageContent.classList.add('message');
-                messageContent.setAttribute('controls', 'controls');
-                messageContent.setAttribute('preload', 'metadata');
-                source.src = receivedMessage.content.substr(1);
-                messageContent.id = 'messageContent' + receivedMessage.messageId;
-                messageContent.appendChild(source);
-                messageContent.addEventListener("play", stopAll, null);
-                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
-                parentDiv.appendChild(fileName);
-                parentDiv.appendChild(messageContent);
-                div6.appendChild(parentDiv);
-                div5.appendChild(div6);
-                div4.appendChild(div5);
-                div3.appendChild(div4);
-                div7.classList.add('row');
-                div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
-                div8.appendChild(dateElement);
-                div7.appendChild(div8);
-                div3.appendChild(div7);
-                div1.appendChild(div2);
-                div1.appendChild(div3);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
-            } else {
-                div1.id = 'message' + receivedMessage.messageId;
-                div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
-                usernameDiv.style.paddingRight = '10px';
-                usernameDiv.classList.add('justify-content-end');
-                div2.appendChild(usernameDiv);
-                div3.classList.add('row');
-                div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
-                div4.style.padding = '5px';
-                div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
-                messageContent.setAttribute('controls', 'controls');
-                messageContent.setAttribute('preload', 'metadata');
-                messageContent.id = 'messageContent' + receivedMessage.messageId;
-                source.src = receivedMessage.content.substr(1);
-                messageContent.appendChild(source);
-                messageContent.addEventListener("play", stopAll, null);
-                editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
-                anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
-                deleteButton.style.border = 'none';
-                deleteButton.style.background = 'none';
-                deleteButton.style.paddingRight = '10px';
-                deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
-                deleteButton.classList.add('deleteButton');
-                deleteIcon.classList.add('fas', 'fa-times');
-                deleteButton.appendChild(deleteIcon);
-                anotherEditAndDeleteDiv.appendChild(deleteButton);
-                editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
-                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
-                parentDiv.appendChild(fileName);
-                parentDiv.appendChild(messageContent);
-                div5.appendChild(parentDiv);
-                editAndDeleteButtonsDiv.appendChild(div5);
-                div4.appendChild(editAndDeleteButtonsDiv);
-                div3.appendChild(div4);
-                div6.classList.add('row');
-                div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
-                div7.appendChild(dateElement);
-                div6.appendChild(div7);
-                div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                messageLink.id = 'messageContent' + receivedMessage.messageId;
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div8.appendChild(messageLink);
-                div2.appendChild(div3);
-                div2.appendChild(div6);
-                div1.appendChild(div2);
-                div1.appendChild(div8);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
-            }
-        } else if (receivedMessage.type === 'VIDEO') {
-            messagePreviewSpan.innerText = receivedMessage.sender + ': Аудиозапись';
-            while (messagePreview.firstChild)
-                messagePreview.firstChild.remove();
-            messagePreview.appendChild(messagePreviewSpan);
-            let editAndDeleteButtonsDiv = document.createElement('div');
-            let anotherEditAndDeleteDiv = document.createElement('div');
-            let deleteButton = document.createElement('button');
-            let deleteIcon = document.createElement('i');
-            let date = new Date(receivedMessage.timestamp);
-            let parentDiv = document.createElement('div');
-            let fileName = document.createElement('span');
-            let div1 = document.createElement('div');
-            let div2 = document.createElement('div');
-            let div3 = document.createElement('div');
-            let div4 = document.createElement('div');
-            let div5 = document.createElement('div');
-            let div6 = document.createElement('div');
-            let div7 = document.createElement('div');
-            let div8 = document.createElement('div');
-            let dateElement = document.createElement('span');
-            let messageLink = document.createElement('a');
-            let authorImg = document.createElement('img');
-            let messageContent = document.createElement('video');
-            let source = document.createElement('source');
-            parentDiv.style.textAlign = 'center';
-            parentDiv.style.background = 'none';
-            parentDiv.classList.add('message');
-            div1.classList.add('row');
-            div1.style.padding = '10px';
-            if (id !== receivedMessage.id) {
-                div1.classList.add('opponents_message');
-                div1.id = 'message' + receivedMessage.messageId;
-                div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div2.appendChild(messageLink);
-                div3.classList.add('col-sm-7', 'col-xl-4');
-                usernameDiv.style.paddingLeft = '10px';
-                usernameDiv.classList.add('justify-content-start');
-                div3.appendChild(usernameDiv);
-                div4.classList.add('row');
-                div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
-                div5.style.padding = '5px';
-                div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                messageContent.classList.add('message');
-                messageContent.setAttribute('controls', 'controls');
-                messageContent.setAttribute('preload', 'metadata');
-                source.src = receivedMessage.content.substr(1);
-                messageContent.id = 'messageContent' + receivedMessage.messageId;
-                messageContent.appendChild(source);
-                messageContent.addEventListener("play", stopAll, null);
-                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
-                parentDiv.appendChild(fileName);
-                parentDiv.appendChild(messageContent);
-                div6.appendChild(parentDiv);
-                div5.appendChild(div6);
-                div4.appendChild(div5);
-                div3.appendChild(div4);
-                div7.classList.add('row');
-                div8.classList.add('col', 'd-xl-flex', 'justify-content-xl-start');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
-                div8.appendChild(dateElement);
-                div7.appendChild(div8);
-                div3.appendChild(div7);
-                div1.appendChild(div2);
-                div1.appendChild(div3);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
-            } else {
-                div1.id = 'message' + receivedMessage.messageId;
-                div2.classList.add('col-sm-7', 'col-xl-6', 'offset-sm-3', 'offset-md-3', 'offset-lg-3', 'offset-xl-5');
-                usernameDiv.style.paddingRight = '10px';
-                usernameDiv.classList.add('justify-content-end');
-                div2.appendChild(usernameDiv);
-                div3.classList.add('row');
-                div4.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-1');
-                div4.style.padding = '5px';
-                div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
-                messageContent.setAttribute('controls', 'controls');
-                messageContent.setAttribute('preload', 'metadata');
-                messageContent.id = 'messageContent' + receivedMessage.messageId;
-                source.src = receivedMessage.content.substr(1);
-                messageContent.appendChild(source);
-                messageContent.addEventListener("play", stopAll, null);
-                editAndDeleteButtonsDiv.classList.add('row', 'edit_message_main');
-                anotherEditAndDeleteDiv.classList.add('col', 'd-flex', 'justify-content-start', 'align-items-start', 'edit_message');
-                deleteButton.style.border = 'none';
-                deleteButton.style.background = 'none';
-                deleteButton.style.paddingRight = '10px';
-                deleteButton.id = 'deleteMessage' + receivedMessage.messageId;
-                deleteButton.classList.add('deleteButton');
-                deleteIcon.classList.add('fas', 'fa-times');
-                deleteButton.appendChild(deleteIcon);
-                anotherEditAndDeleteDiv.appendChild(deleteButton);
-                editAndDeleteButtonsDiv.appendChild(anotherEditAndDeleteDiv);
-                fileName.innerText = receivedMessage.content.substring(receivedMessage.content.lastIndexOf("/") + 1, receivedMessage.content.length);
-                parentDiv.appendChild(fileName);
-                parentDiv.appendChild(messageContent);
-                div5.appendChild(parentDiv);
-                editAndDeleteButtonsDiv.appendChild(div5);
-                div4.appendChild(editAndDeleteButtonsDiv);
-                div3.appendChild(div4);
-                div6.classList.add('row');
-                div7.classList.add('col', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-xl-end');
-                dateElement.classList.add('.date');
-                dateElement.style.fontSize = '11px';
-                dateElement.innerText = ('0' + date.getDate()).slice(-2) + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + ' ' + (date.getHours() + ':' + date.getMinutes());
-                div7.appendChild(dateElement);
-                div6.appendChild(div7);
-                div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
-                messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                messageLink.id = 'messageContent' + receivedMessage.messageId;
-                authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
-                authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                authorImg.style.width = '50px';
-                authorImg.style.height = '50px';
-                messageLink.appendChild(authorImg);
-                div8.appendChild(messageLink);
-                div2.appendChild(div3);
-                div2.appendChild(div6);
-                div1.appendChild(div2);
-                div1.appendChild(div8);
-                messageArea.appendChild(div1);
-                chatWindow.animate({scrollTop: chatWindow[0].scrollHeight}, 10);
-            }
-        } else if (receivedMessage.type === 'UPDATE') {
-            let message = document.getElementById('messageContent' + receivedMessage.messageId);
-            message.textContent = receivedMessage.content;
-        } else if (receivedMessage.type === 'DELETE') {
-            let message = document.getElementById('message' + receivedMessage.messageId);
-            messageArea.removeChild(message);
         }
     }
+
 
     window.addEventListener('paste', e => {
         document.getElementById('file').files = e.clipboardData.files;
@@ -965,12 +1040,6 @@ $(window).on("load", function () {
         };
         stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
     });
-
-    /*
-        $(document).on('click', '.foundMessage', function (event) {
-            window.location.href = "/chat/" + roomId.innerText + "#" + $(event.currentTarget).attr("id");
-            window.location.reload(true);
-        });*/
 
 
     if (cancelEdit != null)
@@ -1090,6 +1159,7 @@ $(window).on("load", function () {
     let searchMessageSubmit = document.getElementById('searchMessageSubmit');
     let searchMessageInput = document.getElementById('searchMessageInput');
 
+
     if (searchMessageSubmit != null)
         searchMessageSubmit.addEventListener('click', function (event) {
             if (searchMessageInput.value.trim() === "") {
@@ -1103,15 +1173,41 @@ $(window).on("load", function () {
                 }
             }
         });
-    searchMessageInput.value = "";
 
-    let savedMessages;
+
+    if (searchMessageInput != null)
+        searchMessageInput.value = "";
+
 
     $('#viewAttachments').on('click', function () {
         let textMessages = document.getElementsByClassName('text');
-        savedMessages = textMessages;
         Array.from(textMessages).forEach(element => {
             document.getElementById('message' + element.id.match(/\d+/g)).style.display = 'none';
-        })
+        });
+        document.getElementById("viewAttachmentsCancel").style.display = 'inline';
+        disableMessaging = true;
+    });
+
+
+    $('#viewAttachmentsCancel').on('click', function () {
+        if (isSearching === 'true')
+            window.history.back();
+        else
+            window.location.reload(true);
+    });
+
+
+    if (isSearching === 'true')
+        document.getElementById('viewAttachmentsCancel').style.display = 'inline';
+
+
+    $("#messageArea").on("focusin", function () {
+        $("a.image_message").fancybox({
+            opacity: true,
+            overlayShow: false,
+            transitionIn: 'elastic',
+            transitionOut: 'fade',
+            aspectRatio: true
+        });
     });
 });

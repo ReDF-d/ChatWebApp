@@ -7,14 +7,15 @@
     <div th:replace="header::links"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link media="screen" rel="stylesheet" th:href="@{~/css/jquery.fancybox.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{~/css/css.css}">
 </head>
 <body>
 <header th:replace="header::head"></header>
-<div class="top-left notify do-show" style="background-color: #66BB6A;">
-    <span>Прикольчик)</span>
-</div>
 <div class="container-fluid img" draggable="false">
     <span hidden id="roomId" th:text="${roomId}"></span>
+    <span hidden id="isSearching" th:if="${searchResult == null}" th:text="false"></span>
+    <span hidden id="isSearching" th:if="${searchResult != null}" th:text="true"></span>
     <div class="row d-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center"
          style="margin: 0px;">
         <div class="col-11 col-md-11 col-lg-11 col-xl-11 chats_body" id="chats_body"
@@ -59,7 +60,8 @@
                     </form>
                 </div>
                 <div class="col-2 col-lg-1 d-flex justify-content-center align-items-center column_bottom_border">
-                    <button class="btn" style="padding: 0; padding-right: 30px;">
+                    <button class="btn" id="viewAttachmentsCancel"
+                            style="padding: 0; padding-right: 30px; display: none">
                         <i class="fas fa-times"></i>
                     </button>
                     <div class="dropleft">
@@ -78,7 +80,8 @@
                                     type="button">
                                 Управление пользователями
                             </button>
-                            <button class="dropdown-item" id="viewAttachments" style="font-size: 15px;" type="button">
+                            <button class="dropdown-item" id="viewAttachments" style="font-size: 15px;"
+                                    th:if="${searchResult == null}" type="button">
                                 Показать вложения
                             </button>
                         </div>
@@ -98,9 +101,11 @@
                                         <div class="col-3 col-md-12 col-sm-5 col-lg-3 col-xl-2 d-flex justify-content-center align-items-center"
                                              style="padding: 0;">
                                             <img class="rounded-circle your_chats_img" draggable="false"
+                                                 th:id="imgPreview + ${chat.getId()}"
                                                  th:if="${chat.getLastMessage() != null}"
                                                  th:src="@{${'~/media/avatars/avatar' + chat.getLastMessage().getUser().getId() + '.png'}}">
                                             <img class="rounded-circle your_chats_img" draggable="false"
+                                                 th:id="imgPreview + ${chat.getId()}"
                                                  th:if="${chat.getLastMessage() == null}"
                                                  th:src="@{'~/media/avatars/defaultAvatar.png'}">
                                         </div>
@@ -123,13 +128,17 @@
                                             <div class="row">
                                                 <div class="col-12 your_chats_message_preview"
                                                      th:id="${'messagePreview' + chat.getId()}">
-                                                    <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('text')}"
+                                                    <span th:id="${'messagePreviewSpan' + chat.getLastMessage().getMessageId()}"
+                                                          th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('text')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + chat.getLastMessage().getMessageText()}"></span>
-                                                    <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('image')}"
+                                                    <span th:id="${'messagePreviewSpan' + chat.getLastMessage().getMessageId()}"
+                                                          th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('image')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + 'Фотография'}"></span>
-                                                    <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('audio')}"
+                                                    <span th:id="${'messagePreviewSpan' + chat.getLastMessage().getMessageId()}"
+                                                          th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('audio')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + 'Аудиозапись'}"></span>
-                                                    <span th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('video')}"
+                                                    <span th:id="${'messagePreviewSpan' + chat.getLastMessage().getMessageId()}"
+                                                          th:if="${chat.getLastMessage() != null and chat.getLastMessage().getMessageType().equals('video')}"
                                                           th:text="${chat.getLastMessage().getUsername() + ': ' + 'Видеозапись'}"></span>
                                                     <span th:if="${chat.getLastMessage() == null}" th:text="''"></span>
                                                 </div>
@@ -183,22 +192,28 @@
                                     <div class="col-sm-7 col-xl-4">
                                         <div class="row d-flex justify-content-start"
                                              style="padding-left: 10px; font-weight: 550;">
-                                            <span th:text="${message.getUser().getUsername()}"></span>
+                                            <a th:href="@{/user/{id}(id=${message.getUser().getId()})}">
+                                                <span th:text="${message.getUser().getUsername()}"></span>
+                                            </a>
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-0" style="padding: 5px;">
                                                 <div class="d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-start justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
                                                     <p class="message text"
                                                        th:if="${message.getMessageType().equals('text')}"
-                                                       style="margin-left: 5px;font-size: 14px;word-break: break-all;"
-                                                       th:id="${'messageContent' + message.getMessageId()}">
+                                                       style="margin-left: 5px;font-size: 14px;"
+                                                       th:id="${'messageContent' + message.getMessageId()}"
                                                        th:text="${message.getMessageText()}">
                                                     </p>
-                                                    <img class="message" draggable="false"
-                                                         style="max-width: 300px; max-height: 300px;"
-                                                         th:id="${'messageContent' + message.getMessageId()}">
-                                                         th:if="${message.getMessageType().equals('image')}"
-                                                         th:src="@{${message.getMessageText().substring(1)}}">
+                                                    <a class="image_message"
+                                                       th:href="@{${message.getMessageText().substring(1)}}"
+                                                       th:if="${message.getMessageType().equals('image')}">
+                                                        <img class="message" draggable="false"
+                                                             style="max-width: 300px; max-height: 300px;"
+                                                             th:id="${'messageContent' + message.getMessageId()}"
+                                                             th:if="${message.getMessageType().equals('image')}"
+                                                             th:src="@{${message.getMessageText().substring(1)}}">
+                                                    </a>
                                                     <div class="message"
                                                          style="text-align: center; background: none; padding-left: 0px; "
                                                          th:if="${message.getMessageType().equals('audio')}">
@@ -213,6 +228,7 @@
                                                          th:if="${message.getMessageType().equals('video')}">
                                                         <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                         <video controls preload="metadata"
+                                                               style="max-width: 500px; max-height: 500px;"
                                                                th:id="${'messageContent' + message.getMessageId()}">
                                                             <source th:src="@{${message.getMessageText().substring(1)}}">
                                                         </video>
@@ -235,7 +251,9 @@
                                     <div class="col-sm-7 col-xl-6 offset-sm-3 offset-md-3 offset-lg-3 offset-xl-5 ">
                                         <div class="row d-flex justify-content-end"
                                              style="padding-right: 10px; font-weight: 550;">
-                                            <span th:text="${message.getUser().getUsername()}"></span>
+                                            <a th:href="@{/user/{id}(id=${message.getUser().getId()})}">
+                                                <span th:text="${message.getUser().getUsername()}"></span>
+                                            </a>
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-1 " style="padding: 5px;">
@@ -260,11 +278,16 @@
                                                            style="margin-right: 0;font-size: 14px;margin-left: 0;"
                                                            th:text="${message.getMessageText()}">
                                                         </p>
-                                                        <img class="message user_message" draggable="false"
+                                                        <a class="image_message"
+                                                           th:href="@{${message.getMessageText().substring(1)}}"
+                                                           th:if="${message.getMessageType().equals('image')}">
+                                                            <img class="message user_message image_message"
+                                                                 draggable="false"
                                                              style="max-width: 300px; max-height: 300px;"
                                                              th:id="${'messageContent' + message.getMessageId()}"
                                                              th:if="${message.getMessageType().equals('image')}"
                                                              th:src="@{${message.getMessageText().substring(1)}}">
+                                                        </a>
                                                         <div class="message"
                                                              style="text-align: center; background: none; !important; padding-right: 0px;"
                                                              th:if="${message.getMessageType().equals('audio')}">
@@ -279,6 +302,7 @@
                                                              th:if="${message.getMessageType().equals('video')}">
                                                             <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                             <video controls preload="metadata"
+                                                                   style="max-width: 500px; max-height: 500px;"
                                                                    th:id="${'messageContent' + message.getMessageId()}">
                                                                 <source th:src="@{${message.getMessageText().substring(1)}}">
                                                             </video>
@@ -325,7 +349,7 @@
                                             <div class="col-sm-12 col-xl-11 offset-xl-0" style="padding: 5px;">
                                                 <div class="d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-start justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
                                                     <p class="message text"
-                                                       style="margin-left: 5px;font-size: 14px;word-break: break-all;"
+                                                       style="margin-left: 5px;font-size: 14px;"
                                                        th:if="${message.getMessageType().equals('text')}"
                                                        th:text="${message.getMessageText()}">
                                                     </p>
@@ -347,6 +371,7 @@
                                                          th:if="${message.getMessageType().equals('video')}">
                                                         <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                         <video controls preload="metadata"
+                                                               style="max-width: 500px; max-height: 500px;"
                                                                th:id="${'messageContent' + message.getMessageId()}">
                                                             <source th:src="@{${message.getMessageText().substring(1)}}">
                                                         </video>
@@ -400,6 +425,7 @@
                                                              th:if="${message.getMessageType().equals('video')}">
                                                             <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                             <video controls preload="metadata"
+                                                                   style="max-width: 500px; max-height: 500px;"
                                                                    th:id="${'messageContent' + message.getMessageId()}">
                                                                 <source th:src="@{${message.getMessageText().substring(1)}}">
                                                             </video>
@@ -731,6 +757,7 @@
     </div>
 </div>
 <footer th:replace="footer::foot"></footer>
+<script th:src="@{~/js/jquery.fancybox.pack.js}"></script>
 <script th:src="@{~/js/chat.js}"></script>
 <script th:src="@{~/js/createChat.js}"></script>
 <script th:src="@{~/js/addChatMember.js}"></script>

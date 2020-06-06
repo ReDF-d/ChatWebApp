@@ -574,7 +574,6 @@ chat_welcome_h1 {
     border: 0 solid rgba(125, 125, 125, .9);
     word-wrap: break-word;
     padding: 10px 15px;
-    font-style: italic;
     border-radius: 20px;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -619,7 +618,6 @@ chat_welcome_h1 {
 
 .your_chats_message_preview {
     font-size: 14px;
-    font-style: italic;
     overflow: hidden
 }
 
@@ -914,18 +912,21 @@ body {
     -webkit-transform: translateX(-420px);
     transform: translateX(-420px);
 }
+
 @-webkit-keyframes slide-in-left {
     to {
         -webkit-transform: translateX(0);
         transform: translateX(0);
     }
 }
+
 @keyframes slide-in-left {
     to {
         -webkit-transform: translateX(0);
         transform: translateX(0);
     }
 }
+
 .top-left.do-show {
     animation: slide-in-left 1s ease-in-out forwards, slide-in-left 1s ease-in-out reverse forwards 5s;
 }
