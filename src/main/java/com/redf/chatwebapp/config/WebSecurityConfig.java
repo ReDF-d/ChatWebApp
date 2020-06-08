@@ -90,8 +90,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAuthority("ADMIN")
                 .and()
                 .rememberMe().key("uniqueAndSecret")
-                .and().
-                sessionManagement()
+                .and()
+                .sessionManagement()
                 .sessionFixation().migrateSession()
                 .and()
                 .sessionManagement()
@@ -99,7 +99,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/ws/**", "/notificationHub/**")
-                .permitAll();
+                .permitAll()
+                .and()
+                .csrf()
+                .ignoringAntMatchers("/ws/**", "/notificationHub/**");
     }
-
 }

@@ -14,12 +14,14 @@ function openExitConfirm(e, id) {
     confirmChatExit.style.display = 'inline';
 }
 
+
 if (chatExitRefuseButton != null) {
     chatExitRefuseButton.addEventListener('click', function () {
         formToHide.style.display = 'inline';
         confirmChatExit.style.display = 'none';
     })
 }
+
 
 if (chatExitConfirmButton != null) {
     chatExitConfirmButton.addEventListener('click', async function () {

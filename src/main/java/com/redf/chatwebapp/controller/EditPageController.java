@@ -5,6 +5,7 @@ import com.redf.chatwebapp.dao.UserDAOImpl;
 import com.redf.chatwebapp.dao.entities.RoleEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.RoleEntityRepository;
+import com.redf.chatwebapp.dao.repo.UserEntityRepository;
 import com.redf.chatwebapp.dao.services.UserService;
 import com.redf.chatwebapp.dao.utils.UserDetails;
 import com.redf.chatwebapp.dto.UserUpdateDto;
@@ -19,10 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
@@ -37,16 +35,18 @@ public class EditPageController {
     private UserDAOImpl userDAO;
     private UserService userService;
     private RoleEntityRepository roleEntityRepository;
+    private UserEntityRepository userEntityRepository;
     private UserUpdateValidatorImpl userUpdateValidator;
 
 
     @Contract(pure = true)
     @Autowired
-    public EditPageController(UserDAOImpl userDAO, UserService userService, RoleEntityRepository roleEntityRepository, UserUpdateValidatorImpl userUpdateValidator) {
+    public EditPageController(UserDAOImpl userDAO, UserService userService, RoleEntityRepository roleEntityRepository, UserUpdateValidatorImpl userUpdateValidator, UserEntityRepository userEntityRepository) {
         setUserDAO(userDAO);
         setUserService(userService);
         setRoleEntityRepository(roleEntityRepository);
         setUserUpdateValidator(userUpdateValidator);
+        setUserEntityRepository(userEntityRepository);
     }
 
 
@@ -91,6 +91,17 @@ public class EditPageController {
         reloadUserDetails(existing, userDetails);
         setAuthentication(userDetails);
         return new ModelAndView("redirect:/user/" + existing.getId());
+    }
+
+
+    @PostMapping(params = {"status", "userId"})
+    public Object changeStatus(@RequestParam(value = "status") String status, @RequestParam(value = "userId") String userId) {
+        UserEntity user = getUserDAO().findById(Long.parseLong(userId));
+        if (status != null && user != null) {
+            user.setStatus(status);
+            getUserEntityRepository().save(user);
+        }
+        return null;
     }
 
 
@@ -163,5 +174,14 @@ public class EditPageController {
 
     private void setUserUpdateValidator(UserUpdateValidatorImpl userUpdateValidator) {
         this.userUpdateValidator = userUpdateValidator;
+    }
+
+    @Contract(pure = true)
+    private UserEntityRepository getUserEntityRepository() {
+        return userEntityRepository;
+    }
+
+    private void setUserEntityRepository(UserEntityRepository userEntityRepository) {
+        this.userEntityRepository = userEntityRepository;
     }
 }

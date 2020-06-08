@@ -65,6 +65,7 @@ public class UserDAOImpl implements UserDAO, TransactionHandler {
         getUser().setLogin(userRegistrationDto.getLogin());
         getUser().setPassword(BcryptPasswordEncoder.passwordEncoder().encode(userRegistrationDto.getPassword().trim()));
         getUser().setUsername(userRegistrationDto.getUsername());
+        getUser().setStatus("");
         RoleEntity roleEntity = getRoleEntityRepository().findByRoleName("USER");
         List<RoleEntity> roles = new ArrayList<>();
         roles.add(roleEntity);
@@ -72,6 +73,7 @@ public class UserDAOImpl implements UserDAO, TransactionHandler {
         getUser().setIsLocked(false);
         return getUser();
     }
+
 
     @Override
     public void createAndSave(@NotNull String login, @NotNull String password, @NotNull List<RoleEntity> roles, @NotNull String username) {

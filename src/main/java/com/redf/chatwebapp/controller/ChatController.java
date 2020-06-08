@@ -4,6 +4,7 @@ import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautify;
 import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomSanitizer;
 import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.MessageDAOImpl;
+import com.redf.chatwebapp.dao.entities.FriendshipEntity;
 import com.redf.chatwebapp.dao.entities.MessageEntity;
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
@@ -122,7 +123,7 @@ public class ChatController implements RoomSanitizer {
     @SendTo("/topic/editChatTitle")
     public EditChatTitleMessage editChatTitle(@NotNull @Payload EditChatTitleMessage message, @DestinationVariable("id") String id) {
         final RoomEntity room = getRoomEntityRepository().findRoomById(Integer.parseInt(message.getRoomId()));
-        if (room.getId() != 1) {
+        if (room.getId() != 1 && !message.getTitle().equals("Общий чат")) {
             room.setTitle(message.getTitle());
             getRoomEntityRepository().save(room);
             return message;
@@ -436,15 +437,30 @@ public class ChatController implements RoomSanitizer {
     private void initOnlineAndOfflineLists(int id) {
         final List<UserEntity> loggedUsers = new ArrayList<>();
         final List<UserEntity> offlineUsers = new ArrayList<>();
-        getOnlineUserEntityRepository().findAllUsersFromRoom((long) id).forEach(o -> {
+        final UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        final UserEntity principal = getUserService().findById(userDetails.getId());
+        ArrayList<FriendshipEntity> friends = (ArrayList<FriendshipEntity>) getFriendshipEntityRepository().getUserFriends(principal.getId());
+        if (id == 1) {
+            getOnlineUserEntityRepository().findAllUsersFromRoom((long) id).forEach(o -> {
+                if (o.isOnline().equals("ONLINE")) {
+                    friends.forEach(f -> {
+                        if (f.getFirstUser().equals(principal) || f.getSecondUser().equals(principal))
+                            loggedUsers.add(o.getUser());
+                    });
+                } else
+                    friends.forEach(f -> {
+                        if (f.getFirstUser().equals(principal) || f.getSecondUser().equals(principal))
+                            offlineUsers.add(o.getUser());
+                    });
+            });
+        } else
+            getOnlineUserEntityRepository().findAllUsersFromRoom((long) id).forEach(o -> {
             if (o.isOnline().equals("ONLINE"))
                 loggedUsers.add(o.getUser());
             else
                 offlineUsers.add(o.getUser());
 
         });
-        final UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        final UserEntity principal = getUserService().findById(userDetails.getId());
         if (!loggedUsers.contains(principal)) {
             loggedUsers.add(principal);
             UserOnlineStatusChangeMessage message = new UserOnlineStatusChangeMessage();

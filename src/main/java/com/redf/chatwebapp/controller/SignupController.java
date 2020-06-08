@@ -68,6 +68,10 @@ public class SignupController {
         if (result.hasErrors()) {
             return new ModelAndView("signup");
         }
+        if (userDto.getUsername().toLowerCase().equals("root") || userDto.getUsername().toLowerCase().equals("admin")) {
+            result.rejectValue("username", "usernameNotAllowed", "Данное имя пользователя зарезервировано");
+            return new ModelAndView("signup");
+        }
         register(userDto);
         createAvatar(getUserService().findByLogin(userDto.getLogin()).getId());
         UserEntity registered = getUserService().findByLogin(userDto.getLogin());

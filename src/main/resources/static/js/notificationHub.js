@@ -30,6 +30,7 @@ $(document).ready(function () {
         notificationHubClient.subscribe("/topic/friendNotification", onFriendNotification);
     }
 
+
     function onFriendNotification(payload) {
         let notification = JSON.parse(payload.body);
         if (principalId === notification.recipient) {

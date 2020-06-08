@@ -195,53 +195,64 @@ $(window).on("load", function () {
     function sendMessage(event) {
         event.preventDefault();
         let messageContent = messageInput.value.trim();
-        if (messageContent && stompClient) {
-            let chatMessage = {
-                roomId: roomId.textContent,
-                messageId: '',
-                id: id,
-                sender: username,
-                login: login,
-                content: messageInput.value,
-                type: 'CHAT',
-                timestamp: date
-            };
-            stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
+        if (messageContent.length > 1024) {
+            let notificationDiv = document.createElement('div');
+            notificationDiv.classList.add('top-left', 'notify', 'do-show');
+            notificationDiv.style.backgroundColor = '#66BB6A';
+            let notificationSpan = document.createElement('span');
+            notificationSpan.innerText = 'Сообщение слишком большое!';
+            notificationDiv.appendChild(notificationSpan);
+            document.body.appendChild(notificationDiv);
             messageInput.value = '';
-        }
-        let file = document.getElementById('file');
-        if (file.files.length !== 0 && stompClient) {
-            let form_data = new FormData();
-            let file_data = file.files;
-            for (let i = 0; i < file_data.length; i++) {
-                form_data.append('file' + i, file_data[i]);
+        } else {
+            if (messageContent && stompClient) {
+                let chatMessage = {
+                    roomId: roomId.textContent,
+                    messageId: '',
+                    id: id,
+                    sender: username,
+                    login: login,
+                    content: messageInput.value,
+                    type: 'CHAT',
+                    timestamp: date
+                };
+                stompClient.send("/app/chat.saveAndSendMessage." + roomId.textContent, {}, JSON.stringify(chatMessage));
+                messageInput.value = '';
             }
-            form_data.append('id', $('#id').text());
-            form_data.append('timestamp', new Date().getTime().toString());
-            form_data.append('roomId', roomId.textContent);
-            form_data.append('sender', username);
-            let token = $("meta[name='_csrf']").attr("content");
-            let ajaxReq = $.ajax({
-                url: "/chat/" + roomId.textContent,
-                type: "POST",
-                headers: {"X-CSRF-TOKEN": token},
-                data: form_data,
-                enctype: 'multipart/form-data',
-                processData: false,
-                contentType: false,
-                cache: false,
-                success: function () {
-                    let o = document.getElementById("progress");
-                    let fileButton = document.getElementById('fileLabel');
-                    let cancelEditButton = document.getElementById('cancelEdit');
-                    let fileDrag = document.getElementById('filedragDIV');
-                    fileDrag.style.display = 'none';
-                    o.innerHTML = '';
-                    fileButton.style.display = 'inline-block';
-                    cancelEditButton.style.display = 'none';
+            let file = document.getElementById('file');
+            if (file.files.length !== 0 && stompClient) {
+                let form_data = new FormData();
+                let file_data = file.files;
+                for (let i = 0; i < file_data.length; i++) {
+                    form_data.append('file' + i, file_data[i]);
                 }
-            });
-            file.value = '';
+                form_data.append('id', $('#id').text());
+                form_data.append('timestamp', new Date().getTime().toString());
+                form_data.append('roomId', roomId.textContent);
+                form_data.append('sender', username);
+                let token = $("meta[name='_csrf']").attr("content");
+                let ajaxReq = $.ajax({
+                    url: "/chat/" + roomId.textContent,
+                    type: "POST",
+                    headers: {"X-CSRF-TOKEN": token},
+                    data: form_data,
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    success: function () {
+                        let o = document.getElementById("progress");
+                        let fileButton = document.getElementById('fileLabel');
+                        let cancelEditButton = document.getElementById('cancelEdit');
+                        let fileDrag = document.getElementById('filedragDIV');
+                        fileDrag.style.display = 'none';
+                        o.innerHTML = '';
+                        fileButton.style.display = 'inline-block';
+                        cancelEditButton.style.display = 'none';
+                    }
+                });
+                file.value = '';
+            }
         }
     }
 
@@ -931,42 +942,44 @@ $(window).on("load", function () {
                 if (typeof messagePreview !== "undefined") {
                     let messagePreviewSpan = document.createElement('span');
                     let messagePreviewImg = document.getElementById('imgPreview' + receivedMessage.roomId);
-                    messagePreviewImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
-                    if (receivedMessage.type === 'CHAT') {
-                        messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
-                        while (messagePreview.firstChild)
-                            messagePreview.firstChild.remove();
-                        messagePreview.appendChild(messagePreviewSpan);
-                    } else if (receivedMessage.type === 'IMAGE') {
-                        messagePreviewSpan.innerText = receivedMessage.sender + ': Фотография';
-                        while (messagePreview.firstChild)
-                            messagePreview.firstChild.remove();
-                        messagePreview.appendChild(messagePreviewSpan);
-                    } else if (receivedMessage.type === 'AUDIO') {
-                        messagePreviewSpan.innerText = receivedMessage.sender + ': Аудиозапись';
-                        while (messagePreview.firstChild)
-                            messagePreview.firstChild.remove();
-                        messagePreview.appendChild(messagePreviewSpan);
-                    } else if (receivedMessage.type === 'VIDEO') {
-                        messagePreviewSpan.innerText = receivedMessage.sender + ': Видеозапись';
-                        while (messagePreview.firstChild)
-                            messagePreview.firstChild.remove();
-                        messagePreview.appendChild(messagePreviewSpan);
-                    } else if (receivedMessage.type === 'UPDATE') {
-                        let previewMessageExistingSpan = document.getElementById('messagePreviewSpan' + receivedMessage.id);
-                        if (typeof previewMessageExistingSpan !== "undefined") {
+                    if (messagePreviewImg !== null) {
+                        messagePreviewImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
+                        if (receivedMessage.type === 'CHAT') {
                             messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
                             while (messagePreview.firstChild)
                                 messagePreview.firstChild.remove();
                             messagePreview.appendChild(messagePreviewSpan);
-                        }
-                    } else if (receivedMessage.type === 'DELETE') {
-                        let previewMessageExistingSpan = document.getElementById('messagePreviewSpan' + receivedMessage.id);
-                        if (typeof previewMessageExistingSpan !== "undefined") {
-                            messagePreviewSpan.innerText = ""; //todo:AJAX CALL
+                        } else if (receivedMessage.type === 'IMAGE') {
+                            messagePreviewSpan.innerText = receivedMessage.sender + ': Фотография';
                             while (messagePreview.firstChild)
                                 messagePreview.firstChild.remove();
                             messagePreview.appendChild(messagePreviewSpan);
+                        } else if (receivedMessage.type === 'AUDIO') {
+                            messagePreviewSpan.innerText = receivedMessage.sender + ': Аудиозапись';
+                            while (messagePreview.firstChild)
+                                messagePreview.firstChild.remove();
+                            messagePreview.appendChild(messagePreviewSpan);
+                        } else if (receivedMessage.type === 'VIDEO') {
+                            messagePreviewSpan.innerText = receivedMessage.sender + ': Видеозапись';
+                            while (messagePreview.firstChild)
+                                messagePreview.firstChild.remove();
+                            messagePreview.appendChild(messagePreviewSpan);
+                        } else if (receivedMessage.type === 'UPDATE') {
+                            let previewMessageExistingSpan = document.getElementById('messagePreviewSpan' + receivedMessage.id);
+                            if (typeof previewMessageExistingSpan !== "undefined") {
+                                messagePreviewSpan.innerText = receivedMessage.sender + ': ' + receivedMessage.content;
+                                while (messagePreview.firstChild)
+                                    messagePreview.firstChild.remove();
+                                messagePreview.appendChild(messagePreviewSpan);
+                            }
+                        } else if (receivedMessage.type === 'DELETE') {
+                            let previewMessageExistingSpan = document.getElementById('messagePreviewSpan' + receivedMessage.id);
+                            if (typeof previewMessageExistingSpan !== "undefined") {
+                                messagePreviewSpan.innerText = ""; //todo:AJAX CALL
+                                while (messagePreview.firstChild)
+                                    messagePreview.firstChild.remove();
+                                messagePreview.appendChild(messagePreviewSpan);
+                            }
                         }
                     }
                 }
@@ -1062,7 +1075,6 @@ $(window).on("load", function () {
             messageInput.value = '';
             currentEditMessageId = null;
         });
-
     if (sendButton != null)
         sendButton.addEventListener('click', function (event) {
             if (disabled === false) {

@@ -34,6 +34,7 @@ public class UserEntity extends AbstractEntity implements Serializable {
     private EmailVerificationToken emailVerificationToken;
     private OnlineUserEntity onlineUserEntity;
     private ForgotPasswordToken forgotPasswordToken;
+    private String status;
 
 
     @Contract(pure = true)
@@ -47,6 +48,7 @@ public class UserEntity extends AbstractEntity implements Serializable {
         setUsername(username);
         setRoles(roles);
         setEnabled(false);
+        setStatus("");
     }
 
 
@@ -187,7 +189,17 @@ public class UserEntity extends AbstractEntity implements Serializable {
         return forgotPasswordToken;
     }
 
+
     public void setForgotPasswordToken(ForgotPasswordToken forgotPasswordToken) {
         this.forgotPasswordToken = forgotPasswordToken;
+    }
+
+    @Column(name = "status")
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

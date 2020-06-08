@@ -56,6 +56,8 @@ public class UserUpdateValidatorImpl implements UserUpdateValidator {
             userDto.setUsername(userDetails.getUsername());
             return true;
         } else {
+            if (userDto.getUsername().toLowerCase().equals("admin") || userDto.getUsername().toLowerCase().equals("root"))
+                return false;
             Pattern ptr = Pattern.compile("^[A-Za-z0-9_-]{3,16}$");
             Matcher m = ptr.matcher(userDto.getUsername());
             return m.matches();
