@@ -206,7 +206,7 @@ $(window).on("load", function () {
             notificationDiv.classList.add('top-left', 'notify', 'do-show');
             notificationDiv.style.backgroundColor = '#66BB6A';
             let notificationSpan = document.createElement('span');
-            notificationSpan.innerText = 'Сообщение слишком большое!';
+            notificationSpan.innerText = 'Максимальный размер сообщения - 1024 символа!';
             notificationDiv.appendChild(notificationSpan);
             document.body.appendChild(notificationDiv);
             messageInput.value = '';
