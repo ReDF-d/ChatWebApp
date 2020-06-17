@@ -15,7 +15,7 @@
         <div class="col-10 col-sm-6 col-md-5 col-lg-4 col-xl-3 offset-md-3 profile_card" style="margin: 100px;">
             <div class="row" style="margin-top: 15px;">
                 <div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8 offset-2 offset-sm-2 offset-md-2 offset-lg-2 offset-xl-2 d-sm-flex d-md-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center">
-                    <img class="rounded-circle" style="max-width: 170px; max-height: 170px;"
+                    <img class="rounded-circle image--cover"
                          th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"></div>
                 <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 offset-0 offset-xl-0 text-left d-flex d-sm-flex justify-content-center align-items-start justify-content-sm-center align-items-sm-start">
                     <form id="profile-form" th:action="@{/user/{id}(id=${user.getId()})}" th:method="put">

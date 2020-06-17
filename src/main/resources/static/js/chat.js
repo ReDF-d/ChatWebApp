@@ -78,6 +78,12 @@ $(window).on("load", function () {
     }
 
 
+    function isUrl(s) {
+        let regexp = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/;
+        return regexp.test(s);
+    }
+
+
     async function onConnected() {
         stompClient.subscribe('/topic/chat/' + roomId.textContent, onMessageReceived);
         stompClient.subscribe('/topic/onlineTracker', onStatusChange);
@@ -387,7 +393,7 @@ $(window).on("load", function () {
     function onMessageReceived(payload) {
         if (!disableMessaging && isSearching === 'false') {
             let receivedMessage = JSON.parse(payload.body);
-            if ((receivedMessage.type === 'CHAT' || receivedMessage.type === 'IMAGE' || receivedMessage.type === 'AUDIO' || receivedMessage.type === 'VIDEO') && receivedMessage.id !== id) {
+            if ((receivedMessage.type === 'CHAT' || receivedMessage.type === 'IMAGE' || receivedMessage.type === 'AUDIO' || receivedMessage.type === 'VIDEO') && (receivedMessage.id !== id && receivedMessage.roomId === roomId.textContent)) {
                 let audio = new Audio('/media/notification.mp3');
                 audio.play();
             }
@@ -405,6 +411,7 @@ $(window).on("load", function () {
                 usernameDiv.style.fontWeight = '550';
                 usernameSpan.innerText = receivedMessage.sender;
                 usernameHref.href = '/user/' + receivedMessage.id;
+                usernameHref.draggable = false;
                 usernameHref.appendChild(usernameSpan);
                 usernameDiv.appendChild(usernameHref);
                 if (receivedMessage.type === 'CHAT') {
@@ -424,7 +431,7 @@ $(window).on("load", function () {
                     let dateElement = document.createElement('span');
                     let messageLink = document.createElement('a');
                     let authorImg = document.createElement('img');
-                    let messageContent = document.createElement('p');
+                    let messageContent;
                     div1.classList.add('row');
                     div1.style.padding = '10px';
                     if (id !== receivedMessage.id) {
@@ -432,7 +439,7 @@ $(window).on("load", function () {
                         div1.id = 'message' + receivedMessage.messageId;
                         div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';
@@ -444,11 +451,25 @@ $(window).on("load", function () {
                         div5.classList.add('col-sm-12', 'col-xl-11', 'offset-xl-0');
                         div5.style.padding = '5px';
                         div6.classList.add('d-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-start', 'justify-content-md-start', 'justify-content-lg-start', 'justify-content-xl-start', 'align-items-xl-center');
-                        messageContent.classList.add('message');
-                        messageContent.style.marginLeft = '5px';
-                        messageContent.style.fontSize = '14px';
-                        messageContent.innerText = receivedMessage.content;
-                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        if (isUrl(receivedMessage.content)) {
+                            messageContent = document.createElement('a');
+                            messageContent.classList.add('message');
+                            messageContent.style.marginLeft = '5px';
+                            messageContent.style.fontSize = '14px';
+                            messageContent.href = receivedMessage.content;
+                            messageContent.innerText = receivedMessage.content;
+                            messageContent.target = '_blank';
+                            messageContent.rel = 'noopener noreferrer';
+                            messageContent.id = 'messageContent' + receivedMessage.messageId;
+                            messageContent.draggable = false;
+                        } else {
+                            messageContent = document.createElement('p');
+                            messageContent.classList.add('message');
+                            messageContent.style.marginLeft = '5px';
+                            messageContent.style.fontSize = '14px';
+                            messageContent.innerText = receivedMessage.content;
+                            messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        }
                         div6.appendChild(messageContent);
                         div5.appendChild(div6);
                         div4.appendChild(div5);
@@ -496,12 +517,26 @@ $(window).on("load", function () {
                         editIcon.classList.add('fas', 'fa-pencil-alt');
                         div4.style.padding = '5px';
                         div5.classList.add('col', 'd-sm-flex', 'd-md-flex', 'd-lg-flex', 'd-xl-flex', 'justify-content-sm-end', 'justify-content-md-end', 'justify-content-lg-end', 'justify-content-xl-end', 'align-items-xl-center');
-                        messageContent.classList.add('message', 'user_message');
-                        messageContent.style.marginRight = '0';
-                        messageContent.style.marginLeft = '0';
-                        messageContent.style.fontSize = '14px';
-                        messageContent.innerText = receivedMessage.content;
-                        messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        if (isUrl(receivedMessage.content)) {
+                            messageContent = document.createElement('a');
+                            messageContent.classList.add('message', 'user_message');
+                            messageContent.style.marginLeft = '5px';
+                            messageContent.style.fontSize = '14px';
+                            messageContent.href = receivedMessage.content;
+                            messageContent.innerText = receivedMessage.content;
+                            messageContent.target = '_blank';
+                            messageContent.rel = 'noopener noreferrer';
+                            messageContent.id = 'messageContent' + receivedMessage.messageId;
+                            messageContent.draggable = false;
+                        } else {
+                            messageContent = document.createElement('p');
+                            messageContent.classList.add('message', 'user_message');
+                            messageContent.style.marginRight = '0';
+                            messageContent.style.marginLeft = '0';
+                            messageContent.style.fontSize = '14px';
+                            messageContent.innerText = receivedMessage.content;
+                            messageContent.id = 'messageContent' + receivedMessage.messageId;
+                        }
                         div5.appendChild(messageContent);
                         deleteButton.appendChild(deleteIcon);
                         editButton.appendChild(editIcon);
@@ -520,7 +555,7 @@ $(window).on("load", function () {
                         div6.appendChild(div7);
                         div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';
@@ -563,7 +598,7 @@ $(window).on("load", function () {
                         div1.id = 'message' + receivedMessage.messageId;
                         div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';
@@ -649,7 +684,7 @@ $(window).on("load", function () {
                         div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
                         messageLink.id = 'messageContent' + receivedMessage.messageId;
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';
@@ -697,7 +732,7 @@ $(window).on("load", function () {
                         div1.id = 'message' + receivedMessage.messageId;
                         div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';
@@ -781,7 +816,7 @@ $(window).on("load", function () {
                         div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
                         messageLink.id = 'messageContent' + receivedMessage.messageId;
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';
@@ -829,7 +864,7 @@ $(window).on("load", function () {
                         div1.id = 'message' + receivedMessage.messageId;
                         div2.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';
@@ -917,7 +952,7 @@ $(window).on("load", function () {
                         div8.classList.add('col-4', 'col-sm-2', 'col-lg-2', 'col-xl-1', 'offset-xl-0', 'd-sm-flex', 'd-xl-flex', 'justify-content-sm-center', 'align-items-sm-start');
                         messageLink.setAttribute('href', "/user/" + receivedMessage.id);
                         messageLink.id = 'messageContent' + receivedMessage.messageId;
-                        authorImg.classList.add('rounded-circle', 'd-xl-flex', 'justify-content-xl-center', 'align-items-xl-center');
+                        authorImg.classList.add('rounded-circle', 'image--cover');
                         authorImg.src = '/media/avatars/avatar' + receivedMessage.id + '.png';
                         authorImg.style.width = '50px';
                         authorImg.style.height = '50px';

@@ -102,6 +102,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 .csrf()
-                .ignoringAntMatchers("/ws/**", "/notificationHub/**");
+                .ignoringAntMatchers("/**");
     }
 }

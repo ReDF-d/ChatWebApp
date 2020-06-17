@@ -28,6 +28,7 @@ public class UserUpdateDto {
     private Timestamp started;
     private Timestamp ends;
     private String dateTimeLocal;
+    private String status;
 
     public UserUpdateDto() {
     }
@@ -142,5 +143,13 @@ public class UserUpdateDto {
 
     public void setDateTimeLocal(String dateTimeLocal) {
         this.dateTimeLocal = dateTimeLocal;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

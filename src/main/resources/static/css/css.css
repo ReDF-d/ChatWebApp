@@ -876,7 +876,6 @@ body {
 #progress p {
     color: black;
     display: block;
-    width: 240px;
     padding: 2px 5px;
     margin: 2px 0;
     border: 1px inset #446;
@@ -907,11 +906,21 @@ body {
     box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.35);
     max-width: 350px;
     margin: 20px;
-    top: 0;
+    bottom: 0;
     left: 0;
     -webkit-transform: translateX(-420px);
     transform: translateX(-420px);
 }
+
+
+.image--cover {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center right;
+}
+
 
 @-webkit-keyframes slide-in-left {
     to {

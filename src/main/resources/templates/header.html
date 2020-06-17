@@ -36,13 +36,15 @@
                                 role="presentation"
                                 sec:authorize="isAuthenticated()">
                                 <form class="form-inline d-xl-flex justify-content-xl-center align-items-xl-center"
-                                      id="searchUser" th:action="@{/search}" th:method="post">
+                                      id="searchUser" th:action="@{/search}" th:method="get">
                                     <input class="form-control" id="searchUserInput" placeholder="Найти пользователя"
                                            style="padding: 1px 0 2px;" th:name="searchUsers"
                                            type="text"/>
                                     <button class="btn btn-light border rounded-0 border-secondary"
                                             id="searchUserSubmit" style="padding: 6px 10px;"
-                                            type="button"><i class="fa fa-search"></i></button>
+                                            type="button">
+                                        <i class="fa fa-search"></i>
+                                    </button>
                                 </form>
                             </li>
                             <li class="nav-item" role="presentation" sec:authorize="isAnonymous()"

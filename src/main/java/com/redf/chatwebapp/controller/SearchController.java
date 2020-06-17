@@ -6,7 +6,7 @@ import com.redf.chatwebapp.dao.repo.UserEntityRepository;
 import org.jetbrains.annotations.Contract;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -25,10 +25,12 @@ public class SearchController {
         setUserEntityRepository(userEntityRepository);
     }
 
+
     SearchController() {
     }
 
-    @PostMapping
+
+    @GetMapping
     public ModelAndView searchUsers(@RequestParam(value = "searchUsers", required = false) String searchString) {
         ModelAndView modelAndView = new ModelAndView("searchUsers");
         ArrayList<UserEntity> searchResult = ((ArrayList<UserEntity>) getUserEntityRepository().findByUsernameContainingIgnoreCase(searchString));

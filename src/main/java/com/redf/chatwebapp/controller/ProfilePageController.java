@@ -106,6 +106,7 @@ public class ProfilePageController {
         return !status.equals("OFFLINE");
     }
 
+
     @PutMapping
     public String getEditPage() {
         return "redirect:/user/edit";
@@ -128,7 +129,6 @@ public class ProfilePageController {
                 members.add(owner);
                 getRoomDAO().createAndSave("dialogue", members, null, principal);
                 room = getDialogueByIds(principal.getId(), owner.getId());
-                assert room != null;
                 return "redirect:/chat/" + room.getId();
             }
         }

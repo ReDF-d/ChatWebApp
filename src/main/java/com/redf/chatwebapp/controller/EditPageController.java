@@ -86,6 +86,7 @@ public class EditPageController {
         if (!userDto.getAvatar().isEmpty())
             getUserUpdateValidator().saveAvatar(userDto);
         userDto.setRoles(getRoleList(userDetails.getAuthorities()));
+        userDto.setStatus(getUserService().findById(userDetails.getId()).getStatus());
         update(userDto);
         existing = getUserDAO().findByLogin(userDto.getLogin());
         reloadUserDetails(existing, userDetails);

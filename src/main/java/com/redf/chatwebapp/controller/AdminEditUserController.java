@@ -130,6 +130,7 @@ public class AdminEditUserController {
                     System.out.println(e.getMessage());
                 }
             }
+            userUpdateDto.setStatus(user.getStatus());
             update(userUpdateDto);
             if (!userUpdateDto.getAvatar().isEmpty())
                 getUserUpdateValidator().saveAvatar(userUpdateDto);

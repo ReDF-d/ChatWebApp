@@ -104,6 +104,7 @@ public class UserDAOImpl implements UserDAO, TransactionHandler {
         getUser().setId(updateDto.getId());
         getUser().setLogin(updateDto.getLogin());
         getUser().setUsername(updateDto.getUsername());
+        getUser().setStatus(updateDto.getStatus());
         if (!updateDto.getPassword().equals("")) {
             getUser().setPassword(BcryptPasswordEncoder.passwordEncoder().encode(updateDto.getPassword()).trim());
         } else {

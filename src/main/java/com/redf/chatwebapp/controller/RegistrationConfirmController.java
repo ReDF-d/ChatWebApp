@@ -6,6 +6,7 @@ import com.redf.chatwebapp.dao.entities.EmailVerificationToken;
 import com.redf.chatwebapp.dao.entities.RoomEntity;
 import com.redf.chatwebapp.dao.entities.UserEntity;
 import com.redf.chatwebapp.dao.repo.RoomEntityRepository;
+import com.redf.chatwebapp.dao.repo.VerificationTokenRepository;
 import com.redf.chatwebapp.dao.services.UserService;
 import org.jetbrains.annotations.Contract;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class RegistrationConfirmController {
     private UserService userService;
     private RoomDAOImpl roomDAO;
     private RoomEntityRepository roomEntityRepository;
+    private VerificationTokenRepository verificationTokenRepository;
 
 
     @Autowired
@@ -45,43 +47,62 @@ public class RegistrationConfirmController {
         UserEntity user = verificationToken.getUser();
         user.setEnabled(true);
         getUserService().updateUser(user);
-        addUserToGlobalChat(user);
+        if (!getGlobalChatRoom().getRoomMembers().contains(user))
+            addUserToGlobalChat(user);
+        getVerificationTokenRepository().delete(verificationToken);
         return new ModelAndView("registrationConfirmSuccess");
     }
+
 
     @Contract(pure = true)
     private UserService getUserService() {
         return userService;
     }
 
+
     private void setUserService(UserService userService) {
         this.userService = userService;
     }
 
+
     private void addUserToGlobalChat(UserEntity user) {
-        getRoomDAO().update(getGlobalChatRoom(user));
+        getRoomDAO().update(getGlobalChatRoom().addRoomMember(user));
     }
 
 
-    private RoomEntity getGlobalChatRoom(UserEntity user) {
-        return getRoomEntityRepository().findRoomById(1).addRoomMember(user);
+    private RoomEntity getGlobalChatRoom() {
+        return getRoomEntityRepository().findRoomById(1);
     }
+
 
     @Contract(pure = true)
     private RoomDAOImpl getRoomDAO() {
         return roomDAO;
     }
 
+
     private void setRoomDAO(RoomDAOImpl roomDAO) {
         this.roomDAO = roomDAO;
     }
+
 
     @Contract(pure = true)
     private RoomEntityRepository getRoomEntityRepository() {
         return roomEntityRepository;
     }
 
+
     private void setRoomEntityRepository(RoomEntityRepository roomEntityRepository) {
         this.roomEntityRepository = roomEntityRepository;
+    }
+
+
+    @Contract(pure = true)
+    private VerificationTokenRepository getVerificationTokenRepository() {
+        return verificationTokenRepository;
+    }
+
+    private void setVerificationTokenRepository(VerificationTokenRepository verificationTokenRepository) {
+        this.verificationTokenRepository = verificationTokenRepository;
     }
 }

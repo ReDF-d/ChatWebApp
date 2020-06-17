@@ -4,10 +4,7 @@ import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomBeautify;
 import com.redf.chatwebapp.controller.interfaces.viewBeautify.RoomSanitizer;
 import com.redf.chatwebapp.dao.FriendshipDAOImpl;
 import com.redf.chatwebapp.dao.MessageDAOImpl;
-import com.redf.chatwebapp.dao.entities.FriendshipEntity;
-import com.redf.chatwebapp.dao.entities.MessageEntity;
-import com.redf.chatwebapp.dao.entities.RoomEntity;
-import com.redf.chatwebapp.dao.entities.UserEntity;
+import com.redf.chatwebapp.dao.entities.*;
 import com.redf.chatwebapp.dao.repo.FriendshipEntityRepository;
 import com.redf.chatwebapp.dao.repo.MessageEntityRepository;
 import com.redf.chatwebapp.dao.repo.OnlineUserEntityRepository;
@@ -345,7 +342,13 @@ public class ChatController implements RoomSanitizer {
             modelAndView.addObject("onlineUsers", getOnlineUsers());
             modelAndView.addObject("offlineUsers", getOfflineUsers());
             modelAndView.addObject("roomType", room.getRoomType());
-            modelAndView.addObject("title", room.getTitle());
+            if (room.getRoomType().equals("dialogue")) {
+                room.getRoomMembers().forEach(u -> {
+                    if (!u.getId().equals(userDetails.getId()))
+                        modelAndView.addObject("title", u.getUsername());
+                });
+            } else
+                modelAndView.addObject("title", room.getTitle());
             modelAndView.addObject("members", room.getRoomMembers());
             modelAndView.addObject("owner", room.getOwner());
             return modelAndView;
@@ -441,17 +444,17 @@ public class ChatController implements RoomSanitizer {
         final UserEntity principal = getUserService().findById(userDetails.getId());
         ArrayList<FriendshipEntity> friends = (ArrayList<FriendshipEntity>) getFriendshipEntityRepository().getUserFriends(principal.getId());
         if (id == 1) {
-            getOnlineUserEntityRepository().findAllUsersFromRoom((long) id).forEach(o -> {
-                if (o.isOnline().equals("ONLINE")) {
-                    friends.forEach(f -> {
-                        if (f.getFirstUser().equals(principal) || f.getSecondUser().equals(principal))
-                            loggedUsers.add(o.getUser());
-                    });
-                } else
-                    friends.forEach(f -> {
-                        if (f.getFirstUser().equals(principal) || f.getSecondUser().equals(principal))
-                            offlineUsers.add(o.getUser());
-                    });
+            friends.forEach(friendshipEntity -> {
+                UserEntity friend;
+                if (!friendshipEntity.getFirstUser().equals(principal))
+                    friend = friendshipEntity.getFirstUser();
+                else
+                    friend = friendshipEntity.getSecondUser();
+                OnlineUserEntity o = getOnlineUserEntityRepository().findByUserId(friend.getId());
+                if (o.isOnline().equals("ONLINE"))
+                    loggedUsers.add(o.getUser());
+                else
+                    offlineUsers.add(o.getUser());
             });
         } else
             getOnlineUserEntityRepository().findAllUsersFromRoom((long) id).forEach(o -> {

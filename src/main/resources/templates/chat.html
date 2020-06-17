@@ -100,11 +100,13 @@
                                          th:classappend="${#strings.equals(#strings.toString(chat.getId()), roomId)} ? selected_chat">
                                         <div class="col-3 col-md-12 col-sm-5 col-lg-3 col-xl-2 d-flex justify-content-center align-items-center"
                                              style="padding: 0;">
-                                            <img class="rounded-circle your_chats_img" draggable="false"
+                                            <img class="rounded-circle image--cover" draggable="false"
+                                                 style="width: 40px;height: 40px;"
                                                  th:id="imgPreview + ${chat.getId()}"
                                                  th:if="${chat.getLastMessage() != null}"
                                                  th:src="@{${'~/media/avatars/avatar' + chat.getLastMessage().getUser().getId() + '.png'}}">
-                                            <img class="rounded-circle your_chats_img" draggable="false"
+                                            <img class="rounded-circle image--cover" draggable="false"
+                                                 style="width: 40px;height: 40px;"
                                                  th:id="imgPreview + ${chat.getId()}"
                                                  th:if="${chat.getLastMessage() == null}"
                                                  th:src="@{'~/media/avatars/defaultAvatar.png'}">
@@ -183,7 +185,7 @@
                                      th:if="${message.getUser().getId() != #authentication.getPrincipal().getId()}">
                                     <div class="col-4 col-sm-2 col-lg-2 col-xl-1 d-sm-flex d-xl-flex justify-content-sm-center align-items-sm-start">
                                         <a draggable="false" th:href="@{/user/{id}(id=${message.getUser().getId()})}">
-                                            <img class="rounded-circle d-xl-flex justify-content-xl-center align-items-xl-center"
+                                            <img class="rounded-circle image--cover"
                                                  draggable="false"
                                                  style="width: 50px;height: 50px;"
                                                  th:src="@{${'~/media/avatars/avatar' + message.getUser().getId() + '.png'}}"/>
@@ -192,20 +194,32 @@
                                     <div class="col-sm-7 col-xl-4">
                                         <div class="row d-flex justify-content-start"
                                              style="padding-left: 10px; font-weight: 550;">
-                                            <a th:href="@{/user/{id}(id=${message.getUser().getId()})}">
+                                            <a draggable="false"
+                                               th:href="@{/user/{id}(id=${message.getUser().getId()})}">
                                                 <span th:text="${message.getUser().getUsername()}"></span>
                                             </a>
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-xl-11 offset-xl-0" style="padding: 5px;">
                                                 <div class="d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-start justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
+                                                    <a class="message text"
+                                                       draggable="false"
+                                                       rel="noopener noreferrer"
+                                                       style="margin-left: 5px;font-size: 14px;"
+                                                       target="_blank"
+                                                       th:href="${message.getMessageText()}"
+                                                       th:id="${'messageContent' + message.getMessageId()}"
+                                                       th:if="${message.getMessageType().equals('text') && message.getMessageText().matches('^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)')}"
+                                                       th:text="${message.getMessageText()}">
+                                                    </a>
                                                     <p class="message text"
-                                                       th:if="${message.getMessageType().equals('text')}"
+                                                       th:if="${message.getMessageType().equals('text') && !message.getMessageText().matches('^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]')}"
                                                        style="margin-left: 5px;font-size: 14px;"
                                                        th:id="${'messageContent' + message.getMessageId()}"
                                                        th:text="${message.getMessageText()}">
                                                     </p>
                                                     <a class="image_message"
+                                                       draggable="false"
                                                        th:href="@{${message.getMessageText().substring(1)}}"
                                                        th:if="${message.getMessageType().equals('image')}">
                                                         <img class="message" draggable="false"
@@ -227,7 +241,7 @@
                                                          style="text-align: center; background: none; padding-left: 0px; "
                                                          th:if="${message.getMessageType().equals('video')}">
                                                         <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
-                                                        <video controls preload="metadata"
+                                                        <video controls draggable="false" preload="metadata"
                                                                style="max-width: 500px; max-height: 500px;"
                                                                th:id="${'messageContent' + message.getMessageId()}">
                                                             <source th:src="@{${message.getMessageText().substring(1)}}">
@@ -251,7 +265,8 @@
                                     <div class="col-sm-7 col-xl-6 offset-sm-3 offset-md-3 offset-lg-3 offset-xl-5 ">
                                         <div class="row d-flex justify-content-end"
                                              style="padding-right: 10px; font-weight: 550;">
-                                            <a th:href="@{/user/{id}(id=${message.getUser().getId()})}">
+                                            <a draggable="false"
+                                               th:href="@{/user/{id}(id=${message.getUser().getId()})}">
                                                 <span th:text="${message.getUser().getUsername()}"></span>
                                             </a>
                                         </div>
@@ -272,13 +287,24 @@
                                                         </button>
                                                     </div>
                                                     <div class="col d-sm-flex d-md-flex d-lg-flex d-xl-flex justify-content-sm-end justify-content-md-end justify-content-lg-end justify-content-xl-end align-items-xl-center">
+                                                        <a class="message user_message text"
+                                                           draggable="false"
+                                                           rel="noopener noreferrer"
+                                                           style="margin-left: 5px;font-size: 14px;"
+                                                           target="_blank"
+                                                           th:href="${message.getMessageText()}"
+                                                           th:id="${'messageContent' + message.getMessageId()}"
+                                                           th:if="${message.getMessageType().equals('text') && message.getMessageText().matches('^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]')}"
+                                                           th:text="${message.getMessageText()}">
+                                                        </a>
                                                         <p class="message user_message text"
                                                            th:id="${'messageContent' + message.getMessageId()}"
-                                                           th:if="${message.getMessageType().equals('text')}"
+                                                           th:if="${message.getMessageType().equals('text') && !message.getMessageText().matches('^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]')}"
                                                            style="margin-right: 0;font-size: 14px;margin-left: 0;"
                                                            th:text="${message.getMessageText()}">
                                                         </p>
                                                         <a class="image_message"
+                                                           draggable="false"
                                                            th:href="@{${message.getMessageText().substring(1)}}"
                                                            th:if="${message.getMessageType().equals('image')}">
                                                             <img class="message user_message image_message"
@@ -302,6 +328,7 @@
                                                              th:if="${message.getMessageType().equals('video')}">
                                                             <span th:text="${#strings.arraySplit(message.getMessageText(), '//')[#arrays.length(#strings.arraySplit(message.getMessageText(), '//')) - 1]}"></span>
                                                             <video controls preload="metadata"
+                                                                   draggable="false"
                                                                    style="max-width: 500px; max-height: 500px;"
                                                                    th:id="${'messageContent' + message.getMessageId()}">
                                                                 <source th:src="@{${message.getMessageText().substring(1)}}">
@@ -320,7 +347,7 @@
                                     </div>
                                     <div class="col-4 col-sm-2 col-lg-2 col-xl-1 offset-xl-0 d-sm-flex d-xl-flex justify-content-sm-center align-items-sm-start">
                                         <a draggable="false" th:href="@{/user/{id}(id=${message.getUser().getId()})}">
-                                            <img class="rounded-circle d-xl-flex justify-content-xl-center align-items-xl-center"
+                                            <img class="rounded-circle image--cover"
                                                  draggable="false"
                                                  style="width: 50px;height: 50px;"
                                                  th:src="@{${'~/media/avatars/avatar' + message.getUser().getId() + '.png'}}"/>
@@ -334,7 +361,7 @@
                                      th:if="${message.getUser().getId() != #authentication.getPrincipal().getId()}">
                                     <div class="col-4 col-sm-2 col-lg-2 col-xl-1 d-sm-flex d-xl-flex justify-content-sm-center align-items-sm-start">
                                         <a draggable="false" th:href="@{/user/{id}(id=${message.getUser().getId()})}">
-                                            <img class="rounded-circle d-xl-flex justify-content-xl-center align-items-xl-center"
+                                            <img class="rounded-circle image--cover"
                                                  draggable="false"
                                                  style="width: 50px;height: 50px;"
                                                  th:src="@{${'~/media/avatars/avatar' + message.getUser().getId() + '.png'}}"/>
@@ -443,7 +470,7 @@
                                     </div>
                                     <div class="col-4 col-sm-2 col-lg-2 col-xl-1 offset-xl-0 d-sm-flex d-xl-flex justify-content-sm-center align-items-sm-start">
                                         <a draggable="false" th:href="@{/user/{id}(id=${message.getUser().getId()})}">
-                                            <img class="rounded-circle d-xl-flex justify-content-xl-center align-items-xl-center"
+                                            <img class="rounded-circle image--cover"
                                                  draggable="false"
                                                  style="width: 50px;height: 50px;"
                                                  th:src="@{${'~/media/avatars/avatar' + message.getUser().getId() + '.png'}}"/>
@@ -506,7 +533,7 @@
                                         <div class="row userStatus" style="padding: 5px; padding-left: 10px;">
                                             <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-3 offset-xl-0 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
                                                  style="padding: 0px;">
-                                                <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                                <img class="rounded-circle image--cover"
                                                      draggable="false"
                                                      style="width: 25px;height: 25px;"
                                                      th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"/>
@@ -535,7 +562,7 @@
                                         <div class="row userStatus" style="padding-left: 10px; padding: 5px;">
                                             <div class="col-4 col-sm-7 col-md-5 col-lg-3 col-xl-3 offset-xl-0 d-sm-flex d-md-flex d-lg-flex justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
                                                  style="padding: 0px;">
-                                                <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                                <img class="rounded-circle image--cover"
                                                      draggable="false"
                                                      style="width: 25px;height: 25px;"
                                                      th:src="@{${'~/media/avatars/avatar' + user.getId() + '.png'}}"/>
@@ -597,8 +624,8 @@
                                         <div class="row dropdown_row" style="margin-top: 5px;">
                                             <div class="col-md-3 d-md-flex justify-content-md-center align-items-md-center"
                                                  style="padding: 0;">
-                                                <img class="rounded-circle" draggable="false"
-                                                     style="width: 20px;"
+                                                <img class="rounded-circle image--cover" draggable="false"
+                                                     style="width: 20px; height: 20px"
                                                      th:src="@{${'~/media/avatars/avatar' + friend.getId() + '.png'}}">
                                             </div>
                                             <div class="col-md-7 dropdown_username" style="padding: 0;">
@@ -657,7 +684,8 @@
                                         <div class="row dropdown_row" style="margin-top: 5px;">
                                             <div class="col-md-3 d-md-flex justify-content-md-center align-items-md-center"
                                                  style="padding: 0px;">
-                                                <img class="rounded-circle" draggable="false" style="width: 20px;"
+                                                <img class="rounded-circle image--cover" draggable="false"
+                                                     style="width: 20px; height: 20px"
                                                      th:src="@{${'~/media/avatars/avatar' + friend.getId() + '.png'}}">
                                             </div>
                                             <div class="col-md-7 dropdown_username" style="padding: 0px;">
@@ -701,7 +729,7 @@
         </div>
         <!--RemoveMembersForm-->
         <div class="col-10 col-sm-7 col-md-6 col-lg-4 col-xl-4 search_result_form" id="removeMembersForm"
-             style="height: 50vh; margin-top: 7vh; display: none">
+             style="height: 50vh; margin-top: 7vh; display: none; overflow-y: auto">
             <div class="row">
                 <div class="col-11 d-flex justify-content-center align-items-center" style="margin: 0; padding: 0;">
                             <span class="d-flex justify-center align-items-center"
@@ -726,18 +754,17 @@
                              th:if="${member.getId() != #authentication.getPrincipal().getId()}">
                             <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3 offset-0 offset-sm-0 offset-md-0 offset-lg-0 offset-xl-0 d-flex d-sm-flex d-md-flex d-lg-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-md-center align-items-md-center justify-content-lg-center align-items-lg-center"
                                  style="padding: 0;">
-                                <img class="rounded-circle d-lg-flex justify-content-lg-center align-items-lg-center"
+                                <img class="rounded-circle image--cover"
                                      draggable="false"
                                      style="width: 50px;height: 50px;"
                                      th:src="@{${'~/media/avatars/avatar' + member.getId() + '.png'}}">
                             </div>
-                            <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 offset-sm-0 offset-xl-0 d-flex d-sm-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
+                            <div class="col-6 offset-sm-0 offset-xl-0 d-flex d-sm-flex d-xl-flex justify-content-start align-items-center justify-content-sm-start align-items-sm-center justify-content-md-start justify-content-lg-start justify-content-xl-start align-items-xl-center">
                                 <a th:href="@{/user/{id}(id=${member.getId()})}">
                                     <div class="row">
                                         <div class="col-sm-12 col-xl-12 offset-xl-0 your_chats_online_users"
                                              style="padding-left: 0;padding-right: 0;">
-                                                            <span style="font-size: 18px;"
-                                                                  th:text="${member.getUsername()}"></span>
+                                            <span style="font-size: 18px;" th:text="${member.getUsername()}"></span>
                                         </div>
                                     </div>
                                 </a>
