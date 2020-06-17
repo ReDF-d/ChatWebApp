@@ -42,9 +42,9 @@
                               th:each="error:${#fields.errors('login')}"
                               th:text="${error}"></span>
                         <div class="row">
-                            <div class="col">
-                                <input id="email" name="login" placeholder="example@email.com" th:field="*{login}"
-                                       type="text">
+                            <div class="col d-flex justify-content-center">
+                                <input class="form-control" id="email" name="login" placeholder="example@email.com" th:field="*{login}"
+                                       type="text" style="width: 70%">
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                      style="margin: 3px;">
                     <div class="col-xl-12 offset-xl-0 text-center user_profile_friends">
                         <div class="row">
-                            <div class="col">
+                            <div class="col d-flex justify-content-center">
                                 <span>Введите новое имя пользователя</span>
                             </div>
                         </div>
@@ -61,10 +61,10 @@
                               th:each="error:${#fields.errors('username')}"
                               th:text="${error}"></span>
                         <div class="row">
-                            <div class="col">
-                                <input id="username" name="username" placeholder="Имя пользователя"
+                            <div class="col d-flex justify-content-center">
+                                <input class="form-control" id="username" name="username" placeholder="Имя пользователя"
                                        th:field="*{username}"
-                                       type="text">
+                                       type="text" style="width: 70%">
                             </div>
                         </div>
                     </div>
@@ -81,10 +81,10 @@
                               th:each="error:${#fields.errors('oldPassword')}"
                               th:text="${error}"></span>
                         <div class="row">
-                            <div class="col">
-                                <input id="oldPassword" name="oldPassword" placeholder="Старый пароль"
+                            <div class="col d-flex justify-content-center">
+                                <input class="form-control" id="oldPassword" name="oldPassword" placeholder="Старый пароль"
                                        th:field="*{oldPassword}"
-                                       type="password"></div>
+                                       type="password" style="width: 70%"></div>
                         </div>
                     </div>
                 </div>
@@ -100,9 +100,9 @@
                               th:each="error:${#fields.errors('password')}"
                               th:text="${error}"></span>
                         <div class="row">
-                            <div class="col">
-                                <input id="password" name="password" placeholder="Пароль" th:field="*{password}"
-                                       type="password"></div>
+                            <div class="col d-flex justify-content-center">
+                                <input class="form-control" id="password" name="password" placeholder="Пароль" th:field="*{password}"
+                                       type="password" style="width: 70%"></div>
                         </div>
                     </div>
                 </div>
@@ -115,13 +115,13 @@
                               th:each="error:${#fields.errors('confirmPassword')}"
                               th:text="${error}"></span>
                         <div class="row">
-                            <div class="col">
-                                <input id="confirmPassword" name="confirmPassword" placeholder="Подтвердите пароль"
-                                       th:field="*{confirmPassword}" type="password"></div>
+                            <div class="col d-flex justify-content-center">
+                                <input class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Подтвердите пароль"
+                                       th:field="*{confirmPassword}" type="password" style="width: 66%"></div>
                         </div>
                     </div>
                 </div>
-                <p><input th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                <p><input  th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
                           type="hidden"/></p>
                 <div class="row d-flex d-sm-flex d-xl-flex justify-content-center align-items-center justify-content-sm-center align-items-sm-center justify-content-xl-center align-items-xl-center">
                     <div class="col-xl-12 offset-xl-0 text-center" style="margin-top: 10px;margin-bottom: 30px;">
