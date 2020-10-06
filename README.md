@@ -1,2 +1,2 @@
 # BlinkTalk
-A chat with a web client
+Web chat appilcation made with Spring
